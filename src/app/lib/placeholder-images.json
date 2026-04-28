@@ -1,0 +1,22 @@
+{
+  "placeholderImages": [
+    {
+      "id": "payment-proof",
+      "description": "Example payment receipt or transaction proof",
+      "imageUrl": "https://picsum.photos/seed/pay123/600/800",
+      "imageHint": "payment receipt"
+    },
+    {
+      "id": "avatar-user",
+      "description": "User profile avatar",
+      "imageUrl": "https://picsum.photos/seed/user1/200/200",
+      "imageHint": "profile avatar"
+    },
+    {
+      "id": "meeting-hero",
+      "description": "Professional meeting background",
+      "imageUrl": "https://picsum.photos/seed/meet1/1200/600",
+      "imageHint": "business meeting"
+    }
+  ]
+}
