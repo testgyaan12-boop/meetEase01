@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
+import { AvailableSlot } from "@/lib/types"
 
 interface SlotPickerProps {
   onSelect: (slotId: string, startTime: string, endTime: string) => void
@@ -23,17 +24,20 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
     if (!firestore || !date) return null
     const start = startOfDay(date).toISOString()
     const end = endOfDay(date).toISOString()
+    
+    // Fetch slots for the selected day that are ACTIVE
     return query(
       collection(firestore, "availableSlots"),
       where("startTime", ">=", start),
       where("startTime", "<=", end),
+      where("isActive", "==", true), // Only show active slots to users
       orderBy("startTime", "asc")
     )
   }, [firestore, date])
 
-  const { data: slots, isLoading } = useCollection(slotsQuery)
+  const { data: slots, isLoading } = useCollection<AvailableSlot>(slotsQuery)
 
-  const handleSlotClick = (slot: any) => {
+  const handleSlotClick = (slot: AvailableSlot) => {
     if (slot.isBooked) return
     setSelectedSlotId(slot.id)
     onSelect(slot.id, slot.startTime, slot.endTime)

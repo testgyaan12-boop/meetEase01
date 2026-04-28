@@ -1,202 +1,61 @@
-
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a registered user of the MeetEase application, primarily for authentication and associating meeting requests.",
+      "description": "Represents a registered user of the MeetEase application.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the User entity."
-        },
-        "email": {
-          "type": "string",
-          "description": "The user's unique email address, used for login.",
-          "format": "email"
-        },
-        "fullName": {
-          "type": "string",
-          "description": "The full name of the user."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp indicating when the user account was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp indicating the last time the user's information was updated.",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "fullName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "email",
-        "fullName",
-        "createdAt",
-        "updatedAt"
-      ]
+      "required": ["id", "email", "fullName", "createdAt", "updatedAt"]
     },
     "AvailableSlot": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "AvailableSlot",
       "type": "object",
-      "description": "Represents a specific time slot that can be booked for a meeting by a client.",
+      "description": "Represents a specific time slot for meetings.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the AvailableSlot entity."
-        },
-        "startTime": {
-          "type": "string",
-          "description": "The start date and time of the available slot.",
-          "format": "date-time"
-        },
-        "endTime": {
-          "type": "string",
-          "description": "The end date and time of the available slot.",
-          "format": "date-time"
-        },
-        "isBooked": {
-          "type": "boolean",
-          "description": "A flag indicating whether the slot has been booked by a meeting. Default to false."
-        },
-        "meetingId": {
-          "type": "string",
-          "description": "Reference to the Meeting entity that has booked this slot, if applicable. (Relationship: AvailableSlot 1:1 Meeting)"
-        }
+        "id": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "isBooked": { "type": "boolean" },
+        "isActive": { "type": "boolean" },
+        "meetingId": { "type": "string" }
       },
-      "required": [
-        "id",
-        "startTime",
-        "endTime",
-        "isBooked"
-      ]
+      "required": ["id", "startTime", "endTime", "isBooked", "isActive"]
     },
     "Meeting": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Meeting",
       "type": "object",
-      "description": "Represents a meeting request made by a client, including its details, status, and associated slot.",
+      "description": "Represents a meeting request.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Meeting entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the User who scheduled this meeting."
-        },
-        "clientName": {
-          "type": "string",
-          "description": "The name of the client."
-        },
-        "clientEmail": {
-          "type": "string",
-          "description": "The email of the client.",
-          "format": "email"
-        },
-        "clientMobile": {
-          "type": "string",
-          "description": "The mobile number of the client."
-        },
-        "description": {
-          "type": "string",
-          "description": "A detailed description of the meeting purpose."
-        },
-        "paymentProofUrl": {
-          "type": "string",
-          "description": "A URL pointing to the uploaded payment proof.",
-          "format": "uri"
-        },
-        "status": {
-          "type": "string",
-          "description": "The current status of the meeting.",
-          "format": "enum",
-          "enum": ["pending", "confirmed", "rejected", "cancelled"]
-        },
-        "availableSlotId": {
-          "type": "string",
-          "description": "Reference to the AvailableSlot entity booked."
-        },
-        "meetingLink": {
-          "type": "string",
-          "description": "The link for the online meeting.",
-          "format": "uri"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientEmail": { "type": "string", "format": "email" },
+        "clientMobile": { "type": "string" },
+        "description": { "type": "string" },
+        "paymentProofUrl": { "type": "string", "format": "uri" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "rejected", "cancelled", "done"] },
+        "availableSlotId": { "type": "string" },
+        "meetingLink": { "type": "string", "format": "uri" },
+        "adminNotes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "userId",
-        "clientName",
-        "clientEmail",
-        "clientMobile",
-        "description",
-        "paymentProofUrl",
-        "status",
-        "availableSlotId",
-        "createdAt",
-        "updatedAt"
-      ]
+      "required": ["id", "userId", "clientName", "clientEmail", "clientMobile", "description", "paymentProofUrl", "status", "availableSlotId", "createdAt", "updatedAt"]
     }
   },
   "auth": {
-    "providers": [
-      "password"
-    ]
+    "providers": ["password"]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles."
-        }
-      },
-      {
-        "path": "/availableSlots/{slotId}",
-        "definition": {
-          "entityName": "AvailableSlot",
-          "schema": {
-            "$ref": "#/backend/entities/AvailableSlot"
-          },
-          "description": "Stores meeting time slots."
-        }
-      },
-      {
-        "path": "/meetings/{meetingId}",
-        "definition": {
-          "entityName": "Meeting",
-          "schema": {
-            "$ref": "#/backend/entities/Meeting"
-          },
-          "description": "Stores meeting requests."
-        }
-      },
-      {
-        "path": "/roles_admin/{adminUid}",
-        "definition": {
-          "entityName": "AdminRole",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Identifies administrators."
-        }
-      }
-    ]
+    "/users/{userId}": { "schema": "User", "description": "User profiles" },
+    "/availableSlots/{slotId}": { "schema": "AvailableSlot", "description": "Meeting slots" },
+    "/meetings/{meetingId}": { "schema": "Meeting", "description": "Meeting requests" },
+    "/roles_admin/{adminUid}": { "schema": "User", "description": "Admins" }
   }
 }

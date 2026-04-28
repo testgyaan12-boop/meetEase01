@@ -18,6 +18,9 @@ import {
   CalendarDays,
   Activity,
   ArrowLeft,
+  Check,
+  X,
+  AlertTriangle
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -27,16 +30,28 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogFooter,
-  DialogTrigger
+  DialogTrigger,
+  DialogDescription
 } from "@/components/ui/dialog"
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { format, setHours, setMinutes, isPast, startOfDay } from "date-fns"
+import { Switch } from "@/components/ui/switch"
+import { format, setHours, setMinutes, isPast } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import { Meeting } from "@/lib/types"
+import { Meeting, AvailableSlot } from "@/lib/types"
 
 export default function AdminDashboard() {
   const { user, isUserLoading } = useUser()
@@ -44,15 +59,20 @@ export default function AdminDashboard() {
   const { toast } = useToast()
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
-  const [activeTab, setActiveTab] = useState("requests")
+  
+  // Slot states
+  const [isAddSlotOpen, setIsAddSlotOpen] = useState(false)
+  const [slotToDelete, setSlotToDelete] = useState<string | null>(null)
+  const [newSlotDateStr, setNewSlotDateStr] = useState(format(new Date(), "yyyy-MM-dd"))
+  const [startTimeStr, setStartTimeStr] = useState("09:00")
+  const [endTimeStr, setEndTimeStr] = useState("10:00")
 
-  // States for Approval/Rejection
+  // Review states
   const [reviewMeeting, setReviewMeeting] = useState<Meeting | null>(null)
   const [meetingLink, setMeetingLink] = useState("")
   const [adminNotes, setAdminNotes] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Super-admin check
   const isSuperAdmin = user?.uid === 'hKv5CWVQv7YvJk8mLyCY11ec96O2'
 
   const adminRoleRef = useMemoFirebase(() => {
@@ -74,20 +94,11 @@ export default function AdminDashboard() {
   }, [firestore, hasAdminAccess])
 
   const { data: meetings, isLoading: isMeetingsLoading } = useCollection<Meeting>(meetingsQuery)
-  const { data: slots, isLoading: isSlotsLoading } = useCollection(slotsQuery)
-
-  const [newSlotDateStr, setNewSlotDateStr] = useState(format(new Date(), "yyyy-MM-dd"))
-  const [startTimeStr, setStartTimeStr] = useState("09:00")
-  const [endTimeStr, setEndTimeStr] = useState("10:00")
-  const [isAddSlotOpen, setIsAddSlotOpen] = useState(false)
+  const { data: slots, isLoading: isSlotsLoading } = useCollection<AvailableSlot>(slotsQuery)
 
   useEffect(() => {
     if (!isUserLoading && !isAdminLoading && user && !hasAdminAccess) {
-      toast({
-        title: "Access Denied",
-        description: "Administrative privileges required.",
-        variant: "destructive",
-      })
+      toast({ title: "Access Denied", variant: "destructive" })
       router.push("/dashboard")
     }
   }, [user, isUserLoading, hasAdminAccess, isAdminLoading, router, toast])
@@ -95,19 +106,17 @@ export default function AdminDashboard() {
   const handleApprove = () => {
     if (!firestore || !reviewMeeting) return
     if (!meetingLink.trim()) {
-      toast({ title: "Error", description: "Meeting link is required for approval.", variant: "destructive" })
+      toast({ title: "Error", description: "Meeting link is required.", variant: "destructive" })
       return
     }
     setIsProcessing(true)
     const meetingRef = doc(firestore, "meetings", reviewMeeting.id)
-    
     updateDocumentNonBlocking(meetingRef, { 
       status: 'confirmed',
       meetingLink: meetingLink,
       updatedAt: new Date().toISOString()
     })
-    
-    toast({ title: "Session Approved" })
+    toast({ title: "Approved Successfully" })
     setReviewMeeting(null)
     setMeetingLink("")
     setIsProcessing(false)
@@ -116,32 +125,20 @@ export default function AdminDashboard() {
   const handleReject = () => {
     if (!firestore || !reviewMeeting) return
     if (!adminNotes.trim()) {
-      toast({ title: "Error", description: "Please provide a reason for rejection.", variant: "destructive" })
+      toast({ title: "Error", description: "Reason required for rejection.", variant: "destructive" })
       return
     }
     setIsProcessing(true)
     const meetingRef = doc(firestore, "meetings", reviewMeeting.id)
-    
     updateDocumentNonBlocking(meetingRef, { 
       status: 'rejected',
       adminNotes: adminNotes,
       updatedAt: new Date().toISOString()
     })
-    
-    toast({ title: "Request Declined", variant: "destructive" })
+    toast({ title: "Request Rejected" })
     setReviewMeeting(null)
     setAdminNotes("")
     setIsProcessing(false)
-  }
-
-  const handleMarkDone = (id: string) => {
-    if (!firestore) return
-    const meetingRef = doc(firestore, "meetings", id)
-    updateDocumentNonBlocking(meetingRef, { 
-      status: 'done',
-      updatedAt: new Date().toISOString()
-    })
-    toast({ title: "Meeting Completed" })
   }
 
   const handleAddSlot = () => {
@@ -152,27 +149,42 @@ export default function AdminDashboard() {
     const startTime = setMinutes(setHours(dateObj, sH), sM).toISOString()
     const endTime = setMinutes(setHours(dateObj, eH), eM).toISOString()
 
+    // Check for duplicates
+    const isDuplicate = slots?.some(s => s.startTime === startTime && s.endTime === endTime)
+    if (isDuplicate) {
+      toast({ title: "Conflict", description: "A slot with this time already exists.", variant: "destructive" })
+      return
+    }
+
     addDocumentNonBlocking(collection(firestore, "availableSlots"), {
       startTime,
       endTime,
       isBooked: false,
+      isActive: true,
     })
 
     toast({ title: "Slot Created" })
     setIsAddSlotOpen(false)
   }
 
-  const handleDeleteSlot = (id: string) => {
+  const toggleSlotActive = (slot: AvailableSlot) => {
     if (!firestore) return
-    deleteDocumentNonBlocking(doc(firestore, "availableSlots", id))
+    const slotRef = doc(firestore, "availableSlots", slot.id)
+    updateDocumentNonBlocking(slotRef, { isActive: !slot.isActive })
+    toast({ title: `Slot ${!slot.isActive ? 'Activated' : 'Deactivated'}` })
+  }
+
+  const confirmDeleteSlot = () => {
+    if (!firestore || !slotToDelete) return
+    deleteDocumentNonBlocking(doc(firestore, "availableSlots", slotToDelete))
     toast({ title: "Slot Removed", variant: "destructive" })
+    setSlotToDelete(null)
   }
 
   if (isUserLoading || (isAdminLoading && !isSuperAdmin)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-sm font-bold text-primary uppercase tracking-widest">Verifying Clearance...</p>
       </div>
     )
   }
@@ -184,321 +196,217 @@ export default function AdminDashboard() {
     m.clientEmail.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const stats = [
-    { title: "Requests", value: meetings?.length || 0, icon: Users, color: "bg-blue-600" },
-    { title: "Pending", value: meetings?.filter(m => m.status === 'pending').length || 0, icon: Activity, color: "bg-orange-500" },
-    { title: "Slots", value: slots?.filter(s => !s.isBooked).length || 0, icon: CalendarDays, color: "bg-green-600" }
-  ]
-
-  const isMeetingExpired = (meeting: Meeting) => {
-    if (meeting.status === 'done') return true
-    if (meeting.slotEndTime && isPast(new Date(meeting.slotEndTime))) return true
-    return false
-  }
-
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 animate-in fade-in duration-700 pb-32">
       <div className="max-w-6xl mx-auto space-y-6">
-        <header className="flex items-center justify-between gap-4">
+        <header className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => router.push("/dashboard")}
-              className="h-10 w-10 rounded-xl bg-white shadow-sm"
-            >
+            <Button variant="ghost" size="icon" onClick={() => router.push("/dashboard")} className="h-10 w-10 rounded-xl bg-white shadow-sm">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center shadow-lg">
-                <ShieldCheck className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-headline font-bold text-primary flex items-center gap-2">
-                  Admin
-                  {isSuperAdmin && <Badge className="bg-accent text-[8px] tracking-tight">SUPER</Badge>}
-                </h1>
-                <p className="text-xs text-muted-foreground font-medium">Control Center</p>
-              </div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-headline font-bold text-primary flex items-center gap-2">
+                Admin Center
+                {isSuperAdmin && <Badge className="bg-accent text-[8px]">SUPER</Badge>}
+              </h1>
+              <p className="text-xs text-muted-foreground">Management Panel</p>
             </div>
           </div>
         </header>
 
         <div className="grid grid-cols-3 gap-3">
-          {stats.map((stat, idx) => (
-            <Card key={idx} className="border-none shadow-md bg-white rounded-2xl overflow-hidden">
-              <CardContent className="p-3 md:p-6 flex flex-col items-center gap-1 md:gap-3">
-                <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-xl flex items-center justify-center text-white", stat.color)}>
-                  <stat.icon className="h-4 w-4 md:h-6 md:w-6" />
+          {[
+            { title: "Total", value: meetings?.length || 0, icon: Users, color: "bg-blue-600" },
+            { title: "Pending", value: meetings?.filter(m => m.status === 'pending').length || 0, icon: Activity, color: "bg-orange-500" },
+            { title: "Open Slots", value: slots?.filter(s => !s.isBooked && s.isActive).length || 0, icon: CalendarDays, color: "bg-green-600" }
+          ].map((stat, idx) => (
+            <Card key={idx} className="border-none shadow-md bg-white rounded-2xl">
+              <CardContent className="p-3 flex flex-col items-center gap-1">
+                <div className={cn("h-8 w-8 rounded-xl flex items-center justify-center text-white", stat.color)}>
+                  <stat.icon className="h-4 w-4" />
                 </div>
                 <div className="text-center">
-                  <p className="text-[8px] md:text-[10px] font-black uppercase tracking-tighter text-muted-foreground">{stat.title}</p>
-                  <p className="text-sm md:text-2xl font-headline font-bold text-primary leading-none">{stat.value}</p>
+                  <p className="text-[8px] font-black uppercase text-muted-foreground">{stat.title}</p>
+                  <p className="text-lg font-headline font-bold text-primary">{stat.value}</p>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <Tabs defaultValue="requests" className="space-y-6" onValueChange={setActiveTab}>
-          <TabsList className="h-12 bg-white rounded-xl p-1 shadow-sm border-none w-full sm:w-auto">
-            <TabsTrigger value="requests" className="flex-1 rounded-lg px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
-              Requests
-            </TabsTrigger>
-            <TabsTrigger value="slots" className="flex-1 rounded-lg px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
-              Availability
-            </TabsTrigger>
+        <Tabs defaultValue="requests" className="space-y-6">
+          <TabsList className="bg-white rounded-xl p-1 shadow-sm w-full sm:w-auto">
+            <TabsTrigger value="requests" className="flex-1 rounded-lg px-6 font-bold text-xs">Requests</TabsTrigger>
+            <TabsTrigger value="slots" className="flex-1 rounded-lg px-6 font-bold text-xs">Slots Table</TabsTrigger>
           </TabsList>
 
           <TabsContent value="requests" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <h2 className="text-lg font-headline font-bold w-full">Incoming Queue</h2>
+              <h2 className="text-lg font-headline font-bold">Meeting Queue</h2>
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder="Filter by name/email..." 
-                  className="pl-10 h-10 bg-white rounded-xl border-none shadow-sm text-sm"
+                  placeholder="Filter client..." 
+                  className="pl-10 h-10 bg-white rounded-xl border-none shadow-sm"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="rounded-2xl border-none shadow-lg bg-white overflow-hidden">
+            <div className="rounded-2xl bg-white shadow-lg overflow-hidden border border-primary/5">
               {isMeetingsLoading ? (
-                <div className="p-4 space-y-2">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
-                </div>
+                <div className="p-8 space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>
               ) : filteredMeetings && filteredMeetings.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader className="bg-primary/5">
-                      <TableRow className="border-none">
-                        <TableHead className="py-4 pl-6 font-black uppercase text-primary/60 tracking-widest text-[10px]">Client</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Status</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Date</TableHead>
-                        <TableHead className="pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[10px]">Action</TableHead>
+                <Table>
+                  <TableHeader className="bg-muted/30">
+                    <TableRow>
+                      <TableHead className="font-black text-[10px] uppercase pl-6">Client</TableHead>
+                      <TableHead className="font-black text-[10px] uppercase">Status</TableHead>
+                      <TableHead className="font-black text-[10px] uppercase">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredMeetings.map((req) => (
+                      <TableRow key={req.id}>
+                        <TableCell className="pl-6">
+                          <p className="font-bold text-sm">{req.clientName}</p>
+                          <p className="text-[10px] text-muted-foreground">{req.clientEmail}</p>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={req.status === 'pending' ? 'secondary' : 'default'} className="text-[9px] uppercase font-black">
+                            {req.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-8 rounded-lg text-xs font-bold"
+                            onClick={() => setReviewMeeting(req)}
+                          >
+                            Review
+                          </Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredMeetings.map((req) => (
-                        <TableRow key={req.id} className="border-primary/5">
-                          <TableCell className="py-4 pl-6">
-                            <div>
-                              <p className="font-bold text-sm text-primary">{req.clientName}</p>
-                              <p className="text-[10px] text-muted-foreground">{req.clientEmail}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={req.status === 'pending' ? 'secondary' : req.status === 'confirmed' ? 'default' : req.status === 'done' ? 'outline' : 'destructive'} 
-                              className="text-[9px] font-black uppercase"
-                            >
-                              {req.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-xs font-bold whitespace-nowrap">
-                            {format(new Date(req.createdAt), "MMM d, p")}
-                          </TableCell>
-                          <TableCell className="pr-6 text-right">
-                            {req.status === 'pending' ? (
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="h-8 rounded-lg font-bold text-xs"
-                                onClick={() => setReviewMeeting(req)}
-                              >
-                                Review
-                              </Button>
-                            ) : req.status === 'confirmed' && !isMeetingExpired(req) ? (
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-8 rounded-lg font-bold text-primary text-xs"
-                                onClick={() => handleMarkDone(req.id)}
-                              >
-                                Done
-                              </Button>
-                            ) : (
-                              <span className="text-[10px] text-muted-foreground italic">Passed</span>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    ))}
+                  </TableBody>
+                </Table>
               ) : (
-                <div className="text-center py-16 bg-white/40">
-                  <Inbox className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
-                  <h3 className="text-sm font-headline font-bold text-muted-foreground/60">No matching requests</h3>
-                </div>
+                <div className="text-center py-20"><Inbox className="mx-auto h-12 w-12 text-muted/20" /></div>
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="slots" className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="text-lg font-headline font-bold">Time Slots</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-headline font-bold">Availability Table</h2>
               <Dialog open={isAddSlotOpen} onOpenChange={setIsAddSlotOpen}>
                 <DialogTrigger asChild>
-                  <Button className="h-10 rounded-xl bg-primary shadow-md font-bold text-xs">
-                    <Plus className="h-4 w-4 mr-2" /> Create Slot
-                  </Button>
+                  <Button className="h-10 rounded-xl bg-primary font-bold text-xs"><Plus className="mr-2 h-4 w-4" /> New Slot</Button>
                 </DialogTrigger>
-                <DialogContent className="rounded-3xl max-w-sm p-6 border-none shadow-2xl">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-headline font-bold">New Availability</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-6 pt-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-primary/60 ml-1">Choose Date</label>
-                      <Input 
-                        type="date" 
-                        value={newSlotDateStr} 
-                        onChange={(e) => setNewSlotDateStr(e.target.value)}
-                        min={format(new Date(), "yyyy-MM-dd")}
-                        className="h-12 rounded-2xl border-primary/10 font-bold"
-                      />
-                    </div>
+                <DialogContent className="rounded-3xl max-w-sm">
+                  <DialogHeader><DialogTitle>Create Slot</DialogTitle></DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <Input type="date" value={newSlotDateStr} onChange={(e) => setNewSlotDateStr(e.target.value)} className="h-12 rounded-xl" />
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-primary/60 ml-1">Start Time</label>
-                        <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-12 rounded-2xl" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-primary/60 ml-1">End Time</label>
-                        <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-12 rounded-2xl" />
-                      </div>
+                      <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-12 rounded-xl" />
+                      <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-12 rounded-xl" />
                     </div>
                   </div>
-                  <DialogFooter className="pt-6">
-                    <Button onClick={handleAddSlot} className="w-full h-14 rounded-2xl font-black text-lg shadow-xl shadow-primary/20">ADD SESSION</Button>
-                  </DialogFooter>
+                  <DialogFooter className="pt-4"><Button onClick={handleAddSlot} className="w-full h-12 rounded-xl font-bold">SAVE SLOT</Button></DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
 
-            <div className="rounded-2xl border-none shadow-lg bg-white overflow-hidden">
+            <div className="rounded-2xl bg-white shadow-lg overflow-hidden border border-primary/5">
               {isSlotsLoading ? (
-                <div className="p-4 space-y-2">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
-                </div>
+                <div className="p-8"><Skeleton className="h-20 w-full" /></div>
               ) : slots && slots.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader className="bg-primary/5">
-                      <TableRow className="border-none">
-                        <TableHead className="py-4 pl-6 font-black uppercase text-primary/60 tracking-widest text-[10px]">Date</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Time</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Booking</TableHead>
-                        <TableHead className="pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[10px]">Remove</TableHead>
+                <Table>
+                  <TableHeader className="bg-muted/30">
+                    <TableRow>
+                      <TableHead className="font-black text-[10px] uppercase pl-6">Time Info</TableHead>
+                      <TableHead className="font-black text-[10px] uppercase">Active</TableHead>
+                      <TableHead className="font-black text-[10px] uppercase">Booked</TableHead>
+                      <TableHead className="font-black text-[10px] uppercase pr-6 text-right">Delete</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {slots.map((slot) => (
+                      <TableRow key={slot.id}>
+                        <TableCell className="pl-6">
+                          <p className="font-bold text-sm">{format(new Date(slot.startTime), "MMM d, yyyy")}</p>
+                          <p className="text-[10px] text-muted-foreground">{format(new Date(slot.startTime), "p")} - {format(new Date(slot.endTime), "p")}</p>
+                        </TableCell>
+                        <TableCell>
+                          <Switch 
+                            checked={slot.isActive} 
+                            onCheckedChange={() => toggleSlotActive(slot)} 
+                            disabled={slot.isBooked}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {slot.isBooked ? <Badge className="bg-destructive text-[8px] uppercase">Occupied</Badge> : <Badge variant="secondary" className="text-[8px] uppercase">Open</Badge>}
+                        </TableCell>
+                        <TableCell className="pr-6 text-right">
+                          <Button variant="ghost" size="icon" onClick={() => setSlotToDelete(slot.id)} className="h-8 w-8 text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {slots.map((slot) => (
-                        <TableRow key={slot.id} className="border-primary/5">
-                          <TableCell className="py-4 pl-6 font-bold text-sm">
-                            {format(new Date(slot.startTime), "MMM d, yyyy")}
-                          </TableCell>
-                          <TableCell className="text-xs font-medium">
-                            {format(new Date(slot.startTime), "p")} - {format(new Date(slot.endTime), "p")}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={slot.isBooked ? "destructive" : "secondary"} className="text-[9px]">
-                              {slot.isBooked ? "Reserved" : "Open"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="pr-6 text-right">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleDeleteSlot(slot.id)}
-                              className="h-8 w-8 text-destructive rounded-lg"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    ))}
+                  </TableBody>
+                </Table>
               ) : (
-                <div className="text-center py-16 bg-white/40">
-                  <CalendarIcon className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
-                  <h3 className="text-sm font-headline font-bold text-muted-foreground/60">No availability set</h3>
-                </div>
+                <div className="text-center py-20"><CalendarIcon className="mx-auto h-12 w-12 text-muted/20" /></div>
               )}
             </div>
           </TabsContent>
         </Tabs>
       </div>
 
+      {/* Confirmation Dialogs */}
+      <AlertDialog open={!!slotToDelete} onOpenChange={() => setSlotToDelete(null)}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-destructive" /> Confirm Deletion</AlertDialogTitle>
+            <AlertDialogDescription>Are you sure you want to remove this time slot? This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteSlot} className="bg-destructive rounded-xl">Delete Slot</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Review Dialog */}
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
-        <DialogContent className="max-w-4xl rounded-3xl overflow-hidden p-0 border-none shadow-2xl bg-white">
+        <DialogContent className="max-w-4xl rounded-3xl p-0 overflow-hidden">
           <div className="flex flex-col md:flex-row max-h-[90vh]">
-            <div className="flex-1 p-6 md:p-10 space-y-6 overflow-y-auto">
+            <div className="flex-1 p-8 overflow-y-auto space-y-6">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline font-bold text-primary">Verification</DialogTitle>
-                <p className="text-sm text-muted-foreground">Approve with meeting link or reject with feedback.</p>
+                <DialogTitle className="text-2xl font-headline font-bold">Verify Request</DialogTitle>
+                <DialogDescription>Validate payment and provide meeting details.</DialogDescription>
               </DialogHeader>
-              
-              <div className="space-y-6">
-                <div className="p-4 rounded-2xl bg-muted/30 border border-muted/20">
-                  <p className="text-[10px] font-black text-primary/60 uppercase mb-1">Agenda</p>
-                  <p className="text-sm font-medium italic text-foreground/80 leading-relaxed">"{reviewMeeting?.description}"</p>
-                </div>
-
+              <div className="p-4 rounded-xl bg-muted/20 border text-sm italic font-medium leading-relaxed">"{reviewMeeting?.description}"</div>
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-primary/60 uppercase px-1">Meeting Link (Approval Required)</label>
-                  <Input 
-                    placeholder="https://meet.google.com/..." 
-                    className="h-12 rounded-2xl bg-muted/20"
-                    value={meetingLink}
-                    onChange={(e) => setMeetingLink(e.target.value)}
-                  />
+                  <label className="text-[10px] font-black uppercase text-primary/60">Meeting Link (Approval)</label>
+                  <Input placeholder="https://meet.google.com/..." className="h-12 rounded-xl" value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} />
                 </div>
-
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-primary/60 uppercase px-1">Reason (Rejection Only)</label>
-                  <Textarea 
-                    placeholder="Why is this request being declined?" 
-                    className="min-h-[80px] rounded-2xl bg-muted/20"
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                  />
+                  <label className="text-[10px] font-black uppercase text-primary/60">Remarks (Rejection)</label>
+                  <Textarea placeholder="Reason for rejection..." className="min-h-[80px] rounded-xl" value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} />
                 </div>
               </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button 
-                  variant="destructive" 
-                  className="flex-1 h-12 rounded-2xl font-bold uppercase text-xs"
-                  onClick={handleReject}
-                  disabled={isProcessing}
-                >
-                  Reject
-                </Button>
-                <Button 
-                  className="flex-1 h-12 rounded-2xl font-bold uppercase text-xs bg-primary"
-                  onClick={handleApprove}
-                  disabled={isProcessing}
-                >
-                  Confirm
-                </Button>
+              <div className="flex gap-4 pt-4">
+                <Button variant="destructive" className="flex-1 h-12 rounded-xl font-bold" onClick={handleReject} disabled={isProcessing}>Reject</Button>
+                <Button className="flex-1 h-12 rounded-xl font-bold bg-primary" onClick={handleApprove} disabled={isProcessing}>Approve</Button>
               </div>
             </div>
-
-            <div className="w-full md:w-[350px] bg-muted/10 p-6 border-t md:border-t-0 md:border-l border-muted/20">
-              <p className="text-[10px] font-black text-muted-foreground uppercase text-center mb-4">Payment Receipt</p>
-              <div className="aspect-[3/4] w-full rounded-2xl overflow-hidden shadow-2xl bg-white border-4 border-white">
-                <img 
-                  src={reviewMeeting?.paymentProofUrl} 
-                  className="object-contain w-full h-full bg-muted/5" 
-                  alt="Payment Proof" 
-                  onError={(e) => { (e.target as HTMLImageElement).src = "https://picsum.photos/seed/error/600/800" }}
-                />
+            <div className="w-full md:w-[320px] bg-muted/10 p-6 border-l flex flex-col items-center">
+              <p className="text-[10px] font-black uppercase text-muted-foreground mb-4">Payment Receipt</p>
+              <div className="w-full aspect-[3/4] rounded-2xl bg-white shadow-xl overflow-hidden p-2">
+                <img src={reviewMeeting?.paymentProofUrl} className="w-full h-full object-contain" alt="Proof" />
               </div>
             </div>
           </div>

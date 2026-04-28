@@ -23,6 +23,7 @@ export interface AvailableSlot {
   startTime: string; // ISO string
   endTime: string;   // ISO string
   isBooked: boolean;
+  isActive: boolean; // Toggle for visibility to users
   meetingId?: string;
 }
 
