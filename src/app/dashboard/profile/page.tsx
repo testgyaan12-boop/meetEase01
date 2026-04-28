@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useAuth } from "@/firebase"
+import { useUser, useFirestore, useDoc, setDocumentNonBlocking, useAuth } from "@/firebase"
 import { doc } from "firebase/firestore"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,12 +9,13 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { User, Mail, Shield, Save, LogOut, ArrowRight } from "lucide-react"
+import { User, Mail, Shield, Save, LogOut, ArrowRight, ShieldCheck } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useMemoFirebase } from "@/firebase"
 import { signOut } from "firebase/auth"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 const profileSchema = z.object({
   fullName: z.string().min(2, "Full name is too short"),
@@ -35,6 +36,13 @@ export default function ProfilePage() {
 
   const { data: profile, isLoading: isProfileLoading } = useDoc(userDocRef)
 
+  // Admin Check
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null
+    return doc(firestore, "roles_admin", user.uid)
+  }, [firestore, user])
+  const { data: adminRole } = useDoc(adminRoleRef)
+
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     values: {
@@ -46,14 +54,18 @@ export default function ProfilePage() {
   const onSubmit = (values: z.infer<typeof profileSchema>) => {
     if (!userDocRef) return
 
-    updateDocumentNonBlocking(userDocRef, {
+    // CRITICAL: Use setDocumentNonBlocking with merge: true
+    // This handles both initial profile creation and subsequent updates safely.
+    setDocumentNonBlocking(userDocRef, {
       ...values,
+      id: user?.uid,
       updatedAt: new Date().toISOString(),
-    })
+      createdAt: profile?.createdAt || new Date().toISOString(),
+    }, { merge: true })
 
     toast({
-      title: "Profile Updated",
-      description: "Your information has been saved successfully.",
+      title: "Profile Saved",
+      description: "Your information has been updated in our secure database.",
     })
   }
 
@@ -78,88 +90,104 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-headline font-bold text-primary">Account Profile</h2>
-          <p className="text-muted-foreground">Manage your personal information and preferences.</p>
+          <p className="text-muted-foreground font-medium">Manage your personal identity and preferences.</p>
         </div>
       </div>
 
-      <Card className="border-none shadow-xl bg-white/70 backdrop-blur-md rounded-[2rem] overflow-hidden">
-        <CardHeader className="bg-primary/5 p-8 border-b">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+      {adminRole && (
+        <Link href="/admin">
+          <Card className="border-2 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group rounded-3xl overflow-hidden mb-6">
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="font-bold text-primary text-lg">Admin Workspace</p>
+                  <p className="text-sm text-primary/70 font-medium">Manage meeting requests and verify payments.</p>
+                </div>
+              </div>
+              <ArrowRight className="h-6 w-6 text-primary transition-transform group-hover:translate-x-2" />
+            </CardContent>
+          </Card>
+        </Link>
+      )}
+
+      <Card className="border-none shadow-2xl bg-white/80 backdrop-blur-md rounded-[2.5rem] overflow-hidden">
+        <CardHeader className="bg-primary/5 p-10 border-b">
+          <div className="flex items-center gap-5">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
               <User className="h-8 w-8 text-white" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-headline font-bold text-primary">Personal Details</CardTitle>
-              <CardDescription>Update your public-facing information.</CardDescription>
+              <CardTitle className="text-2xl font-headline font-bold text-primary tracking-tight">Personal Details</CardTitle>
+              <CardDescription className="text-base font-medium">Update your public information for consultations.</CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-8">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center gap-2">
-                <User className="h-4 w-4" /> Full Name
+        <CardContent className="p-10">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="space-y-3">
+              <label className="text-sm font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 px-1">
+                Full Name
               </label>
               <Input 
                 {...form.register("fullName")} 
-                className="h-14 rounded-2xl border-primary/10 bg-white/50 focus:ring-primary shadow-sm"
+                className="h-16 rounded-2xl border-primary/10 bg-white/50 focus:ring-primary shadow-sm text-lg font-medium px-6"
               />
               {form.formState.errors.fullName && (
-                <p className="text-xs text-destructive font-bold">{form.formState.errors.fullName.message}</p>
+                <p className="text-xs text-destructive font-bold px-1">{form.formState.errors.fullName.message}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center gap-2">
-                <Mail className="h-4 w-4" /> Email Address
+            <div className="space-y-3">
+              <label className="text-sm font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 px-1">
+                Email Address
               </label>
               <Input 
                 {...form.register("email")} 
                 disabled
-                className="h-14 rounded-2xl border-primary/10 bg-muted/30 shadow-sm opacity-70"
+                className="h-16 rounded-2xl border-primary/10 bg-muted/40 shadow-sm opacity-60 px-6 font-medium"
               />
-              <p className="text-[10px] text-muted-foreground italic px-1">Email cannot be changed for security reasons.</p>
+              <p className="text-[11px] text-muted-foreground italic px-1 font-medium">Email is linked to your authentication and cannot be changed.</p>
             </div>
 
-            <div className="pt-4 flex flex-col gap-3">
+            <div className="pt-6 flex flex-col gap-4">
               <Button 
                 type="submit" 
-                className="w-full h-14 bg-primary hover:bg-primary/90 text-white font-bold text-lg rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95 flex gap-2"
+                className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-bold text-xl rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-95 flex gap-3"
               >
-                <Save className="h-5 w-5" /> Save Changes
+                <Save className="h-6 w-6" /> Save Profile
               </Button>
               
               <Button 
                 type="button" 
                 variant="destructive"
                 onClick={handleLogout}
-                className="w-full h-14 font-bold text-lg rounded-2xl transition-all active:scale-95 flex gap-2"
+                className="w-full h-16 font-bold text-xl rounded-2xl transition-all active:scale-95 flex gap-3 bg-destructive/10 text-destructive hover:bg-destructive hover:text-white border-none shadow-none"
               >
-                <LogOut className="h-5 w-5" /> Sign Out
+                <LogOut className="h-6 w-6" /> Sign Out
               </Button>
             </div>
           </form>
         </CardContent>
       </Card>
 
-      <Card className="border-none shadow-sm bg-accent/5 rounded-[2rem]">
-        <CardContent className="p-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
-              <Shield className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="font-bold text-accent">Security Status</p>
-              <p className="text-xs text-muted-foreground font-medium">Your account is verified and protected.</p>
-            </div>
+      <div className="bg-accent/5 rounded-[2.5rem] p-8 flex items-center justify-between border-2 border-accent/10">
+        <div className="flex items-center gap-5">
+          <div className="h-12 w-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
+            <Shield className="h-6 w-6" />
           </div>
-          <ArrowRight className="h-5 w-5 text-accent opacity-20" />
-        </CardContent>
-      </Card>
+          <div>
+            <p className="font-bold text-accent text-lg">Secure Account</p>
+            <p className="text-sm text-muted-foreground font-medium">Your data is encrypted and protected by Firebase Security.</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
