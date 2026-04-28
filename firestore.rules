@@ -3,30 +3,23 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * CORE PHILOSOPHY
-     * This ruleset enforces a hybrid security model: strict user-ownership for private 
-     * profiles and meeting requests, paired with a role-based access control (RBAC) 
-     * system for administrative tasks.
-     *
-     * GLOBAL ADMIN BYPASS: UID 'hKv5CWVQv7YvJk8mLyCY11ec96O2' has global read/write access.
+     * GLOBAL ADMIN BYPASS
+     * The UID 'hKv5CWVQv7YvJk8mLyCY11ec96O2' has absolute access to all documents.
      */
+    function isSuperAdmin() {
+      return request.auth != null && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
+    }
+
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
 
     // --- Helper Functions ---
 
-    /** @description Checks if the user is authenticated. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the user matches the super-admin UID. */
-    function isSuperAdmin() {
-      return isSignedIn() && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
-    }
-
-    /** 
-     * @description Checks if the user is an admin.
-     * Access is granted if they are the super-admin OR exist in the roles_admin collection.
-     */
     function isAdmin() {
       return isSuperAdmin() || (
         isSignedIn() && 
@@ -34,19 +27,8 @@ service cloud.firestore {
       );
     }
 
-    /** @description Checks if the provided UID matches the authenticated user's UID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /** @description Combines ownership and existence checks for updates/deletes. */
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    // --- Global Bypass for Super Admin ---
-    match /{document=**} {
-      allow read, write: if isSuperAdmin();
     }
 
     // --- Collection Rules ---
@@ -55,22 +37,21 @@ service cloud.firestore {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId) || isAdmin();
+      allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
     }
 
     match /availableSlots/{slotId} {
       allow get, list: if isSignedIn();
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin() && resource != null;
+      allow create, update, delete: if isAdmin();
     }
 
     match /meetings/{meetingId} {
-      allow list: if isAdmin() || (isSignedIn() && request.query.limit <= 100 && request.auth.uid == resource.data.userId);
+      allow list: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.userId);
       allow get: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin() || (isExistingOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId);
-      allow delete: if isAdmin() || isExistingOwner(resource.data.userId);
+      allow update: if isAdmin() || (isOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId);
+      allow delete: if isAdmin() || isOwner(resource.data.userId);
     }
 
     match /roles_admin/{adminUid} {
