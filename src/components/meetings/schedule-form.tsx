@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -61,6 +60,8 @@ export function ScheduleMeetingForm() {
       clientMobile: values.clientMobile,
       description: values.description,
       availableSlotId: values.availableSlotId,
+      slotStartTime: values.slotStartTime,
+      slotEndTime: values.slotEndTime,
       paymentProofUrl,
       status: 'pending',
       createdAt: new Date().toISOString(),
