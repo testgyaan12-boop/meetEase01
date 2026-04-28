@@ -19,7 +19,7 @@ import { collection } from "firebase/firestore"
 const formSchema = z.object({
   clientName: z.string().min(2, "Name must be at least 2 characters"),
   clientMobile: z.string().min(10, "Invalid mobile number"),
-  description: z.string().min(10, "Please provide more details about the meeting agenda"),
+  description: z.string().min(10, "Please provide more details about the meeting"),
   availableSlotId: z.string().min(1, "Please select a time slot"),
   slotStartTime: z.string(),
   slotEndTime: z.string(),
@@ -105,7 +105,7 @@ export function ScheduleMeetingForm() {
             <section className="space-y-6">
               <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Contact Information
+                Basic Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -146,7 +146,7 @@ export function ScheduleMeetingForm() {
             <section className="space-y-6">
               <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Availability Check
+                Select Availability
               </h3>
               <SlotPicker 
                 onSelect={(id, start, end) => {
@@ -157,7 +157,7 @@ export function ScheduleMeetingForm() {
               />
               {form.formState.errors.availableSlotId && (
                 <p className="text-xs text-destructive font-bold ml-1 flex items-center gap-1.5">
-                  <AlertCircle className="h-3.5 w-3.5" /> Select a time slot above.
+                  <AlertCircle className="h-3.5 w-3.5" /> Please select a time slot from the calendar.
                 </p>
               )}
             </section>
@@ -165,7 +165,7 @@ export function ScheduleMeetingForm() {
             <section className="space-y-6">
               <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Payment Verification
+                Payment Proof
               </h3>
               <div className="relative group">
                 <input
@@ -190,7 +190,7 @@ export function ScheduleMeetingForm() {
                       <div className="h-20 w-20 rounded-3xl bg-muted flex items-center justify-center text-muted-foreground mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                         <Upload className="h-10 w-10" />
                       </div>
-                      <p className="text-lg font-bold">Upload screenshot</p>
+                      <p className="text-lg font-bold">Click or drag receipt here</p>
                     </>
                   )}
                 </div>
@@ -205,11 +205,11 @@ export function ScheduleMeetingForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-                  Verifying...
+                  Processing...
                 </>
               ) : (
                 <>
-                  Submit Request
+                  Confirm Booking Request
                   <FileText className="ml-3 h-6 w-6 opacity-50" />
                 </>
               )}

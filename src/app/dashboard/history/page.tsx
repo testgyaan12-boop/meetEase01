@@ -3,7 +3,7 @@
 import { useMemoFirebase, useFirestore, useUser, useCollection } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, Link as LinkIcon, Inbox, Mail, AlertCircle, CheckCircle2, Info } from "lucide-react"
+import { Calendar, Clock, Link as LinkIcon, Inbox, Mail, AlertCircle, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format, isPast } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -28,13 +28,10 @@ export default function HistoryPage() {
   if (isUserLoading || isMeetingsLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-10 w-64 rounded-xl" />
-          <Skeleton className="h-4 w-48 rounded-lg" />
-        </div>
-        <div className="rounded-[2rem] border bg-white/50 p-6 space-y-4">
+        <Skeleton className="h-10 w-64" />
+        <div className="rounded-2xl border bg-white/50 p-6 space-y-4">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+            <Skeleton key={i} className="h-16 w-full rounded-xl" />
           ))}
         </div>
       </div>
@@ -42,9 +39,9 @@ export default function HistoryPage() {
   }
 
   const getMeetingStatusBadge = (meeting: Meeting) => {
-    if (meeting.status === 'done') return <Badge variant="outline" className="px-3 font-black text-[9px] uppercase tracking-widest border-primary/20 text-primary">Completed</Badge>
+    if (meeting.status === 'done') return <Badge variant="outline" className="px-3">Completed</Badge>
     if (meeting.status === 'confirmed' && meeting.slotEndTime && isPast(new Date(meeting.slotEndTime))) {
-      return <Badge variant="secondary" className="px-3 font-black text-[9px] uppercase tracking-widest bg-primary/5 text-primary/70">Past Session</Badge>
+      return <Badge variant="secondary" className="px-3">Past Session</Badge>
     }
     
     const variants: Record<string, string> = {
@@ -66,8 +63,8 @@ export default function HistoryPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h2 className="text-3xl font-headline font-bold text-primary">Your History</h2>
-        <p className="text-muted-foreground font-medium">Manage and track your professional consultations.</p>
+        <h2 className="text-3xl font-headline font-bold text-primary">Meeting History</h2>
+        <p className="text-muted-foreground font-medium">Track your requested and confirmed consultations.</p>
       </div>
 
       <div className="rounded-[2.5rem] border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
@@ -76,8 +73,8 @@ export default function HistoryPage() {
             <Table>
               <TableHeader className="bg-primary/5">
                 <TableRow className="hover:bg-transparent border-primary/10">
-                  <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Details</TableHead>
-                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Date Requested</TableHead>
+                  <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Client Details</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Request Date</TableHead>
                   <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Status & Remarks</TableHead>
                   <TableHead className="pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[11px]">Action</TableHead>
                 </TableRow>
@@ -92,7 +89,7 @@ export default function HistoryPage() {
                         </div>
                         <div>
                           <p className="font-bold text-base">{meeting.clientName}</p>
-                          <p className="text-xs text-muted-foreground font-medium truncate max-w-[150px]">{meeting.clientEmail}</p>
+                          <p className="text-xs text-muted-foreground font-medium">{meeting.clientEmail}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -125,13 +122,8 @@ export default function HistoryPage() {
                             <LinkIcon className="h-4 w-4" /> Join
                           </a>
                         </Button>
-                      ) : meeting.status === 'confirmed' && isPast(new Date(meeting.slotEndTime || "")) ? (
-                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest bg-muted/50 px-3 py-1.5 rounded-lg inline-block">Session Ended</p>
                       ) : (
-                        <div className="flex items-center justify-end gap-1.5 text-muted-foreground/60">
-                           <Info className="h-3.5 w-3.5" />
-                           <p className="text-xs font-bold italic">Awaiting Action</p>
-                        </div>
+                        <span className="text-xs text-muted-foreground italic font-medium">N/A</span>
                       )}
                     </TableCell>
                   </TableRow>
@@ -145,10 +137,10 @@ export default function HistoryPage() {
               <Inbox className="h-10 w-10 text-muted-foreground/30" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-2xl font-headline font-bold text-muted-foreground">Empty History</h3>
-              <p className="text-muted-foreground max-w-xs mx-auto font-medium">You haven't scheduled any sessions yet.</p>
+              <h3 className="text-2xl font-headline font-bold text-muted-foreground">No History</h3>
+              <p className="text-muted-foreground max-w-xs mx-auto font-medium">You haven't requested any meetings yet.</p>
             </div>
-            <Button onClick={() => window.location.href = '/dashboard'} className="bg-primary rounded-xl h-12 px-8 font-bold">Book Now</Button>
+            <Button onClick={() => window.location.href = '/dashboard'} className="bg-primary rounded-xl h-12 px-8 font-bold">Schedule Now</Button>
           </div>
         )}
       </div>
