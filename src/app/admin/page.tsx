@@ -40,6 +40,7 @@ import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils"
 
 export default function AdminDashboard() {
   const { user, isUserLoading } = useUser()
@@ -192,12 +193,12 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* Statistics Cards - Responsive 3 cards in one row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Statistics Cards - Responsive layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {stats.map((stat, idx) => (
             <Card key={idx} className="border-none shadow-xl bg-white/80 backdrop-blur-md rounded-[2rem] overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
               <CardContent className="p-8 flex items-center gap-6">
-                <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center text-white shadow-lg", stat.color)}>
+                <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0", stat.color)}>
                   <stat.icon className="h-8 w-8" />
                 </div>
                 <div>
