@@ -3,9 +3,8 @@
 
 import { useMemoFirebase, useFirestore, useUser, useCollection } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, Link as LinkIcon, Inbox } from "lucide-react"
+import { Calendar, Clock, Link as LinkIcon, Inbox, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -15,7 +14,6 @@ export default function HistoryPage() {
   const { user, isUserLoading } = useUser()
   const firestore = useFirestore()
 
-  // Query is strictly limited to the current user's UID for security and correctness
   const meetingsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null
     return query(
@@ -56,7 +54,7 @@ export default function HistoryPage() {
             <Table>
               <TableHeader className="bg-primary/5">
                 <TableRow className="hover:bg-transparent border-primary/10">
-                  <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Consultant</TableHead>
+                  <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Details</TableHead>
                   <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Date Requested</TableHead>
                   <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Status</TableHead>
                   <TableHead className="pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[11px]">Action</TableHead>
@@ -68,11 +66,11 @@ export default function HistoryPage() {
                     <TableCell className="py-6 pl-8">
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                          <Calendar className="h-5 w-5 text-primary" />
+                          <Mail className="h-5 w-5 text-primary" />
                         </div>
                         <div>
                           <p className="font-bold text-base">{meeting.clientName}</p>
-                          <p className="text-xs text-muted-foreground font-medium">{meeting.clientMobile}</p>
+                          <p className="text-xs text-muted-foreground font-medium">{meeting.clientEmail}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -97,11 +95,11 @@ export default function HistoryPage() {
                       {meeting.status === 'confirmed' && meeting.meetingLink ? (
                         <Button size="sm" className="bg-primary hover:bg-primary/90 font-bold rounded-xl h-10 gap-2" asChild>
                           <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer">
-                            <LinkIcon className="h-4 w-4" /> Join Session
+                            <LinkIcon className="h-4 w-4" /> Join
                           </a>
                         </Button>
                       ) : (
-                        <p className="text-xs font-bold text-muted-foreground italic">Pending Verification</p>
+                        <p className="text-xs font-bold text-muted-foreground italic">Pending</p>
                       )}
                     </TableCell>
                   </TableRow>
@@ -116,9 +114,9 @@ export default function HistoryPage() {
             </div>
             <div className="space-y-2">
               <h3 className="text-2xl font-headline font-bold text-muted-foreground">Empty History</h3>
-              <p className="text-muted-foreground max-w-xs mx-auto font-medium">You haven't scheduled any professional sessions yet.</p>
+              <p className="text-muted-foreground max-w-xs mx-auto font-medium">You haven't scheduled any sessions yet.</p>
             </div>
-            <Button onClick={() => window.location.href = '/dashboard'} className="bg-primary rounded-xl h-12 px-8 font-bold">Schedule Now</Button>
+            <Button onClick={() => window.location.href = '/dashboard'} className="bg-primary rounded-xl h-12 px-8 font-bold">Book Now</Button>
           </div>
         )}
       </div>

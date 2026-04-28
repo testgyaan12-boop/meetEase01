@@ -56,6 +56,7 @@ export function ScheduleMeetingForm() {
 
     const meetingData = {
       userId: user.uid,
+      clientEmail: user.email || "",
       clientName: values.clientName,
       clientMobile: values.clientMobile,
       description: values.description,
@@ -94,7 +95,7 @@ export function ScheduleMeetingForm() {
         <div className="bg-primary/5 p-8 border-b">
           <CardHeader className="p-0">
             <CardTitle className="text-3xl font-headline font-bold text-primary">Schedule Consultation</CardTitle>
-            <CardDescription className="text-base">Fill in the details below to secure your professional session with our experts.</CardDescription>
+            <CardDescription className="text-base">Fill in the details below to secure your professional session.</CardDescription>
           </CardHeader>
         </div>
         
@@ -131,7 +132,7 @@ export function ScheduleMeetingForm() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-foreground/80 ml-1">Description</label>
                 <Textarea 
-                  placeholder="What would you like to discuss in this session?" 
+                  placeholder="What would you like to discuss?" 
                   {...form.register("description")}
                   className="min-h-[120px] rounded-2xl bg-white/50 border-primary/10 focus:ring-primary shadow-sm p-4 text-base"
                 />
@@ -155,7 +156,7 @@ export function ScheduleMeetingForm() {
               />
               {form.formState.errors.availableSlotId && (
                 <p className="text-xs text-destructive font-bold ml-1 flex items-center gap-1.5">
-                  <AlertCircle className="h-3.5 w-3.5" /> Please select a time slot from the list above.
+                  <AlertCircle className="h-3.5 w-3.5" /> Select a time slot above.
                 </p>
               )}
             </section>
@@ -182,38 +183,33 @@ export function ScheduleMeetingForm() {
                         <CheckCircle2 className="h-10 w-10" />
                       </div>
                       <p className="text-lg font-bold text-primary">{form.watch("paymentProof")?.[0].name}</p>
-                      <p className="text-sm text-muted-foreground mt-1">Proof received. Click to update the file.</p>
                     </>
                   ) : (
                     <>
                       <div className="h-20 w-20 rounded-3xl bg-muted flex items-center justify-center text-muted-foreground mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                         <Upload className="h-10 w-10" />
                       </div>
-                      <p className="text-lg font-bold">Upload bank transfer screenshot</p>
-                      <p className="text-sm text-muted-foreground mt-1 text-center max-w-[200px]">Ensure the receipt shows the transaction ID and amount clearly.</p>
+                      <p className="text-lg font-bold">Upload screenshot</p>
                     </>
                   )}
                 </div>
               </div>
-              {form.formState.errors.paymentProof && (
-                <p className="text-xs text-destructive font-bold ml-1">{form.formState.errors.paymentProof.message as string}</p>
-              )}
             </section>
 
             <Button 
               type="submit" 
-              className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-black text-xl shadow-2xl shadow-primary/20 rounded-[1.5rem] transition-all active:scale-[0.98] group"
+              className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-black text-xl shadow-2xl shadow-primary/20 rounded-[1.5rem] transition-all group"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-                  Verifying Details...
+                  Verifying...
                 </>
               ) : (
                 <>
-                  Submit Booking Request
-                  <FileText className="ml-3 h-6 w-6 opacity-50 group-hover:opacity-100 transition-opacity" />
+                  Submit Request
+                  <FileText className="ml-3 h-6 w-6 opacity-50" />
                 </>
               )}
             </Button>

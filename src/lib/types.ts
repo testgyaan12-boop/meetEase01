@@ -1,9 +1,11 @@
+
 export type MeetingStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled';
 
 export interface Meeting {
   id: string;
   userId: string;
   clientName: string;
+  clientEmail: string;
   clientMobile: string;
   description: string;
   availableSlotId: string;
@@ -13,7 +15,6 @@ export interface Meeting {
   updatedAt: string;
   meetingLink?: string;
   adminNotes?: string;
-  confirmationSentAt?: string;
 }
 
 export interface AvailableSlot {
