@@ -52,8 +52,10 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
     const s = new Date(start)
     const e = new Date(end)
     const fmt = (d: Date) => {
+      const hours = d.getHours()
+      const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours
       const minutes = d.getMinutes()
-      return format(d, minutes === 0 ? "h" : "h:mm")
+      return minutes === 0 ? `${displayHours}` : format(d, "h:mm")
     }
     const period = format(e, "a")
     return `${fmt(s)}-${fmt(e)} ${period}`
