@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -47,17 +46,20 @@ export default function AdminDashboard() {
 
   const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminRoleRef)
 
-  // CRITICAL: Ensure the query only runs if the user IS confirmed as an admin.
-  // This prevents the permission error you saw.
+  // Super admin check for the UI logic
+  const isSuperAdmin = user?.uid === 'hKv5CWVQv7YvJk8mLyCY11ec96O2'
+  const hasAdminAccess = !!adminRole || isSuperAdmin
+
   const meetingsQuery = useMemoFirebase(() => {
-    if (!firestore || !adminRole) return null
+    // Only run the query if the user has confirmed admin access
+    if (!firestore || !hasAdminAccess) return null
     return query(collection(firestore, "meetings"), orderBy("createdAt", "desc"))
-  }, [firestore, adminRole])
+  }, [firestore, hasAdminAccess])
 
   const { data: meetings, isLoading: isMeetingsLoading } = useCollection(meetingsQuery)
 
   useEffect(() => {
-    if (!isUserLoading && !isAdminLoading && user && !adminRole) {
+    if (!isUserLoading && !isAdminLoading && user && !hasAdminAccess) {
       toast({
         title: "Access Denied",
         description: "You do not have administrative privileges for this section.",
@@ -65,7 +67,7 @@ export default function AdminDashboard() {
       })
       router.push("/dashboard")
     }
-  }, [user, isUserLoading, adminRole, isAdminLoading, router, toast])
+  }, [user, isUserLoading, hasAdminAccess, isAdminLoading, router, toast])
 
   const handleAction = (id: string, action: 'confirmed' | 'rejected') => {
     if (!firestore) return
@@ -81,7 +83,7 @@ export default function AdminDashboard() {
     })
   }
 
-  if (isUserLoading || isAdminLoading) {
+  if (isUserLoading || (isAdminLoading && !isSuperAdmin)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -89,7 +91,7 @@ export default function AdminDashboard() {
     )
   }
 
-  if (!adminRole) return null
+  if (!hasAdminAccess) return null
 
   const filteredMeetings = meetings?.filter(m => 
     m.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -105,13 +107,11 @@ export default function AdminDashboard() {
               <ShieldCheck className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-headline font-bold text-primary">Admin Panel</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-headline font-bold text-primary">Admin Panel</h1>
+                {isSuperAdmin && <Badge variant="outline" className="text-[10px] border-primary text-primary font-bold">SUPER</Badge>}
+              </div>
               <p className="text-sm text-muted-foreground font-medium">Verified Request Management</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
-              <User className="h-5 w-5 text-primary" />
             </div>
           </div>
         </header>

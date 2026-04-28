@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useUser, useFirestore, useDoc, setDocumentNonBlocking, useAuth } from "@/firebase"
@@ -36,12 +35,17 @@ export default function ProfilePage() {
 
   const { data: profile, isLoading: isProfileLoading } = useDoc(userDocRef)
 
-  // Admin Check
+  // Admin Check Logic
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null
     return doc(firestore, "roles_admin", user.uid)
   }, [firestore, user])
+  
   const { data: adminRole } = useDoc(adminRoleRef)
+  
+  // Super admin check
+  const isSuperAdmin = user?.uid === 'hKv5CWVQv7YvJk8mLyCY11ec96O2'
+  const hasAdminAccess = !!adminRole || isSuperAdmin
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -54,8 +58,6 @@ export default function ProfilePage() {
   const onSubmit = (values: z.infer<typeof profileSchema>) => {
     if (!userDocRef) return
 
-    // CRITICAL: Use setDocumentNonBlocking with merge: true
-    // This handles both initial profile creation and subsequent updates safely.
     setDocumentNonBlocking(userDocRef, {
       ...values,
       id: user?.uid,
@@ -65,7 +67,7 @@ export default function ProfilePage() {
 
     toast({
       title: "Profile Saved",
-      description: "Your information has been updated in our secure database.",
+      description: "Your information has been updated successfully.",
     })
   }
 
@@ -98,7 +100,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {adminRole && (
+      {hasAdminAccess && (
         <Link href="/admin">
           <Card className="border-2 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group rounded-3xl overflow-hidden mb-6">
             <CardContent className="p-6 flex items-center justify-between">
@@ -107,7 +109,10 @@ export default function ProfilePage() {
                   <ShieldCheck className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-bold text-primary text-lg">Admin Workspace</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-primary text-lg">Admin Workspace</p>
+                    {isSuperAdmin && <Shield className="h-3 w-3 text-primary fill-primary" />}
+                  </div>
                   <p className="text-sm text-primary/70 font-medium">Manage meeting requests and verify payments.</p>
                 </div>
               </div>
@@ -176,18 +181,6 @@ export default function ProfilePage() {
           </form>
         </CardContent>
       </Card>
-
-      <div className="bg-accent/5 rounded-[2.5rem] p-8 flex items-center justify-between border-2 border-accent/10">
-        <div className="flex items-center gap-5">
-          <div className="h-12 w-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
-            <Shield className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="font-bold text-accent text-lg">Secure Account</p>
-            <p className="text-sm text-muted-foreground font-medium">Your data is encrypted and protected by Firebase Security.</p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

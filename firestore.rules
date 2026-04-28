@@ -14,25 +14,6 @@ service cloud.firestore {
      * - /availableSlots: Global time slots (Public read for users, Admin-only write).
      * - /meetings: Meeting requests containing a denormalized 'userId' for ownership.
      * - /roles_admin: A marker collection for identifying administrative accounts.
-     *
-     * KEY SECURITY DECISIONS
-     * 1. Authorization Independence: The 'Meeting' entity contains a denormalized 
-     *    'userId' field. This allows rules to verify ownership directly on the 
-     *    document without performing expensive lookups to a parent user document.
-     * 2. DBAC (Database Access Control): Admin privileges are determined by the 
-     *    existence of a document in the '/roles_admin' collection matching the user's UID.
-     * 3. Prototyping Mode: Rules prioritize robust authorization over strict schema 
-     *    validation to allow for rapid frontend iteration while maintaining security.
-     *
-     * DENORMALIZATION FOR AUTHORIZATION
-     * - Meetings: The 'userId' is stored directly on every meeting document. This 
-     *   ensures that 'list' and 'get' operations can be authorized instantly by 
-     *   comparing 'resource.data.userId' with 'request.auth.uid'.
-     *
-     * STRUCTURAL SEGREGATION
-     * - Public vs. Private: 'availableSlots' are globally listable by any authenticated 
-     *   user to facilitate booking, while 'meetings' are strictly filtered by user 
-     *   identity or admin status.
      */
 
     // --- Helper Functions ---
@@ -42,9 +23,15 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    /** @description Checks if the user's UID exists in the roles_admin collection. */
+    /** 
+     * @description Checks if the user is an admin.
+     * Access is granted if they exist in the roles_admin collection OR have the specific super-admin UID.
+     */
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) || 
+        request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2'
+      );
     }
 
     /** @description Checks if the provided UID matches the authenticated user's UID. */
@@ -59,64 +46,28 @@ service cloud.firestore {
 
     // --- Collection Rules ---
 
-    /**
-     * @description Rules for user profile documents. Users manage their own data.
-     * @path /users/{userId}
-     * @allow (get) If the authenticated user's UID matches the {userId} path.
-     * @deny (list) If a user tries to list all profiles.
-     * @principle Restricts access to a user's own data tree based on document ID.
-     */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
       allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
+      allow update: if isExistingOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
     }
 
-    /**
-     * @description Global meeting slots available for viewing. Only admins can manage slots.
-     * @path /availableSlots/{slotId}
-     * @allow (get) Any authenticated user viewing available times.
-     * @deny (create) Any non-admin attempting to create a new slot.
-     * @principle Uses role-based access (isAdmin) to protect global configuration data.
-     */
     match /availableSlots/{slotId} {
       allow get, list: if isSignedIn();
       allow create: if isAdmin();
       allow update, delete: if isAdmin() && resource != null;
     }
 
-    /**
-     * @description Meeting requests. Owners can see their history; Admins see everything.
-     * @path /meetings/{meetingId}
-     * @allow (list) User querying their own meetings using a userId filter.
-     * @deny (update) User trying to change the userId of an existing meeting.
-     * @principle Validates relational integrity and enforces ownership via denormalized fields.
-     */
     match /meetings/{meetingId} {
-      // Read access: Allowed if the user is an admin OR the owner of the document.
       allow get, list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
-
-      // Create: User must set themselves as the owner.
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-
-      // Update: Admin can update anything. Owner can update their own, but userId is immutable.
       allow update: if isAdmin() || (isExistingOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId);
-
-      // Delete: Admins or owners can remove the request.
       allow delete: if isAdmin() || isExistingOwner(resource.data.userId);
     }
 
-    /**
-     * @description Admin role markers. Only admins can view or modify the admin list.
-     * @path /roles_admin/{adminUid}
-     * @allow (get) A user checking their own admin status.
-     * @deny (create) A regular user attempting to promote themselves to admin.
-     * @principle Implements DBAC (Database Access Control) using existence checks.
-     */
     match /roles_admin/{adminUid} {
-      // Users can check their own status, but only existing admins can manage the role list.
       allow get: if isSignedIn() && (request.auth.uid == adminUid || isAdmin());
       allow list, create, update, delete: if isAdmin();
     }
