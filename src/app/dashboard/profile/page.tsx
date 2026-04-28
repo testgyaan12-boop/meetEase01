@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useUser, useFirestore, useDoc, setDocumentNonBlocking, useAuth } from "@/firebase"
@@ -43,7 +44,7 @@ export default function ProfilePage() {
   
   const { data: adminRole } = useDoc(adminRoleRef)
   
-  // Super admin check
+  // Super admin check for UID hKv5CWVQv7YvJk8mLyCY11ec96O2
   const isSuperAdmin = user?.uid === 'hKv5CWVQv7YvJk8mLyCY11ec96O2'
   const hasAdminAccess = !!adminRole || isSuperAdmin
 
@@ -111,7 +112,7 @@ export default function ProfilePage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="font-bold text-primary text-lg">Admin Workspace</p>
-                    {isSuperAdmin && <Shield className="h-3 w-3 text-primary fill-primary" />}
+                    <Shield className="h-3 w-3 text-primary fill-primary" />
                   </div>
                   <p className="text-sm text-primary/70 font-medium">Manage meeting requests and verify payments.</p>
                 </div>

@@ -3,7 +3,7 @@
 
 import { useState } from "react"
 import { format, startOfDay, endOfDay, isToday } from "date-fns"
-import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react"
+import { Calendar as CalendarIcon, Clock, AlertCircle, ChevronRight } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,6 +23,7 @@ interface SlotPickerProps {
 export function SlotPicker({ onSelect }: SlotPickerProps) {
   const [date, setDate] = useState<Date>(new Date())
   const [selectedSlotId, setSelectedSlotId] = useState<string>()
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const firestore = useFirestore()
 
   const slotsQuery = useMemoFirebase(() => {
@@ -72,17 +73,18 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
           <p className="text-sm text-muted-foreground">Select your preferred session time</p>
         </div>
 
-        <Popover>
+        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
                 "h-12 px-5 rounded-2xl border-primary/20 hover:border-primary/50 transition-all font-bold gap-2 shadow-sm",
-                !isSelectedToday && "bg-primary/5 border-primary"
+                !isSelectedToday && "bg-primary/5 border-primary text-primary"
               )}
             >
               <CalendarIcon className="h-4 w-4" />
               {isSelectedToday ? "Select Custom Date" : format(date, "PPP")}
+              <ChevronRight className={cn("h-4 w-4 transition-transform", isCalendarOpen && "rotate-90")} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 border-none shadow-2xl rounded-3xl" align="end">
@@ -93,10 +95,12 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
                 if (d) {
                   setDate(d)
                   setSelectedSlotId(undefined)
+                  setIsCalendarOpen(false) // Auto-close after selection
                 }
               }}
               initialFocus
-              disabled={(date) => date < startOfDay(new Date())}
+              disabled={(d) => d < startOfDay(new Date())}
+              className="rounded-3xl border bg-white"
             />
           </PopoverContent>
         </Popover>
@@ -118,24 +122,24 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
                 disabled={slot.isBooked}
                 variant={selectedSlotId === slot.id ? "default" : "outline"}
                 className={cn(
-                  "h-16 flex flex-col items-center justify-center rounded-2xl transition-all border-2",
+                  "h-20 flex flex-col items-center justify-center rounded-2xl transition-all border-2",
                   selectedSlotId === slot.id 
                     ? "bg-primary text-white border-primary shadow-lg scale-105" 
                     : "border-primary/5 hover:border-primary/30 bg-white/50",
-                  slot.isBooked && "opacity-40 grayscale cursor-not-allowed border-dashed"
+                  slot.isBooked && "opacity-50 grayscale cursor-not-allowed border-dashed bg-muted/20"
                 )}
                 onClick={() => handleSlotClick(slot)}
               >
                 <div className="flex items-center gap-1.5">
-                  <Clock className={cn("h-3.5 w-3.5", selectedSlotId === slot.id ? "text-white" : "text-primary")} />
+                  <Clock className={cn("h-4 w-4", selectedSlotId === slot.id ? "text-white" : "text-primary")} />
                   <span className={cn(
-                    "font-bold text-sm",
-                    slot.isBooked && "line-through decoration-destructive/50"
+                    "font-bold text-base",
+                    slot.isBooked && "line-through decoration-destructive decoration-2"
                   )}>
                     {formatRange(slot.startTime, slot.endTime)}
                   </span>
                 </div>
-                {slot.isBooked && <span className="text-[9px] uppercase font-black tracking-widest mt-1 opacity-60">Occupied</span>}
+                {slot.isBooked && <span className="text-[10px] uppercase font-black tracking-widest mt-1 text-destructive/70">Occupied</span>}
               </Button>
             ))}
           </div>
@@ -144,7 +148,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
             <AlertCircle className="h-16 w-16 text-muted-foreground/20 mb-6" />
             <h4 className="text-2xl font-headline font-bold text-muted-foreground">No Slots Found</h4>
             <p className="text-muted-foreground max-w-[320px] mt-2 font-medium">
-              We couldn't find any sessions for this date. Try picking another day or contact support.
+              We couldn't find any sessions for {format(date, "MMMM do")}. Try picking another day.
             </p>
             <Button 
               variant="link" 
