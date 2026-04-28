@@ -8,7 +8,7 @@ service cloud.firestore {
      * profiles and meeting requests, paired with a role-based access control (RBAC) 
      * system for administrative tasks.
      *
-     * Updated: Ensuring super-admin UID 'hKv5CWVQv7YvJk8mLyCY11ec96O2' has priority access.
+     * Updated: Hard-coded super-admin UID 'hKv5CWVQv7YvJk8mLyCY11ec96O2' has absolute priority.
      */
 
     // --- Helper Functions ---
@@ -18,13 +18,18 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    /** @description Checks if the user matches the super-admin UID. */
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
+    }
+
     /** 
      * @description Checks if the user is an admin.
-     * Access is granted if they have the specific super-admin UID OR exist in roles_admin.
+     * Access is granted if they are the super-admin OR exist in the roles_admin collection.
      */
     function isAdmin() {
-      return isSignedIn() && (
-        request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2' ||
+      return isSuperAdmin() || (
+        isSignedIn() && 
         exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
       );
     }
@@ -56,7 +61,9 @@ service cloud.firestore {
     }
 
     match /meetings/{meetingId} {
-      allow get, list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      // Admins can list and get all; owners can only see their own.
+      allow list: if isAdmin() || (isSignedIn() && request.query.limit <= 100 && request.auth.uid == resource.data.userId);
+      allow get: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isAdmin() || (isExistingOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId);
       allow delete: if isAdmin() || isExistingOwner(resource.data.userId);
