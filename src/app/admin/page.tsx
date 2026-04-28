@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { 
-  ShieldCheck, 
   Search,
   Inbox,
   Loader2,
@@ -18,8 +17,6 @@ import {
   CalendarDays,
   Activity,
   ArrowLeft,
-  Check,
-  X,
   AlertTriangle
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -45,7 +42,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { format, setHours, setMinutes, isPast } from "date-fns"
+import { format, setHours, setMinutes } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"

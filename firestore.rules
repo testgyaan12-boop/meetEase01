@@ -8,7 +8,7 @@ service cloud.firestore {
      * profiles and meeting requests, paired with a role-based access control (RBAC) 
      * system for administrative tasks.
      *
-     * Updated: Hard-coded super-admin UID 'hKv5CWVQv7YvJk8mLyCY11ec96O2' has absolute priority.
+     * GLOBAL ADMIN BYPASS: UID 'hKv5CWVQv7YvJk8mLyCY11ec96O2' has global read/write access.
      */
 
     // --- Helper Functions ---
@@ -44,6 +44,11 @@ service cloud.firestore {
       return resource != null && isOwner(userId);
     }
 
+    // --- Global Bypass for Super Admin ---
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+
     // --- Collection Rules ---
 
     match /users/{userId} {
@@ -61,7 +66,6 @@ service cloud.firestore {
     }
 
     match /meetings/{meetingId} {
-      // Admins can list and get all; owners can only see their own.
       allow list: if isAdmin() || (isSignedIn() && request.query.limit <= 100 && request.auth.uid == resource.data.userId);
       allow get: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
