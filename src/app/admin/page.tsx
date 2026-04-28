@@ -20,7 +20,6 @@ import {
   Activity,
   CheckCircle2,
   ExternalLink,
-  MessageSquare,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -216,130 +215,128 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 lg:p-12 animate-in fade-in duration-700 pb-32 md:pb-12">
-      <div className="max-w-6xl mx-auto space-y-10">
+      <div className="max-w-6xl mx-auto space-y-8">
         <header className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4 md:gap-6">
-            <div className="h-14 w-14 md:h-16 md:w-16 rounded-[1.5rem] md:rounded-3xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
-              <ShieldCheck className="h-8 w-8 md:h-9 md:w-9 text-white" />
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
+              <ShieldCheck className="h-8 w-8 text-white" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl md:text-4xl font-headline font-bold text-primary tracking-tight">Admin Dashboard</h1>
-                {isSuperAdmin && <Badge className="bg-accent text-white font-black px-3 py-1 text-[10px] tracking-widest">SUPER ADMIN</Badge>}
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl md:text-3xl font-headline font-bold text-primary">Admin Console</h1>
+                {isSuperAdmin && <Badge className="bg-accent text-[9px] tracking-widest">SUPER ADMIN</Badge>}
               </div>
-              <p className="text-sm md:text-base text-muted-foreground font-medium">Manage requests and availability in real-time.</p>
+              <p className="text-xs md:text-sm text-muted-foreground font-medium">Manage queue and availability.</p>
             </div>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {stats.map((stat, idx) => (
-            <Card key={idx} className="border-none shadow-xl bg-white/90 backdrop-blur-md rounded-[1.5rem] md:rounded-[2rem] overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-              <CardContent className="p-6 md:p-8 flex items-center gap-4 md:gap-6">
-                <div className={cn("h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0", stat.color)}>
-                  <stat.icon className="h-6 w-6 md:h-8 md:w-8" />
+            <Card key={idx} className="border-none shadow-xl bg-white/90 backdrop-blur-md rounded-3xl overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0", stat.color)}>
+                  <stat.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-[10px] md:text-sm font-black uppercase tracking-widest text-muted-foreground">{stat.title}</p>
-                  <p className="text-2xl md:text-4xl font-headline font-bold text-primary">{stat.value}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{stat.title}</p>
+                  <p className="text-2xl md:text-3xl font-headline font-bold text-primary">{stat.value}</p>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <Tabs defaultValue="requests" className="space-y-8" onValueChange={setActiveTab}>
-          <TabsList className="h-14 md:h-16 bg-white rounded-2xl md:rounded-3xl p-1.5 md:p-2 shadow-xl border-none">
-            <TabsTrigger value="requests" className="rounded-xl md:rounded-2xl px-6 md:px-8 h-full font-bold data-[state=active]:bg-primary data-[state=active]:text-white">
+        <Tabs defaultValue="requests" className="space-y-6" onValueChange={setActiveTab}>
+          <TabsList className="h-14 bg-white rounded-2xl p-1.5 shadow-lg border-none">
+            <TabsTrigger value="requests" className="rounded-xl px-6 h-full font-bold data-[state=active]:bg-primary data-[state=active]:text-white">
               Requests
             </TabsTrigger>
-            <TabsTrigger value="slots" className="rounded-xl md:rounded-2xl px-6 md:px-8 h-full font-bold data-[state=active]:bg-primary data-[state=active]:text-white">
-              Availability
+            <TabsTrigger value="slots" className="rounded-xl px-6 h-full font-bold data-[state=active]:bg-primary data-[state=active]:text-white">
+              Slots
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="requests" className="space-y-8 animate-in slide-in-from-left-4 duration-500">
+          <TabsContent value="requests" className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <h2 className="text-xl md:text-2xl font-headline font-bold">Client Queue</h2>
+              <h2 className="text-xl font-headline font-bold">Client Requests</h2>
               <div className="relative w-full max-w-sm">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder="Search by client or email..." 
-                  className="pl-12 h-12 md:h-14 bg-white rounded-xl md:rounded-2xl border-none shadow-xl"
+                  placeholder="Filter client or email..." 
+                  className="pl-10 h-12 bg-white rounded-2xl border-none shadow-xl"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="rounded-[1.5rem] md:rounded-[2.5rem] border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
+            <div className="rounded-3xl border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
               {isMeetingsLoading ? (
-                <div className="p-12 space-y-4">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-2xl" />)}
+                <div className="p-8 space-y-4">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
                 </div>
               ) : filteredMeetings && filteredMeetings.length > 0 ? (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-primary/5">
-                      <TableRow className="border-primary/10 hover:bg-transparent">
-                        <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Client Info</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Status</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Created At</TableHead>
-                        <TableHead className="pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[11px]">Actions</TableHead>
+                      <TableRow className="border-primary/5 hover:bg-transparent">
+                        <TableHead className="py-5 pl-6 font-black uppercase text-primary/60 tracking-widest text-[10px]">Client</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Status</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Date</TableHead>
+                        <TableHead className="pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[10px]">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredMeetings.map((req) => (
                         <TableRow key={req.id} className="border-primary/5 group">
-                          <TableCell className="py-6 md:py-8 pl-8">
+                          <TableCell className="py-4 pl-6">
                             <div>
-                              <p className="font-bold text-base md:text-lg text-primary">{req.clientName}</p>
-                              <p className="text-xs font-medium text-muted-foreground">{req.clientEmail}</p>
+                              <p className="font-bold text-sm text-primary">{req.clientName}</p>
+                              <p className="text-[10px] text-muted-foreground">{req.clientEmail}</p>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
                               <Badge 
                                 variant={req.status === 'pending' ? 'secondary' : req.status === 'confirmed' ? 'default' : req.status === 'done' ? 'outline' : 'destructive'} 
-                                className="w-fit px-3 py-1 rounded-lg font-black text-[9px] md:text-[10px] uppercase tracking-widest"
+                                className="w-fit text-[9px] font-black uppercase"
                               >
                                 {req.status}
                               </Badge>
                               {isMeetingExpired(req) && req.status === 'confirmed' && (
-                                <Badge variant="secondary" className="w-fit text-[8px] opacity-70">AUTO-DONE</Badge>
+                                <span className="text-[8px] text-muted-foreground italic">Exp.</span>
                               )}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2 text-xs md:text-sm font-bold text-foreground/70">
-                              <Clock className="h-4 w-4 text-primary/50" />
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/70">
+                              <Clock className="h-3 w-3" />
                               <span>{format(new Date(req.createdAt), "MMM d, p")}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="pr-8 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              {req.status === 'pending' ? (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-10 px-4 rounded-xl font-bold"
-                                  onClick={() => setReviewMeeting(req)}
-                                >
-                                  Review
-                                </Button>
-                              ) : req.status === 'confirmed' && !isMeetingExpired(req) ? (
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-10 px-4 rounded-xl font-bold text-primary hover:bg-primary/5"
-                                  onClick={() => handleMarkDone(req.id)}
-                                >
-                                  <CheckCircle2 className="h-4 w-4 mr-2" /> Mark Done
-                                </Button>
-                              ) : (
-                                <span className="text-xs text-muted-foreground italic font-medium">Session Ended</span>
-                              )}
-                            </div>
+                          <TableCell className="pr-6 text-right">
+                            {req.status === 'pending' ? (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="h-9 px-3 rounded-xl font-bold text-xs"
+                                onClick={() => setReviewMeeting(req)}
+                              >
+                                Review
+                              </Button>
+                            ) : req.status === 'confirmed' && !isMeetingExpired(req) ? (
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-9 px-3 rounded-xl font-bold text-primary text-xs"
+                                onClick={() => handleMarkDone(req.id)}
+                              >
+                                <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Finish
+                              </Button>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground italic">Ended</span>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -347,28 +344,28 @@ export default function AdminDashboard() {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-32 bg-white/40">
-                  <Inbox className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
-                  <h3 className="text-xl md:text-2xl font-headline font-bold text-muted-foreground/60">Queue is Empty</h3>
+                <div className="text-center py-24 bg-white/40">
+                  <Inbox className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
+                  <h3 className="text-lg font-headline font-bold text-muted-foreground/60">No Requests</h3>
                 </div>
               )}
             </div>
           </TabsContent>
 
-          <TabsContent value="slots" className="space-y-8 animate-in slide-in-from-right-4 duration-500">
+          <TabsContent value="slots" className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl md:text-2xl font-headline font-bold">Manage Slots</h2>
+              <h2 className="text-xl font-headline font-bold">Manage Slots</h2>
               <Dialog open={isAddSlotOpen} onOpenChange={setIsAddSlotOpen}>
                 <DialogTrigger asChild>
-                  <Button className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-primary shadow-xl shadow-primary/20 font-bold gap-2">
-                    <Plus className="h-5 w-5" /> Add New Slot
+                  <Button className="h-12 rounded-2xl bg-primary shadow-xl shadow-primary/20 font-bold gap-2">
+                    <Plus className="h-4 w-4" /> New Slot
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="rounded-[2.5rem] max-w-md">
+                <DialogContent className="rounded-3xl max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Create Availability</DialogTitle>
+                    <DialogTitle>Add Availability</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-6 pt-4">
+                  <div className="space-y-4 pt-4">
                     <Calendar 
                       mode="single" 
                       selected={newSlotDate} 
@@ -376,67 +373,67 @@ export default function AdminDashboard() {
                       className="mx-auto rounded-2xl border bg-white"
                       disabled={(d) => d < new Date(new Date().setHours(0,0,0,0))}
                     />
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/60">Start Time</label>
-                        <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-12 rounded-xl" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black uppercase text-primary/60">Start</label>
+                        <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-10 rounded-xl" />
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/60">End Time</label>
-                        <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-12 rounded-xl" />
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black uppercase text-primary/60">End</label>
+                        <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-10 rounded-xl" />
                       </div>
                     </div>
                   </div>
-                  <DialogFooter className="pt-8">
-                    <Button onClick={handleAddSlot} className="w-full h-14 rounded-xl font-bold">CREATE SLOT</Button>
+                  <DialogFooter className="pt-6">
+                    <Button onClick={handleAddSlot} className="w-full h-12 rounded-xl font-bold">CREATE SLOT</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
 
-            <div className="rounded-[1.5rem] md:rounded-[2.5rem] border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
+            <div className="rounded-3xl border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
               {isSlotsLoading ? (
-                <div className="p-12 space-y-4">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-2xl" />)}
+                <div className="p-8 space-y-4">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
                 </div>
               ) : slots && slots.length > 0 ? (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-primary/5">
-                      <TableRow className="border-primary/10 hover:bg-transparent">
-                        <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Date</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Time Range</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Availability</TableHead>
-                        <TableHead className="pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[11px]">Delete</TableHead>
+                      <TableRow className="border-primary/5 hover:bg-transparent">
+                        <TableHead className="py-5 pl-6 font-black uppercase text-primary/60 tracking-widest text-[10px]">Date</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Time</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Status</TableHead>
+                        <TableHead className="pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[10px]">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {slots.map((slot) => (
                         <TableRow key={slot.id} className="border-primary/5">
-                          <TableCell className="py-6 md:py-8 pl-8">
-                            <span className="font-bold text-base md:text-lg">{format(new Date(slot.startTime), "PPP")}</span>
+                          <TableCell className="py-4 pl-6">
+                            <span className="font-bold text-sm">{format(new Date(slot.startTime), "MMM d, yyyy")}</span>
                           </TableCell>
                           <TableCell>
-                            <span className="font-medium text-sm md:text-lg text-foreground/80">
+                            <span className="font-medium text-[10px] md:text-sm text-foreground/80">
                               {format(new Date(slot.startTime), "p")} – {format(new Date(slot.endTime), "p")}
                             </span>
                           </TableCell>
                           <TableCell>
                             <Badge 
                               variant={slot.isBooked ? "destructive" : "secondary"}
-                              className="font-black text-[9px] md:text-[10px] uppercase tracking-widest px-3"
+                              className="font-black text-[8px] uppercase px-2"
                             >
-                              {slot.isBooked ? "Booked" : "Available"}
+                              {slot.isBooked ? "Booked" : "Free"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="pr-8 text-right">
+                          <TableCell className="pr-6 text-right">
                             <Button 
                               variant="ghost" 
                               size="icon" 
                               onClick={() => handleDeleteSlot(slot.id)}
-                              className="h-10 w-10 text-destructive hover:bg-destructive/10 rounded-xl"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-lg"
                             >
-                              <Trash2 className="h-5 w-5" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -445,9 +442,9 @@ export default function AdminDashboard() {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-32 bg-white/40">
-                  <CalendarIcon className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
-                  <h3 className="text-xl md:text-2xl font-headline font-bold text-muted-foreground/60">No Slots Defined</h3>
+                <div className="text-center py-24 bg-white/40">
+                  <CalendarIcon className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
+                  <h3 className="text-lg font-headline font-bold text-muted-foreground/60">No Slots</h3>
                 </div>
               )}
             </div>
@@ -455,72 +452,85 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
 
-      {/* Review Dialog */}
+      {/* Improved Review Dialog with side-by-side layout and visible proof */}
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
-        <DialogContent className="max-w-2xl rounded-[2.5rem] overflow-hidden p-0 gap-0">
-          <div className="grid md:grid-cols-2">
-            <div className="p-8 space-y-6">
+        <DialogContent className="max-w-4xl rounded-3xl overflow-hidden p-0 border-none shadow-3xl bg-white">
+          <div className="flex flex-col md:flex-row min-h-[500px]">
+            {/* Left side: Information and Actions */}
+            <div className="flex-1 p-6 md:p-10 space-y-6 overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold">Review Request</DialogTitle>
+                <DialogTitle className="text-2xl font-headline font-bold text-primary">Verification</DialogTitle>
+                <p className="text-sm text-muted-foreground font-medium">Verify payment and meeting details.</p>
               </DialogHeader>
               
-              <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-muted/50 space-y-2">
-                  <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest">Description</p>
-                  <p className="text-sm font-medium leading-relaxed italic">"{reviewMeeting?.description}"</p>
+              <div className="space-y-6">
+                <div className="p-4 rounded-2xl bg-muted/30 space-y-2 border border-muted/20">
+                  <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest">Client Message</p>
+                  <p className="text-sm font-medium leading-relaxed italic text-foreground/80">"{reviewMeeting?.description}"</p>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-primary/60 uppercase tracking-widest px-1">Meeting Link (For Confirm)</label>
-                  <Input 
-                    placeholder="Zoom or Google Meet Link" 
-                    className="h-12 rounded-xl"
-                    value={meetingLink}
-                    onChange={(e) => setMeetingLink(e.target.value)}
-                  />
+                  <label className="text-[10px] font-black text-primary/60 uppercase tracking-widest px-1">Meeting Link (Approval Required)</label>
+                  <div className="relative">
+                    <Input 
+                      placeholder="e.g., https://meet.google.com/abc-defg-hij" 
+                      className="h-12 rounded-xl bg-muted/20 border-primary/10 focus:ring-primary pr-10"
+                      value={meetingLink}
+                      onChange={(e) => setMeetingLink(e.target.value)}
+                    />
+                    <ExternalLink className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-primary/60 uppercase tracking-widest px-1">Admin Remarks (For Reject)</label>
+                  <label className="text-[10px] font-black text-primary/60 uppercase tracking-widest px-1">Reason (If Rejecting)</label>
                   <Textarea 
-                    placeholder="Reason for rejection..." 
-                    className="min-h-[80px] rounded-xl"
+                    placeholder="Provide details for the client..." 
+                    className="min-h-[80px] rounded-xl bg-muted/20 border-primary/10"
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <Button 
                   variant="destructive" 
-                  className="flex-1 h-12 rounded-xl font-bold"
+                  className="flex-1 h-12 rounded-xl font-bold uppercase tracking-wide text-xs"
                   onClick={handleReject}
                   disabled={isProcessing}
                 >
-                  REJECT
+                  Reject & Send Feedback
                 </Button>
                 <Button 
-                  className="flex-1 h-12 rounded-xl font-bold"
+                  className="flex-1 h-12 rounded-xl font-bold uppercase tracking-wide text-xs shadow-xl shadow-primary/20"
                   onClick={handleApprove}
                   disabled={isProcessing}
                 >
-                  APPROVE
+                  Approve & Confirm Link
                 </Button>
               </div>
             </div>
 
-            <div className="bg-muted flex flex-col items-center justify-center p-8 space-y-4 border-l">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Payment Verification</p>
-              <div className="aspect-[3/4] w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
-                <img 
-                  src={reviewMeeting?.paymentProofUrl} 
-                  className="object-cover w-full h-full" 
-                  alt="Proof" 
-                  onError={(e) => { (e.target as HTMLImageElement).src = "https://picsum.photos/seed/error/600/800" }}
-                />
+            {/* Right side: Payment Proof ALWAYS VISIBLE */}
+            <div className="w-full md:w-[350px] lg:w-[400px] bg-muted/40 p-6 md:p-8 flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-muted/30">
+              <div className="w-full space-y-4">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">Payment Proof Receipt</p>
+                <div className="aspect-[3/4] w-full rounded-3xl overflow-hidden shadow-2xl bg-white border-4 border-white group relative">
+                  <img 
+                    src={reviewMeeting?.paymentProofUrl} 
+                    className="object-contain w-full h-full bg-muted/10 transition-transform duration-500 group-hover:scale-110" 
+                    alt="Payment Verification" 
+                    onError={(e) => { (e.target as HTMLImageElement).src = "https://picsum.photos/seed/error/600/800" }}
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                    <p className="text-white text-[10px] font-black uppercase tracking-widest">Verified View</p>
+                  </div>
+                </div>
+                <p className="text-[9px] text-muted-foreground font-medium text-center px-4 leading-relaxed">
+                  Verify the transaction amount, date, and reference number before approving.
+                </p>
               </div>
-              <p className="text-[10px] text-muted-foreground font-medium text-center italic">Verify transaction details before confirming.</p>
             </div>
           </div>
         </DialogContent>
