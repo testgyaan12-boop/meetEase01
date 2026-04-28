@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { format, addDays, isSameDay } from "date-fns"
-import { Calendar as CalendarIcon, Clock } from "lucide-react"
+import { useState, useMemo } from "react"
+import { format, addDays, startOfDay, endOfDay } from "date-fns"
+import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,33 +11,38 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-
-interface Slot {
-  id: string
-  time: string
-}
-
-const AVAILABLE_SLOTS: Slot[] = [
-  { id: "1", time: "09:00 AM" },
-  { id: "2", time: "10:00 AM" },
-  { id: "3", time: "11:30 AM" },
-  { id: "4", time: "01:00 PM" },
-  { id: "5", time: "02:30 PM" },
-  { id: "6", time: "04:00 PM" },
-]
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { collection, query, where, orderBy } from "firebase/firestore"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface SlotPickerProps {
-  onSelect: (date: Date, slotId: string, time: string) => void
+  onSelect: (slotId: string, startTime: string, endTime: string) => void
 }
 
 export function SlotPicker({ onSelect }: SlotPickerProps) {
   const [date, setDate] = useState<Date>()
   const [selectedSlotId, setSelectedSlotId] = useState<string>()
+  const firestore = useFirestore()
 
-  const handleSlotClick = (slotId: string, time: string) => {
-    if (!date) return
-    setSelectedSlotId(slotId)
-    onSelect(date, slotId, time)
+  const slotsQuery = useMemoFirebase(() => {
+    if (!firestore || !date) return null
+    const start = startOfDay(date).toISOString()
+    const end = endOfDay(date).toISOString()
+    return query(
+      collection(firestore, "availableSlots"),
+      where("startTime", ">=", start),
+      where("startTime", "<=", end),
+      orderBy("startTime", "asc")
+    )
+  }, [firestore, date])
+
+  const { data: slots, isLoading } = useCollection(slotsQuery)
+
+  const handleSlotClick = (slot: any) => {
+    if (slot.isBooked) return
+    setSelectedSlotId(slot.id)
+    onSelect(slot.id, slot.startTime, slot.endTime)
   }
 
   return (
@@ -49,7 +54,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
             <Button
               variant={"outline"}
               className={cn(
-                "w-full justify-start text-left font-normal",
+                "w-full justify-start text-left font-normal h-12",
                 !date && "text-muted-foreground"
               )}
             >
@@ -61,9 +66,12 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
             <Calendar
               mode="single"
               selected={date}
-              onSelect={setDate}
+              onSelect={(d) => {
+                setDate(d)
+                setSelectedSlotId(undefined)
+              }}
               initialFocus
-              disabled={(date) => date < new Date() || date > addDays(new Date(), 30)}
+              disabled={(date) => date < startOfDay(new Date()) || date > addDays(new Date(), 30)}
             />
           </PopoverContent>
         </Popover>
@@ -72,24 +80,43 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
       {date && (
         <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
           <label className="text-sm font-medium flex items-center gap-2">
-            <Clock className="h-4 w-4" /> Available Slots
+            <Clock className="h-4 w-4" /> Available Slots (Day View)
           </label>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-            {AVAILABLE_SLOTS.map((slot) => (
-              <Button
-                key={slot.id}
-                type="button"
-                variant={selectedSlotId === slot.id ? "default" : "outline"}
-                className={cn(
-                  "text-xs sm:text-sm h-9",
-                  selectedSlotId === slot.id && "bg-primary text-white"
-                )}
-                onClick={() => handleSlotClick(slot.id, slot.time)}
-              >
-                {slot.time}
-              </Button>
-            ))}
-          </div>
+          
+          {isLoading ? (
+            <div className="grid grid-cols-3 gap-2">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
+          ) : slots && slots.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {slots.map((slot) => (
+                <Button
+                  key={slot.id}
+                  type="button"
+                  disabled={slot.isBooked}
+                  variant={selectedSlotId === slot.id ? "default" : "outline"}
+                  className={cn(
+                    "text-xs sm:text-sm h-10 transition-all",
+                    selectedSlotId === slot.id && "bg-primary text-white scale-105",
+                    slot.isBooked && "opacity-50 line-through bg-muted cursor-not-allowed"
+                  )}
+                  onClick={() => handleSlotClick(slot)}
+                >
+                  {format(new Date(slot.startTime), "hh:mm a")} - {format(new Date(slot.endTime), "hh:mm a")}
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <Alert variant="destructive" className="bg-destructive/5">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>No Slots Available</AlertTitle>
+              <AlertDescription>
+                All sessions for {format(date, "MMMM do")} are currently occupied or unavailable.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
       )}
     </div>

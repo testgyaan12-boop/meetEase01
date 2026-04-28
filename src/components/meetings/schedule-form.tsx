@@ -5,22 +5,24 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Upload, CheckCircle2, Loader2 } from "lucide-react"
+import { Upload, CheckCircle2, Loader2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { MeetingDescriptionAI } from "./meeting-description-ai"
 import { SlotPicker } from "./slot-picker"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
+import { collection, serverTimestamp } from "firebase/firestore"
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  mobile: z.string().min(10, "Invalid mobile number"),
+  clientName: z.string().min(2, "Name must be at least 2 characters"),
+  clientMobile: z.string().min(10, "Invalid mobile number"),
   description: z.string().min(10, "Please provide more details"),
-  slotId: z.string().min(1, "Please select a slot"),
-  slotTime: z.string(),
-  slotDate: z.string(),
+  availableSlotId: z.string().min(1, "Please select a slot"),
+  slotStartTime: z.string(),
+  slotEndTime: z.string(),
   paymentProof: z.any().refine((files) => files?.length > 0, "Payment proof is required"),
 })
 
@@ -28,74 +30,110 @@ export function ScheduleMeetingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const { user } = useUser()
+  const firestore = useFirestore()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      mobile: "",
+      clientName: "",
+      clientMobile: "",
       description: "",
-      slotId: "",
-      slotTime: "",
-      slotDate: "",
+      availableSlotId: "",
+      slotStartTime: "",
+      slotEndTime: "",
     },
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user || !firestore) return
+
     setIsSubmitting(true)
-    // Simulating API call/Firebase upload
-    await new Promise((resolve) => setTimeout(resolve, 2000))
     
-    setIsSubmitting(false)
+    // In a real app, you would upload to Firebase Storage first. 
+    // For this prototype, we'll use a placeholder URL.
+    const paymentProofUrl = "https://picsum.photos/seed/pay123/600/800"
+
+    const meetingData = {
+      userId: user.uid,
+      clientName: values.clientName,
+      clientMobile: values.clientMobile,
+      description: values.description,
+      availableSlotId: values.availableSlotId,
+      paymentProofUrl,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
+    
     toast({
-      title: "Meeting Request Submitted",
-      description: "Admin has been notified. We'll verify your payment and confirm soon.",
+      title: "Request Submitted",
+      description: "We'll verify your payment and confirm your slot soon.",
     })
+    
     router.push("/dashboard/history")
   }
 
+  if (!user) {
+    return (
+      <Card className="max-w-md mx-auto">
+        <CardContent className="pt-6 text-center space-y-4">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+          <p className="font-medium">You must be logged in to book a meeting.</p>
+          <Button onClick={() => router.push('/login')}>Go to Login</Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
-    <Card className="w-full max-w-2xl mx-auto border-none shadow-xl bg-white/50 backdrop-blur-sm">
+    <Card className="w-full max-w-2xl mx-auto border-none shadow-xl bg-white/70 backdrop-blur-md">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-headline font-bold text-primary">Schedule a Meeting</CardTitle>
-        <CardDescription>Fill in your details and select a slot.</CardDescription>
+        <CardTitle className="text-2xl font-headline font-bold text-primary">New Appointment</CardTitle>
+        <CardDescription>Select a day and time that works for you.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Full Name</label>
-              <Input placeholder="John Doe" {...form.register("name")} />
-              {form.formState.errors.name && (
-                <p className="text-xs text-destructive">{form.formState.errors.name.message as string}</p>
+              <Input placeholder="John Doe" {...form.register("clientName")} className="h-12" />
+              {form.formState.errors.clientName && (
+                <p className="text-xs text-destructive font-medium">{form.formState.errors.clientName.message as string}</p>
               )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Mobile Number</label>
-              <Input placeholder="+1 234 567 890" {...form.register("mobile")} />
-              {form.formState.errors.mobile && (
-                <p className="text-xs text-destructive">{form.formState.errors.mobile.message as string}</p>
+              <Input placeholder="+1 234 567 890" {...form.register("clientMobile")} className="h-12" />
+              {form.formState.errors.clientMobile && (
+                <p className="text-xs text-destructive font-medium">{form.formState.errors.clientMobile.message as string}</p>
               )}
             </div>
           </div>
 
-          <MeetingDescriptionAI 
-            value={form.watch("description")} 
-            onChange={(val) => form.setValue("description", val, { shouldValidate: true })} 
-          />
-          {form.formState.errors.description && (
-            <p className="text-xs text-destructive">{form.formState.errors.description.message as string}</p>
-          )}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Meeting Purpose</label>
+            <Textarea 
+              placeholder="Tell us what you'd like to discuss..." 
+              {...form.register("description")}
+              className="min-h-[100px] bg-white"
+            />
+            {form.formState.errors.description && (
+              <p className="text-xs text-destructive font-medium">{form.formState.errors.description.message as string}</p>
+            )}
+          </div>
 
           <SlotPicker 
-            onSelect={(date, id, time) => {
-              form.setValue("slotId", id)
-              form.setValue("slotTime", time)
-              form.setValue("slotDate", date.toISOString())
+            onSelect={(id, start, end) => {
+              form.setValue("availableSlotId", id, { shouldValidate: true })
+              form.setValue("slotStartTime", start)
+              form.setValue("slotEndTime", end)
             }} 
           />
-          {form.formState.errors.slotId && (
-            <p className="text-xs text-destructive">Please select a time slot.</p>
+          {form.formState.errors.availableSlotId && (
+            <p className="text-xs text-destructive font-medium">Please select an available time slot.</p>
           )}
 
           <div className="space-y-2">
@@ -105,7 +143,7 @@ export function ScheduleMeetingForm() {
                 type="file"
                 accept="image/*"
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                onChange={(e) => form.setValue("paymentProof", e.target.files)}
+                onChange={(e) => form.setValue("paymentProof", e.target.files, { shouldValidate: true })}
               />
               <div className={cn(
                 "flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 transition-colors bg-white",
@@ -115,34 +153,34 @@ export function ScheduleMeetingForm() {
                   <>
                     <CheckCircle2 className="h-10 w-10 text-primary mb-2" />
                     <p className="text-sm font-medium text-primary">{form.watch("paymentProof")?.[0].name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Click or drag to replace</p>
+                    <p className="text-xs text-muted-foreground mt-1">Click to replace</p>
                   </>
                 ) : (
                   <>
                     <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                    <p className="text-sm font-medium">Click to upload payment proof</p>
-                    <p className="text-xs text-muted-foreground mt-1">Supports JPG, PNG (Max 5MB)</p>
+                    <p className="text-sm font-medium">Upload receipt screenshot</p>
+                    <p className="text-xs text-muted-foreground mt-1">JPG, PNG (Max 5MB)</p>
                   </>
                 )}
               </div>
             </div>
             {form.formState.errors.paymentProof && (
-              <p className="text-xs text-destructive">{form.formState.errors.paymentProof.message as string}</p>
+              <p className="text-xs text-destructive font-medium">{form.formState.errors.paymentProof.message as string}</p>
             )}
           </div>
 
           <Button 
             type="submit" 
-            className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-12"
+            className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 shadow-lg shadow-primary/20"
             disabled={isSubmitting}
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting Request...
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing...
               </>
             ) : (
-              "Confirm Schedule & Pay"
+              "Confirm & Book Session"
             )}
           </Button>
         </form>

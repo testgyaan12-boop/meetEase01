@@ -1,30 +1,33 @@
-export type MeetingStatus = 'pending' | 'confirmed' | 'rejected';
+export type MeetingStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled';
 
 export interface Meeting {
   id: string;
   userId: string;
-  name: string;
-  mobile: string;
+  clientName: string;
+  clientMobile: string;
   description: string;
-  slotId: string;
-  slotTime: string;
-  slotDate: string;
+  availableSlotId: string;
   paymentProofUrl: string;
   status: MeetingStatus;
   createdAt: string;
+  updatedAt: string;
   meetingLink?: string;
+  adminNotes?: string;
+  confirmationSentAt?: string;
 }
 
-export interface Slot {
+export interface AvailableSlot {
   id: string;
-  date: string;
-  time: string;
-  isAvailable: boolean;
+  startTime: string; // ISO string
+  endTime: string;   // ISO string
+  isBooked: boolean;
+  meetingId?: string;
 }
 
-export interface User {
+export interface UserProfile {
   id: string;
   email: string;
-  role: 'client' | 'admin';
-  name?: string;
+  fullName: string;
+  createdAt: string;
+  updatedAt: string;
 }

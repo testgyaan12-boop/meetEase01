@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 240 64% 96%; /* #F0F0FB */
+    --background: 240 64% 98%; /* Lighter background */
     --foreground: 240 10% 10%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 10%;
@@ -23,7 +23,7 @@
     --border: 240 20% 88%;
     --input: 240 20% 88%;
     --ring: 240 60% 50%;
-    --radius: 0.75rem;
+    --radius: 1rem; /* More rounded */
   }
 }
 
@@ -32,7 +32,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground selection:bg-primary/20;
   }
 }
 
@@ -42,4 +42,14 @@
 
 .font-body {
   font-family: 'Inter', sans-serif;
+}
+
+/* Tab transition optimization */
+.animate-in {
+  animation-duration: 400ms;
+}
+
+/* Glassmorphism utility */
+.glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
 }
