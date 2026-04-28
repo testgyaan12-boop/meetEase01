@@ -48,7 +48,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Catch-all for super admin
+    // Catch-all for super admin at bottom
     match /{document=**} {
       allow read, write: if isSuperAdmin();
     }
