@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useUser, useFirestore, useDoc, updateDocumentNonBlocking } from "@/firebase"
+import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useAuth } from "@/firebase"
 import { doc } from "firebase/firestore"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { User, Mail, Shield, Save, Loader2 } from "lucide-react"
+import { User, Mail, Shield, Save, LogOut, ArrowRight } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useMemoFirebase } from "@/firebase"
+import { signOut } from "firebase/auth"
+import { useRouter } from "next/navigation"
 
 const profileSchema = z.object({
   fullName: z.string().min(2, "Full name is too short"),
@@ -21,8 +23,10 @@ const profileSchema = z.object({
 
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser()
+  const auth = useAuth()
   const firestore = useFirestore()
   const { toast } = useToast()
+  const router = useRouter()
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null
@@ -53,6 +57,11 @@ export default function ProfilePage() {
     })
   }
 
+  const handleLogout = async () => {
+    await signOut(auth)
+    router.push("/login")
+  }
+
   if (isUserLoading || isProfileLoading) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
@@ -70,9 +79,11 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div>
-        <h2 className="text-3xl font-headline font-bold text-primary">Account Profile</h2>
-        <p className="text-muted-foreground">Manage your personal information and preferences.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-headline font-bold text-primary">Account Profile</h2>
+          <p className="text-muted-foreground">Manage your personal information and preferences.</p>
+        </div>
       </div>
 
       <Card className="border-none shadow-xl bg-white/70 backdrop-blur-md rounded-[2rem] overflow-hidden">
@@ -114,12 +125,21 @@ export default function ProfilePage() {
               <p className="text-[10px] text-muted-foreground italic px-1">Email cannot be changed for security reasons.</p>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-4 flex flex-col gap-3">
               <Button 
                 type="submit" 
                 className="w-full h-14 bg-primary hover:bg-primary/90 text-white font-bold text-lg rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95 flex gap-2"
               >
-                <Save className="h-5 w-5" /> Save Profile Changes
+                <Save className="h-5 w-5" /> Save Changes
+              </Button>
+              
+              <Button 
+                type="button" 
+                variant="destructive"
+                onClick={handleLogout}
+                className="w-full h-14 font-bold text-lg rounded-2xl transition-all active:scale-95 flex gap-2"
+              >
+                <LogOut className="h-5 w-5" /> Sign Out
               </Button>
             </div>
           </form>
@@ -133,11 +153,11 @@ export default function ProfilePage() {
               <Shield className="h-5 w-5" />
             </div>
             <div>
-              <p className="font-bold text-accent">Account Security</p>
-              <p className="text-xs text-muted-foreground font-medium">Your account is verified and secure.</p>
+              <p className="font-bold text-accent">Security Status</p>
+              <p className="text-xs text-muted-foreground font-medium">Your account is verified and protected.</p>
             </div>
           </div>
-          <Button variant="ghost" className="text-accent font-bold">Manage</Button>
+          <ArrowRight className="h-5 w-5 text-accent opacity-20" />
         </CardContent>
       </Card>
     </div>

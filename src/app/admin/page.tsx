@@ -47,7 +47,8 @@ export default function AdminDashboard() {
 
   const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminRoleRef)
 
-  // CRITICAL: Only fire the collection query if the admin role is confirmed
+  // CRITICAL: Ensure the query only runs if the user IS confirmed as an admin.
+  // This prevents the permission error you saw.
   const meetingsQuery = useMemoFirebase(() => {
     if (!firestore || !adminRole) return null
     return query(collection(firestore, "meetings"), orderBy("createdAt", "desc"))
