@@ -32,7 +32,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { format, setHours, setMinutes, isPast } from "date-fns"
+import { format, setHours, setMinutes, isPast, startOfDay } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -214,93 +214,93 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8 lg:p-12 animate-in fade-in duration-700 pb-32 md:pb-12">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <header className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
-              <ShieldCheck className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-background p-3 md:p-8 lg:p-12 animate-in fade-in duration-700 pb-32 md:pb-12">
+      <div className="max-w-6xl mx-auto space-y-6 md:space-y-8">
+        <header className="flex flex-col sm:flex-row items-center justify-between gap-4 md:gap-6">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 shrink-0">
+              <ShieldCheck className="h-6 w-6 md:h-8 md:w-8 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-headline font-bold text-primary">Admin Console</h1>
-                {isSuperAdmin && <Badge className="bg-accent text-[9px] tracking-widest">SUPER ADMIN</Badge>}
+                <h1 className="text-xl md:text-3xl font-headline font-bold text-primary">Admin Console</h1>
+                {isSuperAdmin && <Badge className="bg-accent text-[8px] md:text-[9px] tracking-widest px-1.5">SUPER ADMIN</Badge>}
               </div>
-              <p className="text-xs md:text-sm text-muted-foreground font-medium">Manage queue and availability.</p>
+              <p className="text-[10px] md:text-sm text-muted-foreground font-medium">Manage queue and availability.</p>
             </div>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {stats.map((stat, idx) => (
-            <Card key={idx} className="border-none shadow-xl bg-white/90 backdrop-blur-md rounded-3xl overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-              <CardContent className="p-6 flex items-center gap-4">
-                <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0", stat.color)}>
-                  <stat.icon className="h-6 w-6" />
+            <Card key={idx} className="border-none shadow-xl bg-white/90 backdrop-blur-md rounded-2xl md:rounded-3xl overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
+              <CardContent className="p-4 md:p-6 flex items-center gap-3 md:gap-4">
+                <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0", stat.color)}>
+                  <stat.icon className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{stat.title}</p>
-                  <p className="text-2xl md:text-3xl font-headline font-bold text-primary">{stat.value}</p>
+                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground">{stat.title}</p>
+                  <p className="text-xl md:text-2xl lg:text-3xl font-headline font-bold text-primary leading-tight">{stat.value}</p>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <Tabs defaultValue="requests" className="space-y-6" onValueChange={setActiveTab}>
-          <TabsList className="h-14 bg-white rounded-2xl p-1.5 shadow-lg border-none">
-            <TabsTrigger value="requests" className="rounded-xl px-6 h-full font-bold data-[state=active]:bg-primary data-[state=active]:text-white">
+        <Tabs defaultValue="requests" className="space-y-4 md:space-y-6" onValueChange={setActiveTab}>
+          <TabsList className="h-12 md:h-14 bg-white rounded-xl md:rounded-2xl p-1 shadow-lg border-none w-full sm:w-auto overflow-hidden">
+            <TabsTrigger value="requests" className="flex-1 sm:flex-none rounded-lg md:rounded-xl px-4 md:px-6 h-full font-bold text-xs md:text-sm data-[state=active]:bg-primary data-[state=active]:text-white">
               Requests
             </TabsTrigger>
-            <TabsTrigger value="slots" className="rounded-xl px-6 h-full font-bold data-[state=active]:bg-primary data-[state=active]:text-white">
+            <TabsTrigger value="slots" className="flex-1 sm:flex-none rounded-lg md:rounded-xl px-4 md:px-6 h-full font-bold text-xs md:text-sm data-[state=active]:bg-primary data-[state=active]:text-white">
               Slots
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="requests" className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <h2 className="text-xl font-headline font-bold">Client Requests</h2>
+          <TabsContent value="requests" className="space-y-4 md:space-y-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <h2 className="text-lg md:text-xl font-headline font-bold w-full">Client Requests</h2>
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder="Filter client or email..." 
-                  className="pl-10 h-12 bg-white rounded-2xl border-none shadow-xl"
+                  placeholder="Filter client..." 
+                  className="pl-10 h-10 md:h-12 bg-white rounded-xl md:rounded-2xl border-none shadow-xl text-sm"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="rounded-3xl border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
+            <div className="rounded-2xl md:rounded-3xl border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
               {isMeetingsLoading ? (
-                <div className="p-8 space-y-4">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
+                <div className="p-6 md:p-8 space-y-3">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 md:h-14 w-full rounded-xl" />)}
                 </div>
               ) : filteredMeetings && filteredMeetings.length > 0 ? (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-primary/5">
                       <TableRow className="border-primary/5 hover:bg-transparent">
-                        <TableHead className="py-5 pl-6 font-black uppercase text-primary/60 tracking-widest text-[10px]">Client</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Status</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Date</TableHead>
-                        <TableHead className="pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[10px]">Action</TableHead>
+                        <TableHead className="py-4 md:py-5 pl-4 md:pl-6 font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px]">Client</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px]">Status</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px]">Date</TableHead>
+                        <TableHead className="pr-4 md:pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px]">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredMeetings.map((req) => (
                         <TableRow key={req.id} className="border-primary/5 group">
-                          <TableCell className="py-4 pl-6">
+                          <TableCell className="py-3 md:py-4 pl-4 md:pl-6">
                             <div>
-                              <p className="font-bold text-sm text-primary">{req.clientName}</p>
-                              <p className="text-[10px] text-muted-foreground">{req.clientEmail}</p>
+                              <p className="font-bold text-xs md:text-sm text-primary line-clamp-1">{req.clientName}</p>
+                              <p className="text-[9px] md:text-[10px] text-muted-foreground line-clamp-1">{req.clientEmail}</p>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
                               <Badge 
                                 variant={req.status === 'pending' ? 'secondary' : req.status === 'confirmed' ? 'default' : req.status === 'done' ? 'outline' : 'destructive'} 
-                                className="w-fit text-[9px] font-black uppercase"
+                                className="w-fit text-[8px] md:text-[9px] font-black uppercase px-1.5 md:px-2"
                               >
                                 {req.status}
                               </Badge>
@@ -310,17 +310,17 @@ export default function AdminDashboard() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/70">
-                              <Clock className="h-3 w-3" />
-                              <span>{format(new Date(req.createdAt), "MMM d, p")}</span>
+                            <div className="flex items-center gap-1.5 text-[9px] md:text-[10px] font-bold text-foreground/70">
+                              <Clock className="h-3 w-3 shrink-0" />
+                              <span className="whitespace-nowrap">{format(new Date(req.createdAt), "MMM d")}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="pr-6 text-right">
+                          <TableCell className="pr-4 md:pr-6 text-right">
                             {req.status === 'pending' ? (
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                className="h-9 px-3 rounded-xl font-bold text-xs"
+                                className="h-8 md:h-9 px-2 md:px-3 rounded-lg md:rounded-xl font-bold text-[10px] md:text-xs"
                                 onClick={() => setReviewMeeting(req)}
                               >
                                 Review
@@ -329,13 +329,13 @@ export default function AdminDashboard() {
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-9 px-3 rounded-xl font-bold text-primary text-xs"
+                                className="h-8 md:h-9 px-2 md:px-3 rounded-lg md:rounded-xl font-bold text-primary text-[10px] md:text-xs"
                                 onClick={() => handleMarkDone(req.id)}
                               >
                                 <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Finish
                               </Button>
                             ) : (
-                              <span className="text-[10px] text-muted-foreground italic">Ended</span>
+                              <span className="text-[9px] md:text-[10px] text-muted-foreground italic">Ended</span>
                             )}
                           </TableCell>
                         </TableRow>
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-24 bg-white/40">
+                <div className="text-center py-16 md:py-24 bg-white/40">
                   <Inbox className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
                   <h3 className="text-lg font-headline font-bold text-muted-foreground/60">No Requests</h3>
                 </div>
@@ -352,86 +352,88 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="slots" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-headline font-bold">Manage Slots</h2>
+          <TabsContent value="slots" className="space-y-4 md:space-y-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg md:text-xl font-headline font-bold">Manage Slots</h2>
               <Dialog open={isAddSlotOpen} onOpenChange={setIsAddSlotOpen}>
                 <DialogTrigger asChild>
-                  <Button className="h-12 rounded-2xl bg-primary shadow-xl shadow-primary/20 font-bold gap-2">
+                  <Button className="h-10 md:h-12 rounded-xl md:rounded-2xl bg-primary shadow-xl shadow-primary/20 font-bold gap-2 text-xs md:text-sm">
                     <Plus className="h-4 w-4" /> New Slot
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="rounded-3xl max-w-md">
+                <DialogContent className="rounded-[2rem] max-w-[calc(100vw-2rem)] sm:max-w-md p-4 md:p-6">
                   <DialogHeader>
-                    <DialogTitle>Add Availability</DialogTitle>
+                    <DialogTitle className="text-xl font-headline">Add Availability</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 pt-4">
-                    <Calendar 
-                      mode="single" 
-                      selected={newSlotDate} 
-                      onSelect={(d) => d && setNewSlotDate(d)}
-                      className="mx-auto rounded-2xl border bg-white"
-                      disabled={(d) => d < new Date(new Date().setHours(0,0,0,0))}
-                    />
+                    <div className="flex justify-center">
+                      <Calendar 
+                        mode="single" 
+                        selected={newSlotDate} 
+                        onSelect={(d) => d && setNewSlotDate(d)}
+                        className="rounded-2xl border bg-white shadow-sm"
+                        disabled={(d) => d < startOfDay(new Date())}
+                      />
+                    </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black uppercase text-primary/60">Start</label>
-                        <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-10 rounded-xl" />
+                        <label className="text-[9px] font-black uppercase text-primary/60 px-1">Start Time</label>
+                        <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-11 rounded-xl bg-muted/20 border-primary/5" />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black uppercase text-primary/60">End</label>
-                        <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-10 rounded-xl" />
+                        <label className="text-[9px] font-black uppercase text-primary/60 px-1">End Time</label>
+                        <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-11 rounded-xl bg-muted/20 border-primary/5" />
                       </div>
                     </div>
                   </div>
-                  <DialogFooter className="pt-6">
-                    <Button onClick={handleAddSlot} className="w-full h-12 rounded-xl font-bold">CREATE SLOT</Button>
+                  <DialogFooter className="pt-6 sm:flex-col sm:space-x-0">
+                    <Button onClick={handleAddSlot} className="w-full h-12 rounded-xl font-bold text-sm uppercase tracking-wider">CREATE SLOT</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
 
-            <div className="rounded-3xl border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
+            <div className="rounded-2xl md:rounded-3xl border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
               {isSlotsLoading ? (
-                <div className="p-8 space-y-4">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
+                <div className="p-6 md:p-8 space-y-3">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 md:h-14 w-full rounded-xl" />)}
                 </div>
               ) : slots && slots.length > 0 ? (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-primary/5">
                       <TableRow className="border-primary/5 hover:bg-transparent">
-                        <TableHead className="py-5 pl-6 font-black uppercase text-primary/60 tracking-widest text-[10px]">Date</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Time</TableHead>
-                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Status</TableHead>
-                        <TableHead className="pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[10px]">Action</TableHead>
+                        <TableHead className="py-4 md:py-5 pl-4 md:pl-6 font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px]">Date</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px]">Time</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px]">Status</TableHead>
+                        <TableHead className="pr-4 md:pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px]">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {slots.map((slot) => (
                         <TableRow key={slot.id} className="border-primary/5">
-                          <TableCell className="py-4 pl-6">
-                            <span className="font-bold text-sm">{format(new Date(slot.startTime), "MMM d, yyyy")}</span>
+                          <TableCell className="py-3 md:py-4 pl-4 md:pl-6">
+                            <span className="font-bold text-xs md:text-sm">{format(new Date(slot.startTime), "MMM d")}</span>
                           </TableCell>
                           <TableCell>
-                            <span className="font-medium text-[10px] md:text-sm text-foreground/80">
+                            <span className="font-medium text-[9px] md:text-sm text-foreground/80 whitespace-nowrap">
                               {format(new Date(slot.startTime), "p")} – {format(new Date(slot.endTime), "p")}
                             </span>
                           </TableCell>
                           <TableCell>
                             <Badge 
                               variant={slot.isBooked ? "destructive" : "secondary"}
-                              className="font-black text-[8px] uppercase px-2"
+                              className="font-black text-[8px] uppercase px-1.5"
                             >
                               {slot.isBooked ? "Booked" : "Free"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="pr-6 text-right">
+                          <TableCell className="pr-4 md:pr-6 text-right">
                             <Button 
                               variant="ghost" 
                               size="icon" 
                               onClick={() => handleDeleteSlot(slot.id)}
-                              className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-lg"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-lg shrink-0"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -442,7 +444,7 @@ export default function AdminDashboard() {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-24 bg-white/40">
+                <div className="text-center py-16 md:py-24 bg-white/40">
                   <CalendarIcon className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
                   <h3 className="text-lg font-headline font-bold text-muted-foreground/60">No Slots</h3>
                 </div>
@@ -452,29 +454,27 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
 
-      {/* Improved Review Dialog with side-by-side layout and visible proof */}
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
-        <DialogContent className="max-w-4xl rounded-3xl overflow-hidden p-0 border-none shadow-3xl bg-white">
-          <div className="flex flex-col md:flex-row min-h-[500px]">
-            {/* Left side: Information and Actions */}
-            <div className="flex-1 p-6 md:p-10 space-y-6 overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] md:max-w-4xl rounded-[2.5rem] overflow-hidden p-0 border-none shadow-3xl bg-white">
+          <div className="flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
+            <div className="flex-1 p-5 md:p-10 space-y-6">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline font-bold text-primary">Verification</DialogTitle>
-                <p className="text-sm text-muted-foreground font-medium">Verify payment and meeting details.</p>
+                <DialogTitle className="text-xl md:text-2xl font-headline font-bold text-primary">Verification</DialogTitle>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium">Verify payment and meeting details.</p>
               </DialogHeader>
               
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <div className="p-4 rounded-2xl bg-muted/30 space-y-2 border border-muted/20">
-                  <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest">Client Message</p>
-                  <p className="text-sm font-medium leading-relaxed italic text-foreground/80">"{reviewMeeting?.description}"</p>
+                  <p className="text-[9px] md:text-[10px] font-black text-primary/60 uppercase tracking-widest">Client Message</p>
+                  <p className="text-xs md:text-sm font-medium leading-relaxed italic text-foreground/80">"{reviewMeeting?.description}"</p>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-primary/60 uppercase tracking-widest px-1">Meeting Link (Approval Required)</label>
+                  <label className="text-[9px] md:text-[10px] font-black text-primary/60 uppercase tracking-widest px-1">Meeting Link (Approved)</label>
                   <div className="relative">
                     <Input 
-                      placeholder="e.g., https://meet.google.com/abc-defg-hij" 
-                      className="h-12 rounded-xl bg-muted/20 border-primary/10 focus:ring-primary pr-10"
+                      placeholder="e.g., https://meet.google.com/abc" 
+                      className="h-11 rounded-xl bg-muted/20 border-primary/10 text-sm pr-10"
                       value={meetingLink}
                       onChange={(e) => setMeetingLink(e.target.value)}
                     />
@@ -483,53 +483,49 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-primary/60 uppercase tracking-widest px-1">Reason (If Rejecting)</label>
+                  <label className="text-[9px] md:text-[10px] font-black text-primary/60 uppercase tracking-widest px-1">Reason (Rejected)</label>
                   <Textarea 
-                    placeholder="Provide details for the client..." 
-                    className="min-h-[80px] rounded-xl bg-muted/20 border-primary/10"
+                    placeholder="Provide feedback..." 
+                    className="min-h-[80px] rounded-xl bg-muted/20 border-primary/10 text-sm"
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button 
                   variant="destructive" 
-                  className="flex-1 h-12 rounded-xl font-bold uppercase tracking-wide text-xs"
+                  className="flex-1 h-11 rounded-xl font-bold uppercase tracking-wide text-[10px] md:text-xs"
                   onClick={handleReject}
                   disabled={isProcessing}
                 >
-                  Reject & Send Feedback
+                  Reject & Notify
                 </Button>
                 <Button 
-                  className="flex-1 h-12 rounded-xl font-bold uppercase tracking-wide text-xs shadow-xl shadow-primary/20"
+                  className="flex-1 h-11 rounded-xl font-bold uppercase tracking-wide text-[10px] md:text-xs shadow-xl shadow-primary/20"
                   onClick={handleApprove}
                   disabled={isProcessing}
                 >
-                  Approve & Confirm Link
+                  Approve & Confirm
                 </Button>
               </div>
             </div>
 
-            {/* Right side: Payment Proof ALWAYS VISIBLE */}
-            <div className="w-full md:w-[350px] lg:w-[400px] bg-muted/40 p-6 md:p-8 flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-muted/30">
+            <div className="w-full md:w-[320px] lg:w-[380px] bg-muted/30 p-5 md:p-8 flex flex-col items-center border-t md:border-t-0 md:border-l border-muted/30">
               <div className="w-full space-y-4">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">Payment Proof Receipt</p>
-                <div className="aspect-[3/4] w-full rounded-3xl overflow-hidden shadow-2xl bg-white border-4 border-white group relative">
+                <p className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">Payment Proof</p>
+                <div className="aspect-[3/4] w-full rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl bg-white border-4 border-white group relative">
                   <img 
                     src={reviewMeeting?.paymentProofUrl} 
-                    className="object-contain w-full h-full bg-muted/10 transition-transform duration-500 group-hover:scale-110" 
-                    alt="Payment Verification" 
+                    className="object-contain w-full h-full bg-muted/10 transition-transform duration-500 group-hover:scale-105" 
+                    alt="Proof" 
                     onError={(e) => { (e.target as HTMLImageElement).src = "https://picsum.photos/seed/error/600/800" }}
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                    <p className="text-white text-[10px] font-black uppercase tracking-widest">Verified View</p>
+                    <p className="text-white text-[9px] font-black uppercase tracking-widest">Receipt View</p>
                   </div>
                 </div>
-                <p className="text-[9px] text-muted-foreground font-medium text-center px-4 leading-relaxed">
-                  Verify the transaction amount, date, and reference number before approving.
-                </p>
               </div>
             </div>
           </div>
