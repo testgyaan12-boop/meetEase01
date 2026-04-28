@@ -1,15 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { format, startOfDay, endOfDay, isToday } from "date-fns"
-import { Calendar as CalendarIcon, Clock, AlertCircle, ChevronDown } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
@@ -22,10 +17,8 @@ interface SlotPickerProps {
 export function SlotPicker({ onSelect }: SlotPickerProps) {
   const [date, setDate] = useState<Date>(new Date())
   const [selectedSlotId, setSelectedSlotId] = useState<string>()
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const firestore = useFirestore()
 
-  // Ensure slots are re-fetched whenever the date changes
   const slotsQuery = useMemoFirebase(() => {
     if (!firestore || !date) return null
     const start = startOfDay(date).toISOString()
@@ -72,48 +65,31 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
           <p className="text-sm text-muted-foreground font-medium">Select your preferred session time</p>
         </div>
 
-        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "h-12 px-5 rounded-2xl border-primary/20 hover:border-primary/50 transition-all font-bold gap-2 shadow-sm bg-white min-w-[180px]",
-                !isSelectedToday && "bg-primary/5 border-primary text-primary"
-              )}
-            >
-              <CalendarIcon className="h-4 w-4" />
-              {isSelectedToday ? "Change Date" : format(date, "MMM d, yyyy")}
-              <ChevronDown className={cn("h-4 w-4 transition-transform", isCalendarOpen && "rotate-180")} />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 border-none shadow-3xl rounded-[2rem] bg-white z-[60]" align="end">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(d) => {
-                if (d) {
-                  setDate(d)
-                  setSelectedSlotId(undefined)
-                  setIsCalendarOpen(false)
-                }
-              }}
-              initialFocus
-              disabled={(d) => d < startOfDay(new Date())}
-              className="rounded-3xl p-4"
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="relative min-w-[180px] w-full sm:w-auto">
+          <Input 
+            type="date"
+            value={format(date, "yyyy-MM-dd")}
+            onChange={(e) => {
+              if (e.target.value) {
+                setDate(new Date(e.target.value))
+                setSelectedSlotId(undefined)
+              }
+            }}
+            min={format(new Date(), "yyyy-MM-dd")}
+            className="h-12 px-4 rounded-2xl border-primary/20 bg-white font-bold text-primary shadow-sm"
+          />
+        </div>
       </div>
 
       <div className="space-y-4">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-16 w-full rounded-2xl" />
             ))}
           </div>
         ) : slots && slots.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 animate-in fade-in slide-in-from-bottom-2">
             {slots.map((slot) => (
               <Button
                 key={slot.id}
@@ -143,19 +119,12 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
             ))}
           </div>
         ) : (
-          <div className="bg-white/40 border-2 border-dashed rounded-[2.5rem] p-12 md:p-16 text-center flex flex-col items-center justify-center animate-in zoom-in duration-300">
-            <AlertCircle className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground/20 mb-4 md:mb-6" />
-            <h4 className="text-xl md:text-2xl font-headline font-bold text-muted-foreground">No Availability</h4>
-            <p className="text-muted-foreground max-w-[280px] mt-2 font-medium text-sm">
-              We couldn't find sessions for {format(date, "MMMM do")}. Please try another date.
+          <div className="bg-white/40 border-2 border-dashed rounded-[2.5rem] p-12 text-center flex flex-col items-center justify-center">
+            <AlertCircle className="h-12 w-12 text-muted-foreground/20 mb-4" />
+            <h4 className="text-xl font-headline font-bold text-muted-foreground">No Availability</h4>
+            <p className="text-muted-foreground mt-2 font-medium text-sm">
+              Try picking another date from the calendar.
             </p>
-            <Button 
-              variant="link" 
-              className="mt-6 text-primary font-bold text-base md:text-lg"
-              onClick={() => { setDate(new Date()); setSelectedSlotId(undefined); }}
-            >
-              Reset to Today
-            </Button>
           </div>
         )}
       </div>

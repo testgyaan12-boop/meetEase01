@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { 
   ShieldCheck, 
   Search,
-  Clock,
   Inbox,
   Loader2,
   Calendar as CalendarIcon,
@@ -18,8 +17,6 @@ import {
   Users,
   CalendarDays,
   Activity,
-  CheckCircle2,
-  ExternalLink,
   ArrowLeft,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -38,7 +35,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { Meeting } from "@/lib/types"
 
@@ -80,7 +76,7 @@ export default function AdminDashboard() {
   const { data: meetings, isLoading: isMeetingsLoading } = useCollection<Meeting>(meetingsQuery)
   const { data: slots, isLoading: isSlotsLoading } = useCollection(slotsQuery)
 
-  const [newSlotDate, setNewSlotDate] = useState<Date>(new Date())
+  const [newSlotDateStr, setNewSlotDateStr] = useState(format(new Date(), "yyyy-MM-dd"))
   const [startTimeStr, setStartTimeStr] = useState("09:00")
   const [endTimeStr, setEndTimeStr] = useState("10:00")
   const [isAddSlotOpen, setIsAddSlotOpen] = useState(false)
@@ -111,7 +107,7 @@ export default function AdminDashboard() {
       updatedAt: new Date().toISOString()
     })
     
-    toast({ title: "Session Approved", description: "Meeting link sent to user." })
+    toast({ title: "Session Approved" })
     setReviewMeeting(null)
     setMeetingLink("")
     setIsProcessing(false)
@@ -150,10 +146,11 @@ export default function AdminDashboard() {
 
   const handleAddSlot = () => {
     if (!firestore) return
+    const dateObj = new Date(newSlotDateStr)
     const [sH, sM] = startTimeStr.split(":").map(Number)
     const [eH, eM] = endTimeStr.split(":").map(Number)
-    const startTime = setMinutes(setHours(newSlotDate, sH), sM).toISOString()
-    const endTime = setMinutes(setHours(newSlotDate, eH), eM).toISOString()
+    const startTime = setMinutes(setHours(dateObj, sH), sM).toISOString()
+    const endTime = setMinutes(setHours(dateObj, eH), eM).toISOString()
 
     addDocumentNonBlocking(collection(firestore, "availableSlots"), {
       startTime,
@@ -175,7 +172,7 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-sm font-bold text-primary tracking-widest uppercase">Verifying Clearance...</p>
+        <p className="text-sm font-bold text-primary uppercase tracking-widest">Verifying Clearance...</p>
       </div>
     )
   }
@@ -188,24 +185,9 @@ export default function AdminDashboard() {
   )
 
   const stats = [
-    {
-      title: "Requests",
-      value: meetings?.length || 0,
-      icon: Users,
-      color: "bg-blue-600",
-    },
-    {
-      title: "Pending",
-      value: meetings?.filter(m => m.status === 'pending').length || 0,
-      icon: Activity,
-      color: "bg-orange-500",
-    },
-    {
-      title: "Slots",
-      value: slots?.filter(s => !s.isBooked).length || 0,
-      icon: CalendarDays,
-      color: "bg-green-600",
-    }
+    { title: "Requests", value: meetings?.length || 0, icon: Users, color: "bg-blue-600" },
+    { title: "Pending", value: meetings?.filter(m => m.status === 'pending').length || 0, icon: Activity, color: "bg-orange-500" },
+    { title: "Slots", value: slots?.filter(s => !s.isBooked).length || 0, icon: CalendarDays, color: "bg-green-600" }
   ]
 
   const isMeetingExpired = (meeting: Meeting) => {
@@ -215,118 +197,115 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-3 md:p-8 animate-in fade-in duration-700 pb-32">
-      <div className="max-w-6xl mx-auto space-y-4 md:space-y-8">
+    <div className="min-h-screen bg-background p-4 md:p-8 animate-in fade-in duration-700 pb-32">
+      <div className="max-w-6xl mx-auto space-y-6">
         <header className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+          <div className="flex items-center gap-4">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => router.push("/dashboard")}
-              className="h-10 w-10 rounded-xl bg-white shadow-sm shrink-0"
+              className="h-10 w-10 rounded-xl bg-white shadow-sm"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary flex items-center justify-center shadow-lg shrink-0">
-                <ShieldCheck className="h-5 w-5 md:h-6 md:w-6 text-white" />
+              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+                <ShieldCheck className="h-6 w-6 text-white" />
               </div>
-              <div className="truncate">
-                <div className="flex items-center gap-1 md:gap-2">
-                  <h1 className="text-lg md:text-2xl font-headline font-bold text-primary truncate">Admin</h1>
-                  {isSuperAdmin && <Badge className="bg-accent text-[7px] md:text-[8px] tracking-tight px-1">SUPER</Badge>}
-                </div>
-                <p className="text-[9px] md:text-xs text-muted-foreground font-medium">Control Center</p>
+              <div>
+                <h1 className="text-xl md:text-2xl font-headline font-bold text-primary flex items-center gap-2">
+                  Admin
+                  {isSuperAdmin && <Badge className="bg-accent text-[8px] tracking-tight">SUPER</Badge>}
+                </h1>
+                <p className="text-xs text-muted-foreground font-medium">Control Center</p>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Stats Row - Forced to 3 columns even on small mobile */}
-        <div className="grid grid-cols-3 gap-2 md:gap-4">
+        <div className="grid grid-cols-3 gap-3">
           {stats.map((stat, idx) => (
-            <Card key={idx} className="border-none shadow-md bg-white rounded-xl md:rounded-2xl overflow-hidden group">
-              <CardContent className="p-2 md:p-4 flex flex-col md:flex-row items-center md:items-start gap-1 md:gap-3">
-                <div className={cn("h-7 w-7 md:h-10 md:w-10 rounded-lg md:rounded-xl flex items-center justify-center text-white shrink-0", stat.color)}>
-                  <stat.icon className="h-3.5 w-3.5 md:h-5 md:w-5" />
+            <Card key={idx} className="border-none shadow-md bg-white rounded-2xl overflow-hidden">
+              <CardContent className="p-3 md:p-6 flex flex-col items-center gap-1 md:gap-3">
+                <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-xl flex items-center justify-center text-white", stat.color)}>
+                  <stat.icon className="h-4 w-4 md:h-6 md:w-6" />
                 </div>
-                <div className="text-center md:text-left min-w-0">
-                  <p className="text-[7px] md:text-[9px] font-black uppercase tracking-tighter text-muted-foreground truncate">{stat.title}</p>
-                  <p className="text-xs md:text-xl font-headline font-bold text-primary leading-none">{stat.value}</p>
+                <div className="text-center">
+                  <p className="text-[8px] md:text-[10px] font-black uppercase tracking-tighter text-muted-foreground">{stat.title}</p>
+                  <p className="text-sm md:text-2xl font-headline font-bold text-primary leading-none">{stat.value}</p>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <Tabs defaultValue="requests" className="space-y-4 md:space-y-6" onValueChange={setActiveTab}>
-          <TabsList className="h-10 md:h-12 bg-white rounded-xl p-1 shadow-sm border-none w-full sm:w-auto">
-            <TabsTrigger value="requests" className="flex-1 sm:flex-none rounded-lg px-4 h-full font-bold text-[10px] md:text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
+        <Tabs defaultValue="requests" className="space-y-6" onValueChange={setActiveTab}>
+          <TabsList className="h-12 bg-white rounded-xl p-1 shadow-sm border-none w-full sm:w-auto">
+            <TabsTrigger value="requests" className="flex-1 rounded-lg px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
               Requests
             </TabsTrigger>
-            <TabsTrigger value="slots" className="flex-1 sm:flex-none rounded-lg px-4 h-full font-bold text-[10px] md:text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
-              Slots
+            <TabsTrigger value="slots" className="flex-1 rounded-lg px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
+              Availability
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="requests" className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-              <h2 className="text-base md:text-lg font-headline font-bold w-full">Queue</h2>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <h2 className="text-lg font-headline font-bold w-full">Incoming Queue</h2>
               <div className="relative w-full max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder="Filter client..." 
-                  className="pl-9 h-9 md:h-10 bg-white rounded-xl border-none shadow-sm text-xs"
+                  placeholder="Filter by name/email..." 
+                  className="pl-10 h-10 bg-white rounded-xl border-none shadow-sm text-sm"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="rounded-xl md:rounded-2xl border-none shadow-lg bg-white overflow-hidden">
+            <div className="rounded-2xl border-none shadow-lg bg-white overflow-hidden">
               {isMeetingsLoading ? (
                 <div className="p-4 space-y-2">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 w-full rounded-lg" />)}
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
                 </div>
               ) : filteredMeetings && filteredMeetings.length > 0 ? (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-primary/5">
-                      <TableRow className="border-none hover:bg-transparent">
-                        <TableHead className="h-10 py-2 pl-4 font-black uppercase text-primary/60 tracking-widest text-[8px] md:text-[10px]">Client</TableHead>
-                        <TableHead className="h-10 font-black uppercase text-primary/60 tracking-widest text-[8px] md:text-[10px]">Status</TableHead>
-                        <TableHead className="h-10 font-black uppercase text-primary/60 tracking-widest text-[8px] md:text-[10px]">Submitted</TableHead>
-                        <TableHead className="h-10 pr-4 text-right font-black uppercase text-primary/60 tracking-widest text-[8px] md:text-[10px]">Action</TableHead>
+                      <TableRow className="border-none">
+                        <TableHead className="py-4 pl-6 font-black uppercase text-primary/60 tracking-widest text-[10px]">Client</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Status</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Date</TableHead>
+                        <TableHead className="pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[10px]">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredMeetings.map((req) => (
-                        <TableRow key={req.id} className="border-primary/5 group">
-                          <TableCell className="py-2 pl-4">
+                        <TableRow key={req.id} className="border-primary/5">
+                          <TableCell className="py-4 pl-6">
                             <div>
-                              <p className="font-bold text-[10px] md:text-xs text-primary truncate max-w-[80px] md:max-w-none">{req.clientName}</p>
-                              <p className="text-[8px] md:text-[10px] text-muted-foreground truncate max-w-[80px] md:max-w-none">{req.clientEmail}</p>
+                              <p className="font-bold text-sm text-primary">{req.clientName}</p>
+                              <p className="text-[10px] text-muted-foreground">{req.clientEmail}</p>
                             </div>
                           </TableCell>
                           <TableCell>
                             <Badge 
                               variant={req.status === 'pending' ? 'secondary' : req.status === 'confirmed' ? 'default' : req.status === 'done' ? 'outline' : 'destructive'} 
-                              className="text-[7px] md:text-[8px] font-black uppercase px-1 h-4"
+                              className="text-[9px] font-black uppercase"
                             >
                               {req.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1 text-[8px] md:text-[10px] font-bold text-foreground/70">
-                              <span className="whitespace-nowrap">{format(new Date(req.createdAt), "MMM d, p")}</span>
-                            </div>
+                          <TableCell className="text-xs font-bold whitespace-nowrap">
+                            {format(new Date(req.createdAt), "MMM d, p")}
                           </TableCell>
-                          <TableCell className="pr-4 text-right">
+                          <TableCell className="pr-6 text-right">
                             {req.status === 'pending' ? (
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                className="h-7 px-2 rounded-lg font-bold text-[9px] md:text-xs"
+                                className="h-8 rounded-lg font-bold text-xs"
                                 onClick={() => setReviewMeeting(req)}
                               >
                                 Review
@@ -335,13 +314,13 @@ export default function AdminDashboard() {
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-7 px-2 rounded-lg font-bold text-primary text-[9px] md:text-xs"
+                                className="h-8 rounded-lg font-bold text-primary text-xs"
                                 onClick={() => handleMarkDone(req.id)}
                               >
-                                Finish
+                                Done
                               </Button>
                             ) : (
-                              <span className="text-[8px] text-muted-foreground italic">Past</span>
+                              <span className="text-[10px] text-muted-foreground italic">Passed</span>
                             )}
                           </TableCell>
                         </TableRow>
@@ -350,96 +329,94 @@ export default function AdminDashboard() {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-10 bg-white/40">
-                  <Inbox className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2" />
-                  <h3 className="text-sm font-headline font-bold text-muted-foreground/60">Empty</h3>
+                <div className="text-center py-16 bg-white/40">
+                  <Inbox className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
+                  <h3 className="text-sm font-headline font-bold text-muted-foreground/60">No matching requests</h3>
                 </div>
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="slots" className="space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-base md:text-lg font-headline font-bold">Slots</h2>
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-lg font-headline font-bold">Time Slots</h2>
               <Dialog open={isAddSlotOpen} onOpenChange={setIsAddSlotOpen}>
                 <DialogTrigger asChild>
-                  <Button className="h-9 md:h-10 rounded-xl bg-primary shadow-md font-bold text-[10px] md:text-xs">
-                    <Plus className="h-3.5 w-3.5 mr-1" /> New Slot
+                  <Button className="h-10 rounded-xl bg-primary shadow-md font-bold text-xs">
+                    <Plus className="h-4 w-4 mr-2" /> Create Slot
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="rounded-2xl max-w-[calc(100vw-2rem)] sm:max-w-md p-4">
+                <DialogContent className="rounded-3xl max-w-sm p-6 border-none shadow-2xl">
                   <DialogHeader>
-                    <DialogTitle className="text-lg font-headline">New Availability</DialogTitle>
+                    <DialogTitle className="text-xl font-headline font-bold">New Availability</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 pt-2">
-                    <div className="flex justify-center scale-90 md:scale-100">
-                      <Calendar 
-                        mode="single" 
-                        selected={newSlotDate} 
-                        onSelect={(d) => d && setNewSlotDate(d)}
-                        className="rounded-xl border bg-white"
-                        disabled={(d) => d < startOfDay(new Date())}
+                  <div className="space-y-6 pt-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-primary/60 ml-1">Choose Date</label>
+                      <Input 
+                        type="date" 
+                        value={newSlotDateStr} 
+                        onChange={(e) => setNewSlotDateStr(e.target.value)}
+                        min={format(new Date(), "yyyy-MM-dd")}
+                        className="h-12 rounded-2xl border-primary/10 font-bold"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-black uppercase text-primary/60 px-1">Start</label>
-                        <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-10 rounded-xl text-xs" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-primary/60 ml-1">Start Time</label>
+                        <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-12 rounded-2xl" />
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-black uppercase text-primary/60 px-1">End</label>
-                        <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-10 rounded-xl text-xs" />
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-primary/60 ml-1">End Time</label>
+                        <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-12 rounded-2xl" />
                       </div>
                     </div>
                   </div>
-                  <DialogFooter className="pt-4">
-                    <Button onClick={handleAddSlot} className="w-full h-11 rounded-xl font-bold text-xs">CREATE</Button>
+                  <DialogFooter className="pt-6">
+                    <Button onClick={handleAddSlot} className="w-full h-14 rounded-2xl font-black text-lg shadow-xl shadow-primary/20">ADD SESSION</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
 
-            <div className="rounded-xl md:rounded-2xl border-none shadow-lg bg-white overflow-hidden">
+            <div className="rounded-2xl border-none shadow-lg bg-white overflow-hidden">
               {isSlotsLoading ? (
                 <div className="p-4 space-y-2">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 w-full rounded-lg" />)}
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
                 </div>
               ) : slots && slots.length > 0 ? (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-primary/5">
-                      <TableRow className="border-none hover:bg-transparent">
-                        <TableHead className="h-10 py-2 pl-4 font-black uppercase text-primary/60 tracking-widest text-[8px] md:text-[10px]">Date</TableHead>
-                        <TableHead className="h-10 font-black uppercase text-primary/60 tracking-widest text-[8px] md:text-[10px]">Time</TableHead>
-                        <TableHead className="h-10 font-black uppercase text-primary/60 tracking-widest text-[8px] md:text-[10px]">Status</TableHead>
-                        <TableHead className="h-10 pr-4 text-right font-black uppercase text-primary/60 tracking-widest text-[8px] md:text-[10px]">Delete</TableHead>
+                      <TableRow className="border-none">
+                        <TableHead className="py-4 pl-6 font-black uppercase text-primary/60 tracking-widest text-[10px]">Date</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Time</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[10px]">Booking</TableHead>
+                        <TableHead className="pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[10px]">Remove</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {slots.map((slot) => (
                         <TableRow key={slot.id} className="border-primary/5">
-                          <TableCell className="py-2 pl-4 font-bold text-[10px] md:text-xs">
-                            {format(new Date(slot.startTime), "MMM d")}
+                          <TableCell className="py-4 pl-6 font-bold text-sm">
+                            {format(new Date(slot.startTime), "MMM d, yyyy")}
                           </TableCell>
-                          <TableCell className="text-[10px] md:text-xs font-medium whitespace-nowrap">
-                            {format(new Date(slot.startTime), "p")}
+                          <TableCell className="text-xs font-medium">
+                            {format(new Date(slot.startTime), "p")} - {format(new Date(slot.endTime), "p")}
                           </TableCell>
                           <TableCell>
-                            <Badge 
-                              variant={slot.isBooked ? "destructive" : "secondary"}
-                              className="text-[7px] md:text-[8px] px-1 h-4"
-                            >
-                              {slot.isBooked ? "Booked" : "Free"}
+                            <Badge variant={slot.isBooked ? "destructive" : "secondary"} className="text-[9px]">
+                              {slot.isBooked ? "Reserved" : "Open"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="pr-4 text-right">
+                          <TableCell className="pr-6 text-right">
                             <Button 
                               variant="ghost" 
                               size="icon" 
                               onClick={() => handleDeleteSlot(slot.id)}
-                              className="h-7 w-7 text-destructive rounded-lg"
+                              className="h-8 w-8 text-destructive rounded-lg"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -448,9 +425,9 @@ export default function AdminDashboard() {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-10 bg-white/40">
-                  <CalendarIcon className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2" />
-                  <h3 className="text-sm font-headline font-bold text-muted-foreground/60">No Slots</h3>
+                <div className="text-center py-16 bg-white/40">
+                  <CalendarIcon className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
+                  <h3 className="text-sm font-headline font-bold text-muted-foreground/60">No availability set</h3>
                 </div>
               )}
             </div>
@@ -459,74 +436,69 @@ export default function AdminDashboard() {
       </div>
 
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] md:max-w-4xl rounded-2xl overflow-hidden p-0 border-none shadow-2xl bg-white">
-          <div className="flex flex-col md:flex-row max-h-[85vh] overflow-y-auto">
-            {/* Form Section */}
-            <div className="flex-1 p-4 md:p-8 space-y-4 md:space-y-6">
+        <DialogContent className="max-w-4xl rounded-3xl overflow-hidden p-0 border-none shadow-2xl bg-white">
+          <div className="flex flex-col md:flex-row max-h-[90vh]">
+            <div className="flex-1 p-6 md:p-10 space-y-6 overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-lg md:text-xl font-headline font-bold text-primary">Verify Request</DialogTitle>
-                <p className="text-[10px] md:text-xs text-muted-foreground">Approve with link or reject with feedback.</p>
+                <DialogTitle className="text-2xl font-headline font-bold text-primary">Verification</DialogTitle>
+                <p className="text-sm text-muted-foreground">Approve with meeting link or reject with feedback.</p>
               </DialogHeader>
               
-              <div className="space-y-4">
-                <div className="p-3 rounded-xl bg-muted/30 space-y-1 border border-muted/20">
-                  <p className="text-[8px] md:text-[9px] font-black text-primary/60 uppercase">Agenda</p>
-                  <p className="text-xs font-medium italic text-foreground/80 leading-snug">"{reviewMeeting?.description}"</p>
+              <div className="space-y-6">
+                <div className="p-4 rounded-2xl bg-muted/30 border border-muted/20">
+                  <p className="text-[10px] font-black text-primary/60 uppercase mb-1">Agenda</p>
+                  <p className="text-sm font-medium italic text-foreground/80 leading-relaxed">"{reviewMeeting?.description}"</p>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[8px] md:text-[9px] font-black text-primary/60 uppercase px-1">Meet Link (Approval)</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-primary/60 uppercase px-1">Meeting Link (Approval Required)</label>
                   <Input 
                     placeholder="https://meet.google.com/..." 
-                    className="h-10 rounded-xl bg-muted/20 text-xs"
+                    className="h-12 rounded-2xl bg-muted/20"
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[8px] md:text-[9px] font-black text-primary/60 uppercase px-1">Feedback (Rejection)</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-primary/60 uppercase px-1">Reason (Rejection Only)</label>
                   <Textarea 
-                    placeholder="Why was this rejected?" 
-                    className="min-h-[60px] rounded-xl bg-muted/20 text-xs"
+                    placeholder="Why is this request being declined?" 
+                    className="min-h-[80px] rounded-2xl bg-muted/20"
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-3 pt-4">
                 <Button 
                   variant="destructive" 
-                  className="flex-1 h-10 rounded-xl font-bold uppercase text-[9px] md:text-xs"
+                  className="flex-1 h-12 rounded-2xl font-bold uppercase text-xs"
                   onClick={handleReject}
                   disabled={isProcessing}
                 >
                   Reject
                 </Button>
                 <Button 
-                  className="flex-1 h-10 rounded-xl font-bold uppercase text-[9px] md:text-xs"
+                  className="flex-1 h-12 rounded-2xl font-bold uppercase text-xs bg-primary"
                   onClick={handleApprove}
                   disabled={isProcessing}
                 >
-                  Approve
+                  Confirm
                 </Button>
               </div>
             </div>
 
-            {/* Always Visible Proof Image */}
-            <div className="w-full md:w-[300px] bg-muted/10 p-4 border-t md:border-t-0 md:border-l border-muted/20">
-              <p className="text-[8px] md:text-[9px] font-black text-muted-foreground uppercase text-center mb-2">Payment Receipt</p>
-              <div className="aspect-[3/4] w-full rounded-xl overflow-hidden shadow-lg bg-white border-2 border-white group relative">
+            <div className="w-full md:w-[350px] bg-muted/10 p-6 border-t md:border-t-0 md:border-l border-muted/20">
+              <p className="text-[10px] font-black text-muted-foreground uppercase text-center mb-4">Payment Receipt</p>
+              <div className="aspect-[3/4] w-full rounded-2xl overflow-hidden shadow-2xl bg-white border-4 border-white">
                 <img 
                   src={reviewMeeting?.paymentProofUrl} 
-                  className="object-contain w-full h-full bg-muted/5 transition-transform duration-500 group-hover:scale-105" 
+                  className="object-contain w-full h-full bg-muted/5" 
                   alt="Payment Proof" 
                   onError={(e) => { (e.target as HTMLImageElement).src = "https://picsum.photos/seed/error/600/800" }}
                 />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                  <p className="text-white text-[8px] font-black uppercase tracking-widest">Full Image</p>
-                </div>
               </div>
             </div>
           </div>
