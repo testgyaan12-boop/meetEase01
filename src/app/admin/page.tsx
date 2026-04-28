@@ -1,7 +1,8 @@
+
 "use client"
 
-import { useState } from "react"
-import { useMemoFirebase, useFirestore, useCollection, updateDocumentNonBlocking } from "@/firebase"
+import { useState, useEffect } from "react"
+import { useMemoFirebase, useFirestore, useCollection, updateDocumentNonBlocking, useDoc, useUser } from "@/firebase"
 import { collection, query, orderBy, doc } from "firebase/firestore"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,7 +17,8 @@ import {
   Search,
   CheckCircle2,
   Clock,
-  Inbox
+  Inbox,
+  AlertTriangle
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -31,18 +33,39 @@ import {
 } from "@/components/ui/dialog"
 import { format } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useRouter } from "next/navigation"
 
 export default function AdminDashboard() {
+  const { user, isUserLoading } = useUser()
   const firestore = useFirestore()
   const { toast } = useToast()
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
 
-  const meetingsQuery = useMemoFirebase(() => {
-    if (!firestore) return null
-    return query(collection(firestore, "meetings"), orderBy("createdAt", "desc"))
-  }, [firestore])
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null
+    return doc(firestore, "roles_admin", user.uid)
+  }, [firestore, user])
 
-  const { data: meetings, isLoading } = useCollection(meetingsQuery)
+  const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminRoleRef)
+
+  const meetingsQuery = useMemoFirebase(() => {
+    if (!firestore || !adminRole) return null
+    return query(collection(firestore, "meetings"), orderBy("createdAt", "desc"))
+  }, [firestore, adminRole])
+
+  const { data: meetings, isLoading: isMeetingsLoading } = useCollection(meetingsQuery)
+
+  useEffect(() => {
+    if (!isUserLoading && !isAdminLoading && user && !adminRole) {
+      toast({
+        title: "Access Denied",
+        description: "You do not have administrative privileges.",
+        variant: "destructive",
+      })
+      router.push("/dashboard")
+    }
+  }, [user, isUserLoading, adminRole, isAdminLoading, router, toast])
 
   const handleAction = (id: string, action: 'confirmed' | 'rejected') => {
     if (!firestore) return
@@ -57,6 +80,16 @@ export default function AdminDashboard() {
       description: `Notification sent to the client.`,
     })
   }
+
+  if (isUserLoading || isAdminLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!adminRole) return null
 
   const filteredMeetings = meetings?.filter(m => 
     m.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,7 +125,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-2">
               <CardDescription className="font-bold uppercase text-[10px] tracking-widest">Pending</CardDescription>
               <CardTitle className="text-4xl font-headline text-primary">
-                {isLoading ? <Skeleton className="h-10 w-12" /> : meetings?.filter(m => m.status === 'pending').length || 0}
+                {isMeetingsLoading ? <Skeleton className="h-10 w-12" /> : meetings?.filter(m => m.status === 'pending').length || 0}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -100,7 +133,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-2">
               <CardDescription className="font-bold uppercase text-[10px] tracking-widest">Confirmed</CardDescription>
               <CardTitle className="text-4xl font-headline text-green-600">
-                {isLoading ? <Skeleton className="h-10 w-12" /> : meetings?.filter(m => m.status === 'confirmed').length || 0}
+                {isMeetingsLoading ? <Skeleton className="h-10 w-12" /> : meetings?.filter(m => m.status === 'confirmed').length || 0}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -118,7 +151,7 @@ export default function AdminDashboard() {
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="Search by client name or phone..." 
+                placeholder="Search by client name..." 
                 className="pl-11 h-12 bg-white rounded-xl border-none shadow-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -127,7 +160,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="grid gap-6">
-            {isLoading ? (
+            {isMeetingsLoading ? (
               [1, 2].map(i => <Skeleton key={i} className="h-40 w-full rounded-2xl" />)
             ) : filteredMeetings && filteredMeetings.length > 0 ? (
               filteredMeetings.map((req) => (
@@ -191,10 +224,6 @@ export default function AdminDashboard() {
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
-                        
-                        <Button variant="ghost" size="sm" className="h-10 rounded-lg text-muted-foreground font-bold hover:bg-primary/5">
-                          <ExternalLink className="h-4 w-4 mr-1.5" /> Full Logs
-                        </Button>
                       </div>
                     </div>
                   </div>
@@ -204,7 +233,7 @@ export default function AdminDashboard() {
               <div className="text-center py-24 bg-white/40 rounded-3xl border-2 border-dashed border-muted-foreground/20 flex flex-col items-center">
                 <Inbox className="h-16 w-16 text-muted-foreground/20 mb-6" />
                 <h3 className="text-2xl font-headline font-bold text-muted-foreground">All Clear!</h3>
-                <p className="text-muted-foreground font-medium">No pending meeting requests to verify at the moment.</p>
+                <p className="text-muted-foreground font-medium">No pending meeting requests to verify.</p>
               </div>
             )}
           </div>
