@@ -10,15 +10,13 @@ import { Button } from "@/components/ui/button"
 import { 
   CheckCircle, 
   XCircle, 
-  ExternalLink, 
-  Bell, 
   ShieldCheck, 
   User, 
   Search,
   CheckCircle2,
   Clock,
   Inbox,
-  AlertTriangle
+  Loader2
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -49,6 +47,7 @@ export default function AdminDashboard() {
 
   const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminRoleRef)
 
+  // CRITICAL: Only fire the collection query if the admin role is confirmed
   const meetingsQuery = useMemoFirebase(() => {
     if (!firestore || !adminRole) return null
     return query(collection(firestore, "meetings"), orderBy("createdAt", "desc"))
@@ -60,7 +59,7 @@ export default function AdminDashboard() {
     if (!isUserLoading && !isAdminLoading && user && !adminRole) {
       toast({
         title: "Access Denied",
-        description: "You do not have administrative privileges.",
+        description: "You do not have administrative privileges for this section.",
         variant: "destructive",
       })
       router.push("/dashboard")
@@ -76,8 +75,8 @@ export default function AdminDashboard() {
     })
     
     toast({
-      title: action === 'confirmed' ? "Booking Confirmed" : "Booking Rejected",
-      description: `Notification sent to the client.`,
+      title: action === 'confirmed' ? "Session Confirmed" : "Request Rejected",
+      description: `Status updated successfully.`,
     })
   }
 
@@ -105,15 +104,11 @@ export default function AdminDashboard() {
               <ShieldCheck className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-headline font-bold text-primary">Admin Command Center</h1>
-              <p className="text-sm text-muted-foreground font-medium">Verified Meeting Management</p>
+              <h1 className="text-3xl font-headline font-bold text-primary">Admin Panel</h1>
+              <p className="text-sm text-muted-foreground font-medium">Verified Request Management</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="relative h-11 w-11 rounded-xl">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-accent rounded-full border-2 border-white animate-pulse" />
-            </Button>
             <div className="h-11 w-11 rounded-xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
               <User className="h-5 w-5 text-primary" />
             </div>
@@ -123,7 +118,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="bg-white border-none shadow-sm rounded-2xl">
             <CardHeader className="pb-2">
-              <CardDescription className="font-bold uppercase text-[10px] tracking-widest">Pending</CardDescription>
+              <CardDescription className="font-bold uppercase text-[10px] tracking-widest">Pending Verification</CardDescription>
               <CardTitle className="text-4xl font-headline text-primary">
                 {isMeetingsLoading ? <Skeleton className="h-10 w-12" /> : meetings?.filter(m => m.status === 'pending').length || 0}
               </CardTitle>
@@ -131,7 +126,7 @@ export default function AdminDashboard() {
           </Card>
           <Card className="bg-white border-none shadow-sm rounded-2xl">
             <CardHeader className="pb-2">
-              <CardDescription className="font-bold uppercase text-[10px] tracking-widest">Confirmed</CardDescription>
+              <CardDescription className="font-bold uppercase text-[10px] tracking-widest">Confirmed Total</CardDescription>
               <CardTitle className="text-4xl font-headline text-green-600">
                 {isMeetingsLoading ? <Skeleton className="h-10 w-12" /> : meetings?.filter(m => m.status === 'confirmed').length || 0}
               </CardTitle>
@@ -139,8 +134,8 @@ export default function AdminDashboard() {
           </Card>
           <Card className="bg-white border-none shadow-sm rounded-2xl">
             <CardHeader className="pb-2">
-              <CardDescription className="font-bold uppercase text-[10px] tracking-widest">Revenue (Mock)</CardDescription>
-              <CardTitle className="text-4xl font-headline text-accent">$2,450</CardTitle>
+              <CardDescription className="font-bold uppercase text-[10px] tracking-widest">Revenue Forecast</CardDescription>
+              <CardTitle className="text-4xl font-headline text-accent">$3,120</CardTitle>
             </CardHeader>
           </Card>
         </div>
@@ -185,20 +180,20 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="flex items-center gap-4 text-xs font-bold text-muted-foreground">
-                        <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Booked: {format(new Date(req.createdAt), "PPp")}</span>
+                        <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Received: {format(new Date(req.createdAt), "PPp")}</span>
                       </div>
 
                       <div className="flex flex-wrap gap-3 pt-2">
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" className="h-10 rounded-lg gap-2 border-primary text-primary hover:bg-primary/5 font-bold">
-                              <CheckCircle2 className="h-4 w-4" /> Verify Payment
+                              <CheckCircle2 className="h-4 w-4" /> Review Payment
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-md rounded-3xl">
                             <DialogHeader>
-                              <DialogTitle className="text-2xl font-headline font-bold">Payment Verification</DialogTitle>
-                              <DialogDescription className="text-base">Review the proof of transfer for {req.clientName}</DialogDescription>
+                              <DialogTitle className="text-2xl font-headline font-bold">Transfer Verification</DialogTitle>
+                              <DialogDescription className="text-base">Review payment proof for {req.clientName}</DialogDescription>
                             </DialogHeader>
                             <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border-4 border-muted/20 shadow-inner mt-4">
                               <img 
@@ -219,7 +214,7 @@ export default function AdminDashboard() {
                                 className="flex-1 h-12 rounded-xl font-bold bg-primary hover:bg-primary/90" 
                                 onClick={() => handleAction(req.id, 'confirmed')}
                               >
-                                <CheckCircle className="mr-2 h-5 w-5" /> Confirm Slot
+                                <CheckCircle className="mr-2 h-5 w-5" /> Confirm
                               </Button>
                             </DialogFooter>
                           </DialogContent>
@@ -232,8 +227,8 @@ export default function AdminDashboard() {
             ) : (
               <div className="text-center py-24 bg-white/40 rounded-3xl border-2 border-dashed border-muted-foreground/20 flex flex-col items-center">
                 <Inbox className="h-16 w-16 text-muted-foreground/20 mb-6" />
-                <h3 className="text-2xl font-headline font-bold text-muted-foreground">All Clear!</h3>
-                <p className="text-muted-foreground font-medium">No pending meeting requests to verify.</p>
+                <h3 className="text-2xl font-headline font-bold text-muted-foreground">Queue Empty</h3>
+                <p className="text-muted-foreground font-medium">No pending requests require your attention right now.</p>
               </div>
             )}
           </div>

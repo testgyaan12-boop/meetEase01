@@ -7,9 +7,9 @@ import { Calendar, History, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const NAV_ITEMS = [
-  { label: "Book", icon: Calendar, href: "/dashboard" },
+  { label: "Schedule", icon: Calendar, href: "/dashboard" },
   { label: "History", icon: History, href: "/dashboard/history" },
-  { label: "Profile", icon: User, href: "/dashboard/profile" },
+  { label: "Account", icon: User, href: "/dashboard/profile" },
 ]
 
 export function MobileNav() {
@@ -28,7 +28,7 @@ export function MobileNav() {
               isActive ? "text-primary bg-primary/5 scale-110" : "text-muted-foreground hover:text-primary"
             )}
           >
-            <item.icon className={cn("h-6 w-6", isActive && "fill-current")} />
+            <item.icon className={cn("h-6 w-6", isActive && "fill-primary")} />
             <span className="text-[10px] font-bold tracking-tight">{item.label}</span>
           </Link>
         )

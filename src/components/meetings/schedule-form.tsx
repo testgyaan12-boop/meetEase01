@@ -20,8 +20,8 @@ import { collection } from "firebase/firestore"
 const formSchema = z.object({
   clientName: z.string().min(2, "Name must be at least 2 characters"),
   clientMobile: z.string().min(10, "Invalid mobile number"),
-  description: z.string().min(10, "Please provide more details"),
-  availableSlotId: z.string().min(1, "Please select a slot"),
+  description: z.string().min(10, "Please provide more details about the meeting agenda"),
+  availableSlotId: z.string().min(1, "Please select a time slot"),
   slotStartTime: z.string(),
   slotEndTime: z.string(),
   paymentProof: z.any().refine((files) => files?.length > 0, "Payment proof is required"),
@@ -51,7 +51,7 @@ export function ScheduleMeetingForm() {
 
     setIsSubmitting(true)
     
-    // Placeholder for payment proof upload
+    // In a real app, this would be a storage upload URL
     const paymentProofUrl = "https://picsum.photos/seed/pay123/600/800"
 
     const meetingData = {
@@ -70,7 +70,7 @@ export function ScheduleMeetingForm() {
     
     toast({
       title: "Booking Requested",
-      description: "We are verifying your payment. Check history for updates.",
+      description: "We are verifying your payment details. Please check history for updates.",
     })
     
     router.push("/dashboard/history")
@@ -81,7 +81,7 @@ export function ScheduleMeetingForm() {
       <Card className="max-w-md mx-auto">
         <CardContent className="pt-6 text-center space-y-4">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
-          <p className="font-medium">Session expired. Please log in again.</p>
+          <p className="font-medium">Session expired. Please log in again to continue.</p>
           <Button onClick={() => router.push('/login')} className="w-full">Sign In</Button>
         </CardContent>
       </Card>
@@ -94,7 +94,7 @@ export function ScheduleMeetingForm() {
         <div className="bg-primary/5 p-8 border-b">
           <CardHeader className="p-0">
             <CardTitle className="text-3xl font-headline font-bold text-primary">Schedule Consultation</CardTitle>
-            <CardDescription className="text-base">Fill in the details below to secure your professional session.</CardDescription>
+            <CardDescription className="text-base">Fill in the details below to secure your professional session with our experts.</CardDescription>
           </CardHeader>
         </div>
         
@@ -103,7 +103,7 @@ export function ScheduleMeetingForm() {
             <section className="space-y-6">
               <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Personal Information
+                Contact Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -131,7 +131,7 @@ export function ScheduleMeetingForm() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-foreground/80 ml-1">Description</label>
                 <Textarea 
-                  placeholder="Briefly describe what you'd like to discuss..." 
+                  placeholder="What would you like to discuss in this session?" 
                   {...form.register("description")}
                   className="min-h-[120px] rounded-2xl bg-white/50 border-primary/10 focus:ring-primary shadow-sm p-4 text-base"
                 />
@@ -144,7 +144,7 @@ export function ScheduleMeetingForm() {
             <section className="space-y-6">
               <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Select Appointment
+                Availability Check
               </h3>
               <SlotPicker 
                 onSelect={(id, start, end) => {
@@ -155,7 +155,7 @@ export function ScheduleMeetingForm() {
               />
               {form.formState.errors.availableSlotId && (
                 <p className="text-xs text-destructive font-bold ml-1 flex items-center gap-1.5">
-                  <AlertCircle className="h-3.5 w-3.5" /> Please select a time slot.
+                  <AlertCircle className="h-3.5 w-3.5" /> Please select a time slot from the list above.
                 </p>
               )}
             </section>
@@ -163,7 +163,7 @@ export function ScheduleMeetingForm() {
             <section className="space-y-6">
               <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Payment Proof
+                Payment Verification
               </h3>
               <div className="relative group">
                 <input
@@ -182,15 +182,15 @@ export function ScheduleMeetingForm() {
                         <CheckCircle2 className="h-10 w-10" />
                       </div>
                       <p className="text-lg font-bold text-primary">{form.watch("paymentProof")?.[0].name}</p>
-                      <p className="text-sm text-muted-foreground mt-1">File received. Click to change.</p>
+                      <p className="text-sm text-muted-foreground mt-1">Proof received. Click to update the file.</p>
                     </>
                   ) : (
                     <>
                       <div className="h-20 w-20 rounded-3xl bg-muted flex items-center justify-center text-muted-foreground mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                         <Upload className="h-10 w-10" />
                       </div>
-                      <p className="text-lg font-bold">Upload screenshot</p>
-                      <p className="text-sm text-muted-foreground mt-1 text-center max-w-[200px]">PNG or JPG format showing your bank transfer receipt.</p>
+                      <p className="text-lg font-bold">Upload bank transfer screenshot</p>
+                      <p className="text-sm text-muted-foreground mt-1 text-center max-w-[200px]">Ensure the receipt shows the transaction ID and amount clearly.</p>
                     </>
                   )}
                 </div>
@@ -208,11 +208,11 @@ export function ScheduleMeetingForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-                  Processing...
+                  Verifying Details...
                 </>
               ) : (
                 <>
-                  Confirm Booking Request
+                  Submit Booking Request
                   <FileText className="ml-3 h-6 w-6 opacity-50 group-hover:opacity-100 transition-opacity" />
                 </>
               )}

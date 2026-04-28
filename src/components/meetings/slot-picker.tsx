@@ -47,7 +47,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
 
   const isSelectedToday = isToday(date)
 
-  // Function to format time range concisely like "1-2" or "1:30-2:30"
+  // Format time range concisely like "1-2 PM"
   const formatRange = (start: string, end: string) => {
     const s = new Date(start)
     const e = new Date(end)
@@ -80,7 +80,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
               )}
             >
               <CalendarIcon className="h-4 w-4" />
-              {isSelectedToday ? "Custom Date" : format(date, "PPP")}
+              {isSelectedToday ? "Select Custom Date" : format(date, "PPP")}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 border-none shadow-2xl rounded-3xl" align="end">
@@ -120,13 +120,16 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
                   selectedSlotId === slot.id 
                     ? "bg-primary text-white border-primary shadow-lg scale-105" 
                     : "border-primary/5 hover:border-primary/30 bg-white/50",
-                  slot.isBooked && "opacity-40 grayscale cursor-not-allowed border-dashed line-through"
+                  slot.isBooked && "opacity-40 grayscale cursor-not-allowed border-dashed"
                 )}
                 onClick={() => handleSlotClick(slot)}
               >
                 <div className="flex items-center gap-1.5">
                   <Clock className={cn("h-3.5 w-3.5", selectedSlotId === slot.id ? "text-white" : "text-primary")} />
-                  <span className="font-bold text-sm">
+                  <span className={cn(
+                    "font-bold text-sm",
+                    slot.isBooked && "line-through decoration-destructive/50"
+                  )}>
                     {formatRange(slot.startTime, slot.endTime)}
                   </span>
                 </div>
@@ -139,7 +142,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
             <AlertCircle className="h-16 w-16 text-muted-foreground/20 mb-6" />
             <h4 className="text-2xl font-headline font-bold text-muted-foreground">No Slots Found</h4>
             <p className="text-muted-foreground max-w-[320px] mt-2 font-medium">
-              We couldn't find any sessions for this date. Try picking another day.
+              We couldn't find any sessions for this date. Try picking another day or contact support.
             </p>
             <Button 
               variant="link" 

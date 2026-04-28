@@ -1,3 +1,4 @@
+
 "use client"
 
 import { MobileNav } from "@/components/navigation/mobile-nav"
@@ -38,7 +39,7 @@ export default function DashboardLayout({
           <div className="h-16 w-16 bg-primary rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-primary/20">
             <Loader2 className="h-10 w-10 animate-spin text-white" />
           </div>
-          <p className="text-lg font-bold text-primary animate-pulse">Synchronizing Workspace...</p>
+          <p className="text-lg font-bold text-primary animate-pulse tracking-tight">MeetEase - Preparing Workspace</p>
         </div>
       </div>
     )
@@ -47,9 +48,9 @@ export default function DashboardLayout({
   if (!user) return null
 
   const NAV_LINKS = [
-    { href: "/dashboard", label: "Book Meeting", icon: Calendar },
+    { href: "/dashboard", label: "Schedule", icon: Calendar },
     { href: "/dashboard/history", label: "History", icon: History },
-    { href: "/dashboard/profile", label: "My Profile", icon: User },
+    { href: "/dashboard/profile", label: "Account", icon: User },
   ]
 
   return (
@@ -103,7 +104,7 @@ export default function DashboardLayout({
           </div>
           <div className="flex items-center gap-5 ml-auto">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-black text-foreground">{user.displayName || 'Account Owner'}</p>
+              <p className="text-sm font-black text-foreground">{user.displayName || 'Account Holder'}</p>
               <p className="text-xs font-medium text-muted-foreground">{user.email}</p>
             </div>
             <div className="h-12 w-12 rounded-2xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center shadow-inner hover:scale-105 transition-transform cursor-pointer">
@@ -112,7 +113,7 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        <div className="p-6 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="p-4 md:p-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
           {children}
         </div>
       </main>
