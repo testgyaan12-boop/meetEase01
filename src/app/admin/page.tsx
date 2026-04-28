@@ -199,26 +199,25 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 animate-in fade-in duration-700 pb-32">
       <div className="max-w-6xl mx-auto space-y-6">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.push("/dashboard")} className="h-10 w-10 rounded-xl bg-white shadow-sm">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-xl md:text-2xl font-headline font-bold text-primary flex items-center gap-2">
-                Admin Center
-                {isSuperAdmin && <Badge className="bg-accent text-[8px]">SUPER</Badge>}
-              </h1>
-              <p className="text-xs text-muted-foreground">Management Panel</p>
-            </div>
+        <header className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.push("/dashboard")} className="h-10 w-10 rounded-xl bg-white shadow-sm">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-xl md:text-2xl font-headline font-bold text-primary flex items-center gap-2">
+              Admin Center
+              {isSuperAdmin && <Badge className="bg-accent text-[8px]">SUPER</Badge>}
+            </h1>
+            <p className="text-xs text-muted-foreground">Management Panel</p>
           </div>
         </header>
 
+        {/* Responsive Summary Cards: Forced into 3 columns on mobile */}
         <div className="grid grid-cols-3 gap-3">
           {[
             { title: "Total", value: meetings?.length || 0, icon: Users, color: "bg-blue-600" },
             { title: "Pending", value: meetings?.filter(m => m.status === 'pending').length || 0, icon: Activity, color: "bg-orange-500" },
-            { title: "Open Slots", value: slots?.filter(s => !s.isBooked && s.isActive).length || 0, icon: CalendarDays, color: "bg-green-600" }
+            { title: "Slots", value: slots?.filter(s => !s.isBooked && s.isActive).length || 0, icon: CalendarDays, color: "bg-green-600" }
           ].map((stat, idx) => (
             <Card key={idx} className="border-none shadow-md bg-white rounded-2xl">
               <CardContent className="p-3 flex flex-col items-center gap-1">
@@ -378,7 +377,7 @@ export default function AdminDashboard() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Review Dialog */}
+      {/* Review Dialog with Always-On Proof */}
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
         <DialogContent className="max-w-4xl rounded-3xl p-0 overflow-hidden">
           <div className="flex flex-col md:flex-row max-h-[90vh]">
@@ -403,6 +402,7 @@ export default function AdminDashboard() {
                 <Button className="flex-1 h-12 rounded-xl font-bold bg-primary" onClick={handleApprove} disabled={isProcessing}>Approve</Button>
               </div>
             </div>
+            {/* Proof Sidebar */}
             <div className="w-full md:w-[320px] bg-muted/10 p-6 border-l flex flex-col items-center">
               <p className="text-[10px] font-black uppercase text-muted-foreground mb-4">Payment Receipt</p>
               <div className="w-full aspect-[3/4] rounded-2xl bg-white shadow-xl overflow-hidden p-2">
