@@ -5,15 +5,17 @@ import { useMemoFirebase, useFirestore, useUser, useCollection } from "@/firebas
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, Link as LinkIcon, MoreHorizontal, Loader2, Inbox } from "lucide-react"
+import { Calendar, Clock, Link as LinkIcon, Inbox } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export default function HistoryPage() {
   const { user, isUserLoading } = useUser()
   const firestore = useFirestore()
 
+  // Query is strictly limited to the current user's UID for security and correctness
   const meetingsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null
     return query(
@@ -27,88 +29,99 @@ export default function HistoryPage() {
 
   if (isUserLoading || isMeetingsLoading) {
     return (
-      <div className="space-y-4">
-        <div className="h-12 w-48 mb-6"><Skeleton className="h-full w-full" /></div>
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="border-none shadow-sm h-24">
-            <CardContent className="p-6 flex items-center gap-4">
-              <Skeleton className="h-10 w-10 rounded-full" />
-              <div className="space-y-2 flex-1">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-3 w-1/4" />
-              </div>
-              <Skeleton className="h-8 w-20" />
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-6">
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-10 w-64 rounded-xl" />
+          <Skeleton className="h-4 w-48 rounded-lg" />
+        </div>
+        <div className="rounded-[2rem] border bg-white/50 p-6 space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h2 className="text-3xl font-headline font-bold text-primary">Meeting History</h2>
-        <p className="text-muted-foreground">Manage your upcoming and past appointments.</p>
+        <h2 className="text-3xl font-headline font-bold text-primary">Your History</h2>
+        <p className="text-muted-foreground font-medium">Manage and track your professional consultations.</p>
       </div>
 
-      <div className="grid gap-4">
-        {meetings?.map((meeting) => (
-          <Card key={meeting.id} className="overflow-hidden bg-white/70 backdrop-blur-sm border-none shadow-sm hover:shadow-md transition-all">
-            <CardContent className="p-0">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 gap-4">
-                <div className="flex gap-4 items-center">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Calendar className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">{meeting.clientName}</h3>
-                    <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1 font-medium">
-                        <Clock className="h-3.5 w-3.5" /> 
+      <div className="rounded-[2.5rem] border-none shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden">
+        {meetings && meetings.length > 0 ? (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-primary/5">
+                <TableRow className="hover:bg-transparent border-primary/10">
+                  <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Consultant</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Date Requested</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Status</TableHead>
+                  <TableHead className="pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[11px]">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {meetings.map((meeting) => (
+                  <TableRow key={meeting.id} className="border-primary/5 hover:bg-primary/5 transition-colors group">
+                    <TableCell className="py-6 pl-8">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                          <Calendar className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-base">{meeting.clientName}</p>
+                          <p className="text-xs text-muted-foreground font-medium">{meeting.clientMobile}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 text-sm font-bold text-foreground/80">
+                        <Clock className="h-4 w-4 text-primary/60" />
                         {format(new Date(meeting.createdAt), "MMM do, yyyy")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                  <Badge 
-                    variant={
-                      meeting.status === 'confirmed' ? 'default' : 
-                      meeting.status === 'pending' ? 'secondary' : 'destructive'
-                    }
-                    className="capitalize px-4 py-1.5 font-bold"
-                  >
-                    {meeting.status}
-                  </Badge>
-                  
-                  {meeting.status === 'confirmed' && meeting.meetingLink && (
-                    <Button variant="outline" size="sm" className="gap-2 border-primary text-primary hover:bg-primary/10 font-bold" asChild>
-                      <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer">
-                        <LinkIcon className="h-3.5 w-3.5" /> Join
-                      </a>
-                    </Button>
-                  )}
-                  
-                  <Button variant="ghost" size="icon" className="hover:bg-primary/5">
-                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={
+                          meeting.status === 'confirmed' ? 'default' : 
+                          meeting.status === 'pending' ? 'secondary' : 'destructive'
+                        }
+                        className="capitalize px-4 py-1 font-black rounded-lg text-[10px] tracking-wide"
+                      >
+                        {meeting.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="pr-8 text-right">
+                      {meeting.status === 'confirmed' && meeting.meetingLink ? (
+                        <Button size="sm" className="bg-primary hover:bg-primary/90 font-bold rounded-xl h-10 gap-2" asChild>
+                          <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer">
+                            <LinkIcon className="h-4 w-4" /> Join Session
+                          </a>
+                        </Button>
+                      ) : (
+                        <p className="text-xs font-bold text-muted-foreground italic">Pending Verification</p>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="py-24 text-center space-y-6 bg-white/40">
+            <div className="h-20 w-20 rounded-3xl bg-muted/20 mx-auto flex items-center justify-center">
+              <Inbox className="h-10 w-10 text-muted-foreground/30" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-headline font-bold text-muted-foreground">Empty History</h3>
+              <p className="text-muted-foreground max-w-xs mx-auto font-medium">You haven't scheduled any professional sessions yet.</p>
+            </div>
+            <Button onClick={() => window.location.href = '/dashboard'} className="bg-primary rounded-xl h-12 px-8 font-bold">Schedule Now</Button>
+          </div>
+        )}
       </div>
-
-      {(!meetings || meetings.length === 0) && (
-        <div className="text-center py-20 bg-white/40 rounded-2xl border-2 border-dashed border-muted-foreground/20 flex flex-col items-center">
-          <Inbox className="h-12 w-12 text-muted-foreground/30 mb-4" />
-          <h3 className="text-xl font-headline font-bold text-muted-foreground">No meetings yet</h3>
-          <p className="text-muted-foreground mb-6">Schedule your first professional session today.</p>
-          <Button onClick={() => window.location.href = '/dashboard'} className="bg-primary">Schedule Now</Button>
-        </div>
-      )}
     </div>
   )
 }
