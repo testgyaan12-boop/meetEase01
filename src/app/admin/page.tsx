@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -19,7 +18,10 @@ import {
   Calendar as CalendarIcon,
   Plus,
   Trash2,
-  Mail
+  Mail,
+  Users,
+  CalendarDays,
+  Activity
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -32,13 +34,12 @@ import {
   DialogFooter,
   DialogTrigger
 } from "@/components/ui/dialog"
-import { format, setHours, setMinutes, startOfDay } from "date-fns"
+import { format, setHours, setMinutes } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 export default function AdminDashboard() {
   const { user, isUserLoading } = useUser()
@@ -149,6 +150,30 @@ export default function AdminDashboard() {
     m.clientEmail.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const stats = [
+    {
+      title: "Total Requests",
+      value: meetings?.length || 0,
+      icon: Users,
+      color: "bg-blue-500",
+      description: "Lifetime consultation requests"
+    },
+    {
+      title: "Pending Approval",
+      value: meetings?.filter(m => m.status === 'pending').length || 0,
+      icon: Activity,
+      color: "bg-orange-500",
+      description: "Requires immediate attention"
+    },
+    {
+      title: "Available Slots",
+      value: slots?.filter(s => !s.isBooked).length || 0,
+      icon: CalendarDays,
+      color: "bg-green-500",
+      description: "Current open sessions"
+    }
+  ]
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-12 animate-in fade-in duration-700">
       <div className="max-w-6xl mx-auto space-y-10">
@@ -166,6 +191,24 @@ export default function AdminDashboard() {
             </div>
           </div>
         </header>
+
+        {/* Statistics Cards - Responsive 3 cards in one row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {stats.map((stat, idx) => (
+            <Card key={idx} className="border-none shadow-xl bg-white/80 backdrop-blur-md rounded-[2rem] overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+              <CardContent className="p-8 flex items-center gap-6">
+                <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center text-white shadow-lg", stat.color)}>
+                  <stat.icon className="h-8 w-8" />
+                </div>
+                <div>
+                  <p className="text-sm font-black uppercase tracking-widest text-muted-foreground">{stat.title}</p>
+                  <p className="text-4xl font-headline font-bold text-primary">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1 font-medium">{stat.description}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
         <Tabs defaultValue="requests" className="space-y-8" onValueChange={setActiveTab}>
           <TabsList className="h-16 bg-white rounded-3xl p-2 shadow-xl border-none">
@@ -197,61 +240,63 @@ export default function AdminDashboard() {
                   {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-2xl" />)}
                 </div>
               ) : filteredMeetings && filteredMeetings.length > 0 ? (
-                <Table>
-                  <TableHeader className="bg-primary/5">
-                    <TableRow className="border-primary/10">
-                      <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Client</TableHead>
-                      <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Status</TableHead>
-                      <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Date</TableHead>
-                      <TableHead className="pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[11px]">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredMeetings.map((req) => (
-                      <TableRow key={req.id} className="border-primary/5">
-                        <TableCell className="py-8 pl-8">
-                          <div>
-                            <p className="font-bold text-lg text-primary">{req.clientName}</p>
-                            <p className="text-sm font-medium text-muted-foreground">{req.clientEmail}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={req.status === 'pending' ? 'secondary' : req.status === 'confirmed' ? 'default' : 'destructive'} 
-                            className="px-4 py-1.5 rounded-lg font-black text-[10px] uppercase tracking-widest"
-                          >
-                            {req.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 text-sm font-bold text-foreground/70">
-                            <Clock className="h-4 w-4" />
-                            {format(new Date(req.createdAt), "PPP")}
-                          </div>
-                        </TableCell>
-                        <TableCell className="pr-8 text-right">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="h-12 px-6 rounded-xl font-bold">Review</Button>
-                            </DialogTrigger>
-                            <DialogContent className="rounded-[2.5rem]">
-                              <DialogHeader>
-                                <DialogTitle>Review Payment</DialogTitle>
-                              </DialogHeader>
-                              <div className="aspect-[3/4] rounded-3xl overflow-hidden mt-4">
-                                <img src={req.paymentProofUrl} className="object-cover w-full h-full" />
-                              </div>
-                              <DialogFooter className="pt-8 gap-4">
-                                <Button variant="destructive" className="flex-1" onClick={() => handleMeetingAction(req.id, 'rejected')}>REJECT</Button>
-                                <Button className="flex-1" onClick={() => handleMeetingAction(req.id, 'confirmed')}>APPROVE</Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader className="bg-primary/5">
+                      <TableRow className="border-primary/10">
+                        <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Client</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Status</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Date</TableHead>
+                        <TableHead className="pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[11px]">Action</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredMeetings.map((req) => (
+                        <TableRow key={req.id} className="border-primary/5">
+                          <TableCell className="py-8 pl-8">
+                            <div>
+                              <p className="font-bold text-lg text-primary">{req.clientName}</p>
+                              <p className="text-sm font-medium text-muted-foreground">{req.clientEmail}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={req.status === 'pending' ? 'secondary' : req.status === 'confirmed' ? 'default' : 'destructive'} 
+                              className="px-4 py-1.5 rounded-lg font-black text-[10px] uppercase tracking-widest"
+                            >
+                              {req.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2 text-sm font-bold text-foreground/70">
+                              <Clock className="h-4 w-4" />
+                              {format(new Date(req.createdAt), "PPP")}
+                            </div>
+                          </TableCell>
+                          <TableCell className="pr-8 text-right">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-12 px-6 rounded-xl font-bold">Review</Button>
+                              </DialogTrigger>
+                              <DialogContent className="rounded-[2.5rem]">
+                                <DialogHeader>
+                                  <DialogTitle>Review Payment</DialogTitle>
+                                </DialogHeader>
+                                <div className="aspect-[3/4] rounded-3xl overflow-hidden mt-4">
+                                  <img src={req.paymentProofUrl} className="object-cover w-full h-full" alt="Payment Proof" />
+                                </div>
+                                <DialogFooter className="pt-8 gap-4">
+                                  <Button variant="destructive" className="flex-1" onClick={() => handleMeetingAction(req.id, 'rejected')}>REJECT</Button>
+                                  <Button className="flex-1" onClick={() => handleMeetingAction(req.id, 'confirmed')}>APPROVE</Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
                 <div className="text-center py-32 bg-white/40">
                   <Inbox className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
@@ -299,45 +344,47 @@ export default function AdminDashboard() {
                   {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-2xl" />)}
                 </div>
               ) : slots && slots.length > 0 ? (
-                <Table>
-                  <TableHeader className="bg-primary/5">
-                    <TableRow className="border-primary/10">
-                      <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Date</TableHead>
-                      <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Time Range</TableHead>
-                      <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Status</TableHead>
-                      <TableHead className="pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[11px]">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {slots.map((slot) => (
-                      <TableRow key={slot.id} className="border-primary/5">
-                        <TableCell className="py-8 pl-8">
-                          <span className="font-bold text-lg">{format(new Date(slot.startTime), "PPP")}</span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium text-lg">
-                            {format(new Date(slot.startTime), "p")} - {format(new Date(slot.endTime), "p")}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={slot.isBooked ? "destructive" : "secondary"}>
-                            {slot.isBooked ? "Booked" : "Available"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="pr-8 text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => handleDeleteSlot(slot.id)}
-                            className="text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </Button>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader className="bg-primary/5">
+                      <TableRow className="border-primary/10">
+                        <TableHead className="py-6 pl-8 font-black uppercase text-primary/60 tracking-widest text-[11px]">Date</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Time Range</TableHead>
+                        <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[11px]">Status</TableHead>
+                        <TableHead className="pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[11px]">Action</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {slots.map((slot) => (
+                        <TableRow key={slot.id} className="border-primary/5">
+                          <TableCell className="py-8 pl-8">
+                            <span className="font-bold text-lg">{format(new Date(slot.startTime), "PPP")}</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-medium text-lg">
+                              {format(new Date(slot.startTime), "p")} - {format(new Date(slot.endTime), "p")}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={slot.isBooked ? "destructive" : "secondary"}>
+                              {slot.isBooked ? "Booked" : "Available"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="pr-8 text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleDeleteSlot(slot.id)}
+                              className="text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
                 <div className="text-center py-32 bg-white/40">
                   <CalendarIcon className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
