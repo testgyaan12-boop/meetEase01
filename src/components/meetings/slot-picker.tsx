@@ -70,6 +70,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
         </div>
 
         <div className="relative min-w-[180px] w-full sm:w-auto">
+          {/* Using native system date picker for mobile friendliness */}
           <Input 
             type="date"
             value={format(date, "yyyy-MM-dd")}

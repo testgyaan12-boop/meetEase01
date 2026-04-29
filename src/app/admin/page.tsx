@@ -209,7 +209,7 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* Responsive Summary Cards: Forced into 3 columns on mobile */}
+        {/* Forced 3 columns on mobile */}
         <div className="grid grid-cols-3 gap-3">
           {[
             { title: "Total", value: meetings?.length || 0, icon: Users, color: "bg-blue-600" },
@@ -304,10 +304,20 @@ export default function AdminDashboard() {
                 <DialogContent className="rounded-3xl max-w-sm">
                   <DialogHeader><DialogTitle>Create Slot</DialogTitle></DialogHeader>
                   <div className="space-y-4 pt-4">
-                    <Input type="date" value={newSlotDateStr} onChange={(e) => setNewSlotDateStr(e.target.value)} className="h-12 rounded-xl" />
+                    {/* Native date picker for mobile friendliness */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Select Date</label>
+                      <Input type="date" value={newSlotDateStr} onChange={(e) => setNewSlotDateStr(e.target.value)} className="h-12 rounded-xl" />
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-12 rounded-xl" />
-                      <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-12 rounded-xl" />
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Start Time</label>
+                        <Input type="time" value={startTimeStr} onChange={(e) => setStartTimeStr(e.target.value)} className="h-12 rounded-xl" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-muted-foreground ml-1">End Time</label>
+                        <Input type="time" value={endTimeStr} onChange={(e) => setEndTimeStr(e.target.value)} className="h-12 rounded-xl" />
+                      </div>
                     </div>
                   </div>
                   <DialogFooter className="pt-4"><Button onClick={handleAddSlot} className="w-full h-12 rounded-xl font-bold">SAVE SLOT</Button></DialogFooter>
@@ -369,7 +379,7 @@ export default function AdminDashboard() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteSlot} className="bg-destructive rounded-xl">Delete Slot</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDeleteSlot} className="bg-destructive rounded-xl text-white">Delete Slot</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -396,11 +406,11 @@ export default function AdminDashboard() {
               </div>
               <div className="flex gap-4 pt-4">
                 <Button variant="destructive" className="flex-1 h-12 rounded-xl font-bold" onClick={handleReject} disabled={isProcessing}>Reject</Button>
-                <Button className="flex-1 h-12 rounded-xl font-bold bg-primary" onClick={handleApprove} disabled={isProcessing}>Approve</Button>
+                <Button className="flex-1 h-12 rounded-xl font-bold bg-primary text-white" onClick={handleApprove} disabled={isProcessing}>Approve</Button>
               </div>
             </div>
-            {/* Proof Sidebar */}
-            <div className="w-full md:w-[320px] bg-muted/10 p-6 border-l flex flex-col items-center">
+            {/* Proof Sidebar - Always On */}
+            <div className="w-full md:w-[320px] bg-muted/10 p-6 border-l flex flex-col items-center shrink-0">
               <p className="text-[10px] font-black uppercase text-muted-foreground mb-4">Payment Receipt</p>
               <div className="w-full aspect-[3/4] rounded-2xl bg-white shadow-xl overflow-hidden p-2">
                 <img src={reviewMeeting?.paymentProofUrl} className="w-full h-full object-contain" alt="Proof" />
