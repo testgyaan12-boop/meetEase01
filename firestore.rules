@@ -1,19 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // GLOBAL SUPER-ADMIN BYPASS - ABSOLUTE PRIORITY
+    // GLOBAL SUPER-ADMIN BYPASS - MUST BE FIRST
     function isSuperAdmin() {
-      return isSignedIn() && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
+      return request.auth != null && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
     }
 
-    // Explicitly allow super-admin everywhere
     match /{document=**} {
       allow read, write: if isSuperAdmin();
+    }
+
+    // Helper functions for other users
+    function isSignedIn() {
+      return request.auth != null;
     }
 
     function isAdmin() {
