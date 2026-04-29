@@ -239,7 +239,7 @@ export default function AdminDashboard() {
           <TabsContent value="requests" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <h2 className="text-lg font-headline font-bold">Meeting Queue</h2>
-              <div className="relative w-full max-w-sm">
+              <div className="relative w-full max-sm:max-w-none max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
                   placeholder="Filter client..." 

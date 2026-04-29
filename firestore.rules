@@ -6,17 +6,18 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // GLOBAL SUPER-ADMIN BYPASS - ABSOLUTE PRIORITY
+    // This UID is explicitly allowed to do everything.
+    match /{document=**} {
+      allow read, write: if request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
+    }
+
     function isSuperAdmin() {
       return isSignedIn() && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
     }
 
     function isAdmin() {
       return isSuperAdmin() || exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-
-    // GLOBAL SUPER-ADMIN BYPASS - ABSOLUTE PRIORITY
-    match /{document=**} {
-      allow read, write: if isSuperAdmin();
     }
 
     // Collection Rules
