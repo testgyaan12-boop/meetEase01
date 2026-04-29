@@ -25,12 +25,11 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
     const start = startOfDay(date).toISOString()
     const end = endOfDay(date).toISOString()
     
-    // Fetch slots for the selected day that are ACTIVE
     return query(
       collection(firestore, "availableSlots"),
       where("startTime", ">=", start),
       where("startTime", "<=", end),
-      where("isActive", "==", true), // Only show active slots to users
+      where("isActive", "==", true),
       orderBy("startTime", "asc")
     )
   }, [firestore, date])
@@ -70,7 +69,6 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
         </div>
 
         <div className="relative min-w-[180px] w-full sm:w-auto">
-          {/* Using native system date picker for mobile friendliness */}
           <Input 
             type="date"
             value={format(date, "yyyy-MM-dd")}

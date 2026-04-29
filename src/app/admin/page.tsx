@@ -304,7 +304,6 @@ export default function AdminDashboard() {
                 <DialogContent className="rounded-3xl max-w-sm">
                   <DialogHeader><DialogTitle>Create Slot</DialogTitle></DialogHeader>
                   <div className="space-y-4 pt-4">
-                    {/* Native date picker for mobile friendliness */}
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Select Date</label>
                       <Input type="date" value={newSlotDateStr} onChange={(e) => setNewSlotDateStr(e.target.value)} className="h-12 rounded-xl" />
