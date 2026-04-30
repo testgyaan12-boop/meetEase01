@@ -6,10 +6,6 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
     }
 
-    match /{document=**} {
-      allow read, write: if isSuperAdmin();
-    }
-
     // Helper functions for other users
     function isSignedIn() {
       return request.auth != null;
@@ -19,14 +15,26 @@ service cloud.firestore {
       return isSuperAdmin() || exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
+    // SUPER ADMIN RULE
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+
     // Collection Rules
+    match /availableSlots {
+      allow list: if isSignedIn();
+    }
+
     match /availableSlots/{slotId} {
-      allow read: if isSignedIn();
+      allow get: if isSignedIn();
       allow write: if isAdmin();
     }
 
+    match /meetings {
+      allow list: if isAdmin();
+    }
+
     match /meetings/{meetingId} {
-      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow get: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
