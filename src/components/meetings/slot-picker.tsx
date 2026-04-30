@@ -61,14 +61,15 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
+          <h3 className="text-xl font-headline font-bold text-primary flex items-center gap-3">
+            <CalendarIcon className="h-6 w-6" />
             {isSelectedToday ? "Today's Availability" : `Slots for ${format(date, "MMM do")}`}
           </h3>
           <p className="text-sm text-muted-foreground font-medium">Select your preferred session time</p>
         </div>
 
-        <div className="relative min-w-[180px] w-full sm:w-auto">
+        <div className="relative min-w-[200px] w-full sm:w-auto">
+          {/* NATIVE SYSTEM CALENDAR FOR MOBILE PERFORMANCE */}
           <Input 
             type="date"
             value={format(date, "yyyy-MM-dd")}
@@ -79,20 +80,20 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
               }
             }}
             min={format(new Date(), "yyyy-MM-dd")}
-            className="h-12 px-4 rounded-2xl border-primary/20 bg-white font-bold text-primary shadow-sm"
+            className="h-14 px-6 rounded-2xl border-2 border-primary/10 bg-white font-bold text-primary shadow-lg focus:ring-4 focus:ring-primary/5 transition-all"
           />
         </div>
       </div>
 
       <div className="space-y-4">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+              <Skeleton key={i} className="h-24 w-full rounded-2xl" />
             ))}
           </div>
         ) : slots && slots.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 animate-in fade-in slide-in-from-bottom-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {slots.map((slot) => (
               <Button
                 key={slot.id}
@@ -100,33 +101,36 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
                 disabled={slot.isBooked}
                 variant={selectedSlotId === slot.id ? "default" : "outline"}
                 className={cn(
-                  "h-20 flex flex-col items-center justify-center rounded-2xl transition-all border-2",
+                  "h-24 flex flex-col items-center justify-center rounded-[1.5rem] transition-all border-2",
                   selectedSlotId === slot.id 
-                    ? "bg-primary text-white border-primary shadow-xl scale-[1.03]" 
-                    : "border-primary/10 hover:border-primary/40 bg-white/60 backdrop-blur-sm",
-                  slot.isBooked && "opacity-50 grayscale cursor-not-allowed border-dashed bg-muted/20"
+                    ? "bg-primary text-white border-primary shadow-2xl scale-105" 
+                    : "border-primary/5 hover:border-primary/30 bg-white/40 backdrop-blur-md shadow-sm",
+                  slot.isBooked && "opacity-40 grayscale cursor-not-allowed border-dashed bg-muted/20"
                 )}
                 onClick={() => handleSlotClick(slot)}
               >
-                <div className="flex items-center gap-1.5">
-                  <Clock className={cn("h-4 w-4", selectedSlotId === slot.id ? "text-white" : "text-primary")} />
+                <div className="flex items-center gap-2">
+                  <Clock className={cn("h-4 w-4", selectedSlotId === slot.id ? "text-white" : "text-primary/60")} />
                   <span className={cn(
-                    "font-black text-sm md:text-base",
-                    slot.isBooked && "line-through decoration-destructive/80 decoration-2"
+                    "font-black text-base md:text-lg tracking-tight",
+                    slot.isBooked && "line-through decoration-destructive/60 decoration-2"
                   )}>
                     {formatRange(slot.startTime, slot.endTime)}
                   </span>
                 </div>
-                {slot.isBooked && <span className="text-[9px] uppercase font-black tracking-widest mt-1 text-destructive/80">Occupied</span>}
+                {slot.isBooked && <span className="text-[10px] uppercase font-black tracking-widest mt-1 text-destructive/80">Reserved</span>}
+                {selectedSlotId === slot.id && <span className="text-[10px] uppercase font-black tracking-widest mt-1 animate-pulse">Selected</span>}
               </Button>
             ))}
           </div>
         ) : (
-          <div className="bg-white/40 border-2 border-dashed rounded-[2.5rem] p-12 text-center flex flex-col items-center justify-center">
-            <AlertCircle className="h-12 w-12 text-muted-foreground/20 mb-4" />
-            <h4 className="text-xl font-headline font-bold text-muted-foreground">No Availability</h4>
-            <p className="text-muted-foreground mt-2 font-medium text-sm">
-              Try picking another date from the calendar.
+          <div className="bg-white/30 border-2 border-dashed border-primary/10 rounded-[3rem] p-16 text-center flex flex-col items-center justify-center animate-in zoom-in duration-500">
+            <div className="h-24 w-24 rounded-full bg-primary/5 flex items-center justify-center mb-6">
+              <AlertCircle className="h-12 w-12 text-primary/20" />
+            </div>
+            <h4 className="text-2xl font-headline font-bold text-muted-foreground/60">No Slots Available</h4>
+            <p className="text-muted-foreground mt-2 font-medium text-base max-w-xs">
+              Our experts are fully booked or haven't listed availability for this date yet.
             </p>
           </div>
         )}
