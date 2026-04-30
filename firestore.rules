@@ -14,14 +14,15 @@ service cloud.firestore {
       return isSuperAdmin() || exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    // ABSOLUTE SUPER ADMIN BYPASS - MUST BE FIRST
+    // GLOBAL SUPER ADMIN BYPASS
     match /{document=**} {
       allow read, write: if isSuperAdmin();
     }
 
     // Collection Specific Rules
     match /availableSlots {
-      allow read, list: if isSignedIn();
+      // Explicitly allow listing for all signed in users to fix useCollection errors
+      allow list, read: if isSignedIn();
     }
 
     match /availableSlots/{slotId} {
