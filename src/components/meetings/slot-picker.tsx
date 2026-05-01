@@ -20,6 +20,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
   const [selectedSlotId, setSelectedSlotId] = useState<string>()
   const { user } = useUser()
   const firestore = useFirestore()
+  
   const slotsQuery = useMemoFirebase(() => {
     if (!firestore || !date || !user) return null
     const start = startOfDay(date).toISOString()
@@ -68,7 +69,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
         </div>
 
         <div className="relative min-w-[200px] w-full sm:w-auto">
-          {/* NATIVE SYSTEM CALENDAR FOR MOBILE PERFORMANCE */}
+          {/* NATIVE SYSTEM CALENDAR FOR BEST MOBILE UX */}
           <Input
             type="date"
             value={format(date, "yyyy-MM-dd")}

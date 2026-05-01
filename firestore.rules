@@ -12,28 +12,39 @@ service cloud.firestore {
     function isAdmin() {
       return isSuperAdmin() || exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
-    
-    // PUBLIC - Available slots
-    match /availableSlots/{slotId} {
-      allow read, write: if true;
+
+    // 1. ABSOLUTE PRIORITY: SUPER ADMIN BYPASS
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
     }
     
-    // MEETINGS - Fixed
-    match /meetings/{meetingId} {
-      allow read: if isSignedIn();  // read = get + list dono
-      allow write: if isSignedIn();
+    // 2. PUBLIC/USER ACCESSIBLE COLLECTIONS
+    match /availableSlots {
+      allow list: if isSignedIn();
+      allow read: if isSignedIn();
+    }
+    match /availableSlots/{slotId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    
+    match /meetings {
+      allow list: if isSignedIn();
       allow create: if isSignedIn();
-      allow update: if isSignedIn();
+    }
+    match /meetings/{meetingId} {
+      allow read: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow update: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
       allow delete: if isAdmin();
     }
     
-    // USERS
+    // 3. USER PROFILES
     match /users/{userId} {
       allow read: if isSignedIn();
       allow write: if isSignedIn() && request.auth.uid == userId;
     }
     
-    // Admin roles
+    // 4. ADMIN ROLES
     match /roles_admin/{adminUid} {
       allow read: if isSignedIn();
       allow write: if isSuperAdmin();
