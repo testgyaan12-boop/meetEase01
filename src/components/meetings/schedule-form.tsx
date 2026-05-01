@@ -154,7 +154,7 @@ export function ScheduleMeetingForm() {
                   <div className="relative group">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm md:text-base">+91</div>
                     <Input 
-                      placeholder="e.g. 9876543210" 
+                      placeholder="Enter 10 digit number" 
                       maxLength={10}
                       type="tel"
                       {...form.register("clientMobile")} 
@@ -162,7 +162,7 @@ export function ScheduleMeetingForm() {
                     />
                   </div>
                   <p className="text-[9px] md:text-[10px] text-muted-foreground font-medium px-1 flex items-center gap-1">
-                    <Info className="h-3 w-3" /> Exactly 10 digits starting with 6, 7, 8, or 9
+                    <Info className="h-3 w-3" /> Indian Mobile (Exactly 10 digits starting with 6, 7, 8, or 9)
                   </p>
                   {form.formState.errors.clientMobile && (
                     <p className="text-[9px] md:text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.clientMobile.message as string}</p>
