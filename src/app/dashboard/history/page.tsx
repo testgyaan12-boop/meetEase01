@@ -19,7 +19,7 @@ export default function HistoryPage() {
     return query(
       collection(firestore, "meetings"),
       where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
+      // orderBy("createdAt", "desc")
     )
   }, [firestore, user])
 
@@ -43,15 +43,15 @@ export default function HistoryPage() {
     if (meeting.status === 'confirmed' && meeting.slotEndTime && isPast(new Date(meeting.slotEndTime))) {
       return <Badge variant="secondary" className="px-3">Past Session</Badge>
     }
-    
+
     const variants: Record<string, string> = {
       pending: 'secondary',
       confirmed: 'default',
       rejected: 'destructive',
     }
-    
+
     return (
-      <Badge 
+      <Badge
         variant={variants[meeting.status] as any}
         className="capitalize px-4 py-1 font-black rounded-lg text-[10px] tracking-wide"
       >
