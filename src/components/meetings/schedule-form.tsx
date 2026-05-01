@@ -82,10 +82,8 @@ export function ScheduleMeetingForm() {
         updatedAt: new Date().toISOString(),
       }
 
-      // Add meeting document
       addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
       
-      // Notify Admin
       addDocumentNonBlocking(collection(firestore, "admin_notifications"), {
         title: "New Meeting Request",
         message: `${values.clientName} requested a consultation.`,
@@ -167,7 +165,7 @@ export function ScheduleMeetingForm() {
                     <Phone className="h-3 w-3" /> Mobile Number
                   </label>
                   <Input 
-                    placeholder="Enter 10 digit mobile number" 
+                    placeholder="Enter 10 digit number" 
                     maxLength={10}
                     type="tel"
                     {...form.register("clientMobile")} 
