@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -46,7 +45,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { format, setHours, setMinutes, isPast } from "date-fns"
+import { format, setHours, setMinutes } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -151,12 +150,6 @@ export default function AdminDashboard() {
     const startTime = setMinutes(setHours(dateObj, sH), sM).toISOString()
     const endTime = setMinutes(setHours(dateObj, eH), eM).toISOString()
 
-    const isDuplicate = slots?.some(s => s.startTime === startTime && s.endTime === endTime)
-    if (isDuplicate) {
-      toast({ title: "Slot Conflict", description: "This time slot already exists.", variant: "destructive" })
-      return
-    }
-
     addDocumentNonBlocking(collection(firestore, "availableSlots"), {
       startTime,
       endTime,
@@ -205,9 +198,9 @@ export default function AdminDashboard() {
             variant="outline" 
             size="icon" 
             onClick={() => router.push("/dashboard")} 
-            className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border-primary/10"
+            className="h-12 w-12 rounded-xl bg-white shadow-sm border-primary/10"
           >
-            <ArrowLeft className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            <ArrowLeft className="h-6 w-6 text-primary" />
           </Button>
           <div>
             <h1 className="text-xl md:text-3xl font-headline font-bold text-primary flex items-center gap-2">
@@ -218,7 +211,6 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* Forced 3 columns for mobile efficiency */}
         <div className="grid grid-cols-3 gap-3 md:gap-6">
           {[
             { title: "Total", value: meetings?.length || 0, icon: Users, color: "bg-blue-600" },
@@ -420,7 +412,6 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
 
-      {/* Deletion Confirm */}
       <AlertDialog open={!!slotToDelete} onOpenChange={() => setSlotToDelete(null)}>
         <AlertDialogContent className="rounded-2xl p-8 max-w-sm">
           <AlertDialogHeader>
@@ -441,7 +432,6 @@ export default function AdminDashboard() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Review Dialog with Persistent Proof */}
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
         <DialogContent className="max-w-4xl rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
           <div className="flex flex-col md:flex-row max-h-[85vh]">
@@ -502,25 +492,32 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Document Viewer Sidebar */}
             <div className="w-full md:w-[320px] bg-muted/20 p-8 border-l flex flex-col items-center">
               <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-4">Transaction Proof</h4>
               <div className="w-full aspect-[3/4] rounded-2xl bg-white shadow-xl overflow-hidden p-2 group relative">
-                <img 
-                  src={reviewMeeting?.paymentProofUrl} 
-                  className="w-full h-full object-contain rounded-xl transition-transform hover:scale-105" 
-                  alt="Actual Payment Proof" 
-                />
-                <a 
-                  href={reviewMeeting?.paymentProofUrl} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="absolute bottom-3 right-3 h-10 w-10 bg-white rounded-lg shadow-xl flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-opacity border"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
+                {reviewMeeting?.paymentProofUrl ? (
+                  <img 
+                    src={reviewMeeting.paymentProofUrl} 
+                    className="w-full h-full object-contain rounded-xl transition-transform hover:scale-105" 
+                    alt="Actual Payment Proof" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted/20 rounded-xl">
+                    <Inbox className="h-8 w-8 text-muted-foreground/30" />
+                  </div>
+                )}
+                {reviewMeeting?.paymentProofUrl && (
+                  <a 
+                    href={reviewMeeting.paymentProofUrl} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="absolute bottom-3 right-3 h-10 w-10 bg-white rounded-lg shadow-xl flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-opacity border"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
               </div>
-              <p className="mt-4 text-[10px] text-muted-foreground font-bold italic text-center">Click image to zoom/inspect</p>
+              <p className="mt-4 text-[10px] text-muted-foreground font-bold italic text-center">Verified Client Document</p>
             </div>
           </div>
         </DialogContent>

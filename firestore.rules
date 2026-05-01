@@ -1,24 +1,63 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // GLOBAL BYPASS FOR PROTOTYPING
-    // This allows all read/write/list operations to prevent "Missing or insufficient permissions"
-    match /{document=**} {
-      allow read, write: if true;
+    // ========== HELPER FUNCTIONS ==========
+    function isSignedIn() {
+      return request.auth != null;
     }
     
-    // Explicit match for admin notifications to ensure list operations work
-    match /admin_notifications/{notificationId} {
-      allow read, write: if true;
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
     }
-
-    match /meetings/{meetingId} {
-      allow read, write: if true;
+    
+    function isAdmin() {
+      return isSuperAdmin() || 
+             exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
-
+    
+    // ========== COLLECTION RULES ==========
+    
+    // 1. Available Slots - Public Access for Prototyping
     match /availableSlots/{slotId} {
-      allow read, write: if true;
+      allow read, write, list: if true;
+    }
+    
+    // 2. Meetings - Signed in users can access their own, admins all
+    match /meetings/{meetingId} {
+      allow read, list: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+    
+    // 3. Users - Profile access
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write, update: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn();
+    }
+    
+    // 4. Admin Notifications - Only admins
+    match /admin_notifications/{notificationId} {
+      allow read, list, write, create, update, delete: if isAdmin();
+    }
+    
+    // 5. Admin Roles - Only super admin to write
+    match /roles_admin/{adminUid} {
+      allow read: if isSignedIn();
+      allow write: if isSuperAdmin();
+      allow list: if isAdmin();
+    }
+    
+    // 6. Bookings - User specific
+    match /bookings/{bookingId} {
+      allow read, write, list: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn();
+    }
+    
+    // 7. Catch all - Default deny
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
     }
   }
 }

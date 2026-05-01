@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -59,7 +58,6 @@ export function ScheduleMeetingForm() {
       let paymentProofUrl = ""
       const file = values.paymentProof?.[0]
       if (file) {
-        // Convert to base64 for real document viewing in admin
         paymentProofUrl = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
@@ -172,7 +170,7 @@ export function ScheduleMeetingForm() {
                     className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium" 
                   />
                   <p className="text-[10px] text-muted-foreground font-medium px-1 flex items-center gap-1 mt-1">
-                    <Info className="h-3 w-3" /> 10-digit number starting with 6-9
+                    <Info className="h-3 w-3" /> 10-digit Indian number starting with 6-9
                   </p>
                   {form.formState.errors.clientMobile && (
                     <p className="text-[10px] text-destructive font-bold px-1">{form.formState.errors.clientMobile.message as string}</p>
@@ -238,13 +236,13 @@ export function ScheduleMeetingForm() {
                     <>
                       <CheckCircle2 className="h-16 w-16 text-primary mb-4 animate-in zoom-in" />
                       <p className="text-lg font-bold text-primary text-center truncate w-full px-4">{form.watch("paymentProof")?.[0].name}</p>
-                      <p className="text-xs font-medium text-muted-foreground mt-1">Screenshot attached. Click to replace.</p>
+                      <p className="text-xs font-medium text-muted-foreground mt-1">Document attached. Click to replace.</p>
                     </>
                   ) : (
                     <>
                       <Upload className="h-16 w-16 text-muted-foreground/30 mb-4 group-hover:scale-110 transition-transform" />
-                      <p className="text-lg font-bold text-muted-foreground">Upload Payment Screenshot</p>
-                      <p className="text-xs font-medium text-muted-foreground/60 mt-1">Provide a clear image of the transaction.</p>
+                      <p className="text-lg font-bold text-muted-foreground">Upload Payment Receipt</p>
+                      <p className="text-xs font-medium text-muted-foreground/60 mt-1">Actual file required for verification.</p>
                     </>
                   )}
                 </div>
