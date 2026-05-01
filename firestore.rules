@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -20,7 +21,6 @@ service cloud.firestore {
     
     // 2. PUBLIC/USER ACCESSIBLE COLLECTIONS
     match /availableSlots {
-      // Made public to stop permission errors during rapid prototyping
       allow list: if true;
       allow read: if true;
     }
@@ -30,7 +30,6 @@ service cloud.firestore {
     }
     
     match /meetings {
-      // Allow public listing and creation to stop issues
       allow list: if true;
       allow create: if true;
     }
@@ -38,6 +37,11 @@ service cloud.firestore {
       allow read: if true;
       allow update: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    match /admin_notifications {
+      allow create: if isSignedIn();
+      allow list, read, update: if isAdmin();
     }
     
     // 3. USER PROFILES

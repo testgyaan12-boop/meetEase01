@@ -1,3 +1,4 @@
+
 export type MeetingStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'done';
 
 export interface Meeting {
@@ -33,4 +34,13 @@ export interface UserProfile {
   fullName: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AdminNotification {
+  id: string;
+  title: string;
+  message: string;
+  meetingId?: string;
+  isRead: boolean;
+  createdAt: string;
 }

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -55,12 +56,9 @@ export function ScheduleMeetingForm() {
     setIsSubmitting(true)
     
     try {
-      let paymentProofUrl = "https://picsum.photos/seed/pay123/600/800"
-      
+      let paymentProofUrl = ""
       const file = values.paymentProof?.[0]
       if (file) {
-        // For prototyping, we convert the file to a Data URI to "save" it in Firestore
-        // Note: Firestore has a 1MB limit per document.
         paymentProofUrl = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
@@ -84,7 +82,16 @@ export function ScheduleMeetingForm() {
         updatedAt: new Date().toISOString(),
       }
 
+      // Add meeting document
       addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
+      
+      // Notify Admin
+      addDocumentNonBlocking(collection(firestore, "admin_notifications"), {
+        title: "New Meeting Request",
+        message: `${values.clientName} requested a consultation.`,
+        isRead: false,
+        createdAt: new Date().toISOString()
+      })
       
       toast({
         title: "Booking Requested Successfully",
@@ -103,19 +110,7 @@ export function ScheduleMeetingForm() {
     }
   }
 
-  if (!user) {
-    return (
-      <Card className="max-w-md mx-auto border-none shadow-2xl">
-        <CardContent className="pt-10 text-center space-y-6">
-          <div className="h-16 w-16 bg-destructive/10 rounded-2xl flex items-center justify-center mx-auto text-destructive">
-            <AlertCircle className="h-8 w-8" />
-          </div>
-          <p className="font-bold text-lg text-primary">Session expired. Please log in again.</p>
-          <Button onClick={() => router.push('/login')} className="w-full h-12 rounded-xl">Sign In</Button>
-        </CardContent>
-      </Card>
-    )
-  }
+  if (!user) return null
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-32">
@@ -259,7 +254,7 @@ export function ScheduleMeetingForm() {
                         <Upload className="h-8 w-8 md:h-12 md:w-12" />
                       </div>
                       <p className="text-base md:text-xl font-bold text-primary/80 tracking-tight">Upload Payment Proof</p>
-                      <p className="text-[10px] md:text-sm font-medium text-muted-foreground mt-2">PNG, JPG or PDF up to 500KB recommended</p>
+                      <p className="text-[10px] md:text-sm font-medium text-muted-foreground mt-2">PNG, JPG up to 500KB recommended</p>
                     </>
                   )}
                 </div>

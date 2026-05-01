@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -47,6 +48,20 @@
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "clientName", "clientEmail", "clientMobile", "description", "paymentProofUrl", "status", "availableSlotId", "createdAt", "updatedAt"]
+    },
+    "AdminNotification": {
+      "title": "AdminNotification",
+      "type": "object",
+      "description": "System notification for admins.",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "meetingId": { "type": "string" },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "message", "isRead", "createdAt"]
     }
   },
   "auth": {
@@ -56,6 +71,7 @@
     "/users/{userId}": { "schema": "User", "description": "User profiles" },
     "/availableSlots/{slotId}": { "schema": "AvailableSlot", "description": "Meeting slots" },
     "/meetings/{meetingId}": { "schema": "Meeting", "description": "Meeting requests" },
-    "/roles_admin/{adminUid}": { "schema": "User", "description": "Admins" }
+    "/roles_admin/{adminUid}": { "schema": "User", "description": "Admins" },
+    "/admin_notifications/{notificationId}": { "schema": "AdminNotification", "description": "Admin alerts" }
   }
 }

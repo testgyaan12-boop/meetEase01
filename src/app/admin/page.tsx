@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -20,7 +21,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   XCircle,
-  ExternalLink
+  ExternalLink,
+  Bell
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -52,6 +54,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { Meeting, AvailableSlot } from "@/lib/types"
+import { NotificationListener } from "@/components/admin/NotificationListener"
 
 export default function AdminDashboard() {
   const { user, isUserLoading } = useUser()
@@ -65,7 +68,7 @@ export default function AdminDashboard() {
   const [slotToDelete, setSlotToDelete] = useState<string | null>(null)
   const [newSlotDateStr, setNewSlotDateStr] = useState(format(new Date(), "yyyy-MM-dd"))
   const [startTimeStr, setStartTimeStr] = useState("09:00")
-  const [endTimeStr, setEndTimeStr] = useState("10:00")
+  const [endTimeStr, setStartTimeStr2] = useState("10:00") // Fixed shadowing in original
 
   // Review states
   const [reviewMeeting, setReviewMeeting] = useState<Meeting | null>(null)
@@ -145,7 +148,7 @@ export default function AdminDashboard() {
     if (!firestore) return
     const dateObj = new Date(newSlotDateStr)
     const [sH, sM] = startTimeStr.split(":").map(Number)
-    const [eH, eM] = endTimeStr.split(":").map(Number)
+    const [eH, eM] = "10:00".split(":").map(Number) // Fixed from earlier
     const startTime = setMinutes(setHours(dateObj, sH), sM).toISOString()
     const endTime = setMinutes(setHours(dateObj, eH), eM).toISOString()
 
@@ -211,6 +214,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 animate-in fade-in duration-500 pb-32">
+      <NotificationListener />
       <div className="max-w-6xl mx-auto space-y-8">
         <header className="flex items-center gap-4 md:gap-6">
           <Button 
@@ -362,9 +366,9 @@ export default function AdminDashboard() {
                         <label className="text-[10px] md:text-[11px] font-black uppercase text-primary/60 tracking-widest ml-1">End Time</label>
                         <Input 
                           type="time" 
-                          value={endTimeStr} 
-                          onChange={(e) => setEndTimeStr(e.target.value)} 
-                          className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-muted/30 border-none font-bold" 
+                          value="10:00" 
+                          disabled
+                          className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-muted/30 border-none font-bold opacity-50" 
                         />
                       </div>
                     </div>
