@@ -6,7 +6,7 @@ import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AvailableSlot } from "@/lib/types"
@@ -18,21 +18,20 @@ interface SlotPickerProps {
 export function SlotPicker({ onSelect }: SlotPickerProps) {
   const [date, setDate] = useState<Date>(new Date())
   const [selectedSlotId, setSelectedSlotId] = useState<string>()
+  const { user } = useUser()
   const firestore = useFirestore()
-
   const slotsQuery = useMemoFirebase(() => {
-    if (!firestore || !date) return null
+    if (!firestore || !date || !user) return null
     const start = startOfDay(date).toISOString()
     const end = endOfDay(date).toISOString()
-    
+
     return query(
       collection(firestore, "availableSlots"),
       where("startTime", ">=", start),
       where("startTime", "<=", end),
-      where("isActive", "==", true),
       orderBy("startTime", "asc")
     )
-  }, [firestore, date])
+  }, [firestore, date, user])
 
   const { data: slots, isLoading } = useCollection<AvailableSlot>(slotsQuery)
 
@@ -70,7 +69,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
 
         <div className="relative min-w-[200px] w-full sm:w-auto">
           {/* NATIVE SYSTEM CALENDAR FOR MOBILE PERFORMANCE */}
-          <Input 
+          <Input
             type="date"
             value={format(date, "yyyy-MM-dd")}
             onChange={(e) => {
@@ -102,8 +101,8 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
                 variant={selectedSlotId === slot.id ? "default" : "outline"}
                 className={cn(
                   "h-24 flex flex-col items-center justify-center rounded-[1.5rem] transition-all border-2",
-                  selectedSlotId === slot.id 
-                    ? "bg-primary text-white border-primary shadow-2xl scale-105" 
+                  selectedSlotId === slot.id
+                    ? "bg-primary text-white border-primary shadow-2xl scale-105"
                     : "border-primary/5 hover:border-primary/30 bg-white/40 backdrop-blur-md shadow-sm",
                   slot.isBooked && "opacity-40 grayscale cursor-not-allowed border-dashed bg-muted/20"
                 )}
