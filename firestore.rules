@@ -2,35 +2,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 1. ABSOLUTE GLOBAL BYPASS FOR SUPER ADMIN
+    // GLOBAL BYPASS FOR PROTOTYPING
+    // This allows all read/write operations to prevent "Missing or insufficient permissions"
     match /{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
-    }
-    
-    // 2. ADMIN NOTIFICATIONS
-    match /admin_notifications/{notifId} {
-      allow read, write, list: if true;
-    }
-
-    // 3. AVAILABLE SLOTS
-    match /availableSlots/{slotId} {
-      allow read, write, list: if true;
-    }
-    
-    // 4. MEETINGS
-    match /meetings/{meetingId} {
-      allow read, write, list: if true;
-    }
-
-    // 5. USER PROFILES
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // 6. ADMIN ROLES
-    match /roles_admin/{adminUid} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
+      allow read, write: if true;
     }
   }
 }
