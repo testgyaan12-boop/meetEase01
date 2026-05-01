@@ -54,32 +54,53 @@ export function ScheduleMeetingForm() {
 
     setIsSubmitting(true)
     
-    // In a real app, we would upload the file to Firebase Storage here.
-    const paymentProofUrl = "https://picsum.photos/seed/pay123/600/800"
+    try {
+      let paymentProofUrl = "https://picsum.photos/seed/pay123/600/800"
+      
+      const file = values.paymentProof?.[0]
+      if (file) {
+        // For prototyping, we convert the file to a Data URI to "save" it in Firestore
+        // Note: Firestore has a 1MB limit per document.
+        paymentProofUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
 
-    const meetingData = {
-      userId: user.uid,
-      clientEmail: values.clientEmail,
-      clientName: values.clientName,
-      clientMobile: values.clientMobile,
-      description: values.description,
-      availableSlotId: values.availableSlotId,
-      slotStartTime: values.slotStartTime,
-      slotEndTime: values.slotEndTime,
-      paymentProofUrl,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      const meetingData = {
+        userId: user.uid,
+        clientEmail: values.clientEmail,
+        clientName: values.clientName,
+        clientMobile: values.clientMobile,
+        description: values.description,
+        availableSlotId: values.availableSlotId,
+        slotStartTime: values.slotStartTime,
+        slotEndTime: values.slotEndTime,
+        paymentProofUrl,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
+      
+      toast({
+        title: "Booking Requested Successfully",
+        description: "Our team will verify your payment and confirm the slot shortly.",
+      })
+      
+      router.push("/dashboard/history")
+    } catch (error) {
+      toast({
+        title: "Submission Error",
+        description: "Failed to process the request. Please try a smaller image.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
     }
-
-    addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
-    
-    toast({
-      title: "Booking Requested Successfully",
-      description: "Our team will verify your payment and confirm the slot shortly.",
-    })
-    
-    router.push("/dashboard/history")
   }
 
   if (!user) {
@@ -114,7 +135,6 @@ export function ScheduleMeetingForm() {
         <CardContent className="p-6 md:p-12">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 md:space-y-12">
             
-            {/* 1. Personal Details */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm">1</div>
@@ -159,7 +179,7 @@ export function ScheduleMeetingForm() {
                     className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm text-sm md:text-base font-medium px-4 md:px-6" 
                   />
                   <p className="text-[9px] md:text-[10px] text-muted-foreground font-medium px-1 flex items-center gap-1">
-                    <Info className="h-3 w-3" /> Indian Mobile (Exactly 10 digits starting with 6, 7, 8, or 9)
+                    <Info className="h-3 w-3" /> 10-digit Indian Mobile (starts with 6-9)
                   </p>
                   {form.formState.errors.clientMobile && (
                     <p className="text-[9px] md:text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.clientMobile.message as string}</p>
@@ -168,7 +188,6 @@ export function ScheduleMeetingForm() {
               </div>
             </section>
 
-            {/* 2. Agenda */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm">2</div>
@@ -189,7 +208,6 @@ export function ScheduleMeetingForm() {
               </div>
             </section>
 
-            {/* 3. Slot Selection */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm">3</div>
@@ -211,7 +229,6 @@ export function ScheduleMeetingForm() {
               )}
             </section>
 
-            {/* 4. Payment */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm">4</div>
@@ -242,7 +259,7 @@ export function ScheduleMeetingForm() {
                         <Upload className="h-8 w-8 md:h-12 md:w-12" />
                       </div>
                       <p className="text-base md:text-xl font-bold text-primary/80 tracking-tight">Upload Payment Proof</p>
-                      <p className="text-[10px] md:text-sm font-medium text-muted-foreground mt-2">PNG, JPG or PDF up to 5MB</p>
+                      <p className="text-[10px] md:text-sm font-medium text-muted-foreground mt-2">PNG, JPG or PDF up to 500KB recommended</p>
                     </>
                   )}
                 </div>
