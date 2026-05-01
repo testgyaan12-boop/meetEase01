@@ -151,16 +151,13 @@ export function ScheduleMeetingForm() {
                   <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
                     <Phone className="h-3 w-3" /> Mobile Number
                   </label>
-                  <div className="relative group">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm md:text-base">+91</div>
-                    <Input 
-                      placeholder="Enter 10 digit number" 
-                      maxLength={10}
-                      type="tel"
-                      {...form.register("clientMobile")} 
-                      className="h-12 md:h-14 pl-14 rounded-xl md:rounded-2xl bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm text-sm md:text-base font-medium px-4 md:px-6" 
-                    />
-                  </div>
+                  <Input 
+                    placeholder="Enter 10 digit mobile number" 
+                    maxLength={10}
+                    type="tel"
+                    {...form.register("clientMobile")} 
+                    className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm text-sm md:text-base font-medium px-4 md:px-6" 
+                  />
                   <p className="text-[9px] md:text-[10px] text-muted-foreground font-medium px-1 flex items-center gap-1">
                     <Info className="h-3 w-3" /> Indian Mobile (Exactly 10 digits starting with 6, 7, 8, or 9)
                   </p>
