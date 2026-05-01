@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemoFirebase, useFirestore, useUser, useCollection } from "@/firebase"
-import { collection, query, where, orderBy } from "firebase/firestore"
+import { collection, query, where } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock, Link as LinkIcon, Inbox, Mail, AlertCircle, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { format, isPast } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Meeting } from "@/lib/types"
+import { useMemo } from "react"
 
 export default function HistoryPage() {
   const { user, isUserLoading } = useUser()
@@ -16,14 +17,22 @@ export default function HistoryPage() {
 
   const meetingsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null
+    // Removed orderBy to avoid requiring a composite index immediately
     return query(
       collection(firestore, "meetings"),
-      where("userId", "==", user.uid),
-      // orderBy("createdAt", "desc")
+      where("userId", "==", user.uid)
     )
   }, [firestore, user])
 
-  const { data: meetings, isLoading: isMeetingsLoading } = useCollection<Meeting>(meetingsQuery)
+  const { data: rawMeetings, isLoading: isMeetingsLoading } = useCollection<Meeting>(meetingsQuery)
+
+  // Sort meetings client-side by createdAt descending
+  const meetings = useMemo(() => {
+    if (!rawMeetings) return []
+    return [...rawMeetings].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+  }, [rawMeetings])
 
   if (isUserLoading || isMeetingsLoading) {
     return (
