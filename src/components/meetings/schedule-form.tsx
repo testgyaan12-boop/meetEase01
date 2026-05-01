@@ -85,22 +85,22 @@ export function ScheduleMeetingForm() {
       addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
       
       addDocumentNonBlocking(collection(firestore, "admin_notifications"), {
-        title: "New Meeting Request",
-        message: `${values.clientName} requested a consultation.`,
+        title: "New Booking Request",
+        message: `${values.clientName} is requesting a consultation.`,
         isRead: false,
         createdAt: new Date().toISOString()
       })
       
       toast({
         title: "Booking Requested Successfully",
-        description: "Our team will verify your payment and confirm the slot shortly.",
+        description: "Admin will verify your payment and confirm the slot shortly.",
       })
       
       router.push("/dashboard/history")
     } catch (error) {
       toast({
         title: "Submission Error",
-        description: "Failed to process the request. Please try a smaller image.",
+        description: "Failed to process the request. Try a smaller image.",
         variant: "destructive"
       })
     } finally {
@@ -112,56 +112,56 @@ export function ScheduleMeetingForm() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-32">
-      <Card className="border-none shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] bg-white/80 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
-        <div className="bg-gradient-to-br from-primary/10 via-background to-accent/5 p-6 md:p-10 border-b border-primary/5">
+      <Card className="border-none shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] bg-white/90 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
+        <div className="bg-gradient-to-br from-primary/5 via-background to-accent/5 p-8 md:p-12 border-b border-primary/5">
           <CardHeader className="p-0 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/20">
-                <Calendar className="h-5 w-5 md:h-6 md:w-6" />
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/20">
+                <Calendar className="h-6 w-6" />
               </div>
-              <CardTitle className="text-2xl md:text-4xl font-headline font-bold text-primary tracking-tight">Schedule Consultation</CardTitle>
+              <CardTitle className="text-3xl md:text-4xl font-headline font-bold text-primary tracking-tight">Schedule Session</CardTitle>
             </div>
-            <CardDescription className="text-sm md:text-base font-medium text-muted-foreground/80">Secure your professional session by filling out the details below.</CardDescription>
+            <CardDescription className="text-base font-medium text-muted-foreground/80">Submit your details and payment proof to secure your time slot.</CardDescription>
           </CardHeader>
         </div>
         
-        <CardContent className="p-6 md:p-12">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 md:space-y-12">
+        <CardContent className="p-8 md:p-14">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
             
-            <section className="space-y-6 md:space-y-8">
+            <section className="space-y-8">
               <div className="flex items-center gap-4">
-                <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm">1</div>
-                <h3 className="text-[10px] md:text-sm font-black uppercase tracking-[0.2em] text-primary/60">Contact Information</h3>
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm">1</div>
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-primary/60">Your Information</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
                     <User className="h-3 w-3" /> Full Name
                   </label>
                   <Input 
-                    placeholder="Enter your name" 
+                    placeholder="Jane Doe" 
                     {...form.register("clientName")} 
-                    className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm text-sm md:text-base font-medium px-4 md:px-6" 
+                    className="h-14 rounded-2xl bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm font-medium px-6" 
                   />
                   {form.formState.errors.clientName && (
-                    <p className="text-[9px] md:text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.clientName.message as string}</p>
+                    <p className="text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.clientName.message as string}</p>
                   )}
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
                     <Mail className="h-3 w-3" /> Email Address
                   </label>
                   <Input 
-                    placeholder="you@example.com" 
+                    placeholder="name@example.com" 
                     {...form.register("clientEmail")} 
-                    className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm text-sm md:text-base font-medium px-4 md:px-6" 
+                    className="h-14 rounded-2xl bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm font-medium px-6" 
                   />
                   {form.formState.errors.clientEmail && (
-                    <p className="text-[9px] md:text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.clientEmail.message as string}</p>
+                    <p className="text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.clientEmail.message as string}</p>
                   )}
                 </div>
                 <div className="space-y-3 md:col-span-2">
-                  <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
                     <Phone className="h-3 w-3" /> Mobile Number
                   </label>
                   <Input 
@@ -169,42 +169,42 @@ export function ScheduleMeetingForm() {
                     maxLength={10}
                     type="tel"
                     {...form.register("clientMobile")} 
-                    className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm text-sm md:text-base font-medium px-4 md:px-6" 
+                    className="h-14 rounded-2xl bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm font-medium px-6" 
                   />
-                  <p className="text-[9px] md:text-[10px] text-muted-foreground font-medium px-1 flex items-center gap-1">
-                    <Info className="h-3 w-3" /> 10-digit Indian Mobile (starts with 6-9)
+                  <p className="text-[10px] text-muted-foreground font-medium px-1 flex items-center gap-1">
+                    <Info className="h-3 w-3" /> 10-digit Indian Number (Starts with 6-9)
                   </p>
                   {form.formState.errors.clientMobile && (
-                    <p className="text-[9px] md:text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.clientMobile.message as string}</p>
+                    <p className="text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.clientMobile.message as string}</p>
                   )}
                 </div>
               </div>
             </section>
 
-            <section className="space-y-6 md:space-y-8">
+            <section className="space-y-8">
               <div className="flex items-center gap-4">
-                <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm">2</div>
-                <h3 className="text-[10px] md:text-sm font-black uppercase tracking-[0.2em] text-primary/60">Meeting Agenda</h3>
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm">2</div>
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-primary/60">Meeting Focus</h3>
               </div>
               <div className="space-y-3">
-                <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
-                  <FileText className="h-3 w-3" /> Describe your requirements
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                  <FileText className="h-3 w-3" /> Agenda / Requirements
                 </label>
                 <Textarea 
-                  placeholder="What would you like to discuss during this consultation?" 
+                  placeholder="Tell us what you'd like to achieve during this session..." 
                   {...form.register("description")} 
-                  className="min-h-[120px] md:min-h-[160px] rounded-[1.5rem] md:rounded-[2rem] bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm p-4 md:p-6 text-sm md:text-base font-medium leading-relaxed" 
+                  className="min-h-[160px] rounded-[2rem] bg-white/50 border-primary/10 focus:ring-4 focus:ring-primary/5 shadow-sm p-6 text-base font-medium leading-relaxed" 
                 />
                 {form.formState.errors.description && (
-                  <p className="text-[9px] md:text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.description.message as string}</p>
+                  <p className="text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.description.message as string}</p>
                 )}
               </div>
             </section>
 
-            <section className="space-y-6 md:space-y-8">
+            <section className="space-y-8">
               <div className="flex items-center gap-4">
-                <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm">3</div>
-                <h3 className="text-[10px] md:text-sm font-black uppercase tracking-[0.2em] text-primary/60">Pick a Time</h3>
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm">3</div>
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-primary/60">Availability</h3>
               </div>
               <div className="p-1">
                 <SlotPicker 
@@ -216,16 +216,16 @@ export function ScheduleMeetingForm() {
                 />
               </div>
               {form.formState.errors.availableSlotId && (
-                <p className="text-[9px] md:text-[10px] text-destructive font-black px-1 uppercase tracking-wider flex items-center gap-2">
+                <p className="text-[10px] text-destructive font-black px-1 uppercase tracking-wider flex items-center gap-2">
                   <AlertCircle className="h-3 w-3" /> Please select a time slot above
                 </p>
               )}
             </section>
 
-            <section className="space-y-6 md:space-y-8">
+            <section className="space-y-8">
               <div className="flex items-center gap-4">
-                <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs md:text-sm">4</div>
-                <h3 className="text-[10px] md:text-sm font-black uppercase tracking-[0.2em] text-primary/60">Payment Verification</h3>
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm">4</div>
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-primary/60">Proof of Payment</h3>
               </div>
               <div className="relative group">
                 <input
@@ -235,47 +235,47 @@ export function ScheduleMeetingForm() {
                   onChange={(e) => form.setValue("paymentProof", e.target.files, { shouldValidate: true })}
                 />
                 <div className={cn(
-                  "flex flex-col items-center justify-center border-4 border-dashed rounded-[2rem] md:rounded-[3rem] p-8 md:p-16 transition-all bg-white/30 backdrop-blur-md",
+                  "flex flex-col items-center justify-center border-4 border-dashed rounded-[3rem] p-16 transition-all bg-white/40 backdrop-blur-md",
                   form.watch("paymentProof")?.[0] ? "border-primary bg-primary/5" : "border-primary/10 group-hover:border-primary/30"
                 )}>
                   {form.watch("paymentProof")?.[0] ? (
                     <>
-                      <div className="h-16 w-16 md:h-24 md:w-24 rounded-2xl md:rounded-[2rem] bg-primary flex items-center justify-center text-white mb-4 md:mb-6 shadow-2xl shadow-primary/20 animate-in zoom-in duration-500">
-                        <CheckCircle2 className="h-8 w-8 md:h-12 md:w-12" />
+                      <div className="h-24 w-24 rounded-[2rem] bg-primary flex items-center justify-center text-white mb-6 shadow-2xl shadow-primary/20 animate-in zoom-in">
+                        <CheckCircle2 className="h-12 w-12" />
                       </div>
-                      <p className="text-base md:text-xl font-bold text-primary tracking-tight text-center truncate w-full px-4">{form.watch("paymentProof")?.[0].name}</p>
-                      <p className="text-[10px] md:text-sm font-medium text-muted-foreground mt-2">Click to replace receipt</p>
+                      <p className="text-xl font-bold text-primary tracking-tight text-center truncate w-full px-8">{form.watch("paymentProof")?.[0].name}</p>
+                      <p className="text-sm font-medium text-muted-foreground mt-2">Document Attached. Click to replace.</p>
                     </>
                   ) : (
                     <>
-                      <div className="h-16 w-16 md:h-24 md:w-24 rounded-2xl md:rounded-[2rem] bg-muted/50 flex items-center justify-center text-muted-foreground/40 mb-4 md:mb-6 group-hover:bg-primary/10 group-hover:text-primary transition-all duration-300">
-                        <Upload className="h-8 w-8 md:h-12 md:w-12" />
+                      <div className="h-24 w-24 rounded-[2rem] bg-muted/50 flex items-center justify-center text-muted-foreground/40 mb-6 group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                        <Upload className="h-12 w-12" />
                       </div>
-                      <p className="text-base md:text-xl font-bold text-primary/80 tracking-tight">Upload Payment Proof</p>
-                      <p className="text-[10px] md:text-sm font-medium text-muted-foreground mt-2">PNG, JPG up to 500KB recommended</p>
+                      <p className="text-xl font-bold text-primary/80 tracking-tight">Upload Receipt</p>
+                      <p className="text-sm font-medium text-muted-foreground mt-2">Image files up to 500KB</p>
                     </>
                   )}
                 </div>
               </div>
               {form.formState.errors.paymentProof && (
-                <p className="text-[9px] md:text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.paymentProof.message as string}</p>
+                <p className="text-[10px] text-destructive font-black px-1 uppercase tracking-wider">{form.formState.errors.paymentProof.message as string}</p>
               )}
             </section>
 
             <Button 
               type="submit" 
-              className="w-full h-16 md:h-20 bg-primary hover:bg-primary/90 text-white font-black text-lg md:text-2xl shadow-[0_20px_50px_rgba(51,51,204,0.3)] rounded-2xl md:rounded-[2rem] transition-all group active:scale-[0.98]"
+              className="w-full h-20 bg-primary hover:bg-primary/90 text-white font-black text-2xl shadow-[0_20px_50px_rgba(51,51,204,0.3)] rounded-[2rem] transition-all group active:scale-[0.98]"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-3 h-6 w-6 md:h-8 md:w-8 animate-spin" />
-                  CONFIRMING...
+                  <Loader2 className="mr-3 h-8 w-8 animate-spin" />
+                  PROCESSING...
                 </>
               ) : (
                 <>
                   BOOK CONSULTATION
-                  <FileText className="ml-3 h-6 w-6 md:h-8 md:w-8 opacity-50 group-hover:translate-x-1 transition-transform" />
+                  <FileText className="ml-3 h-8 w-8 opacity-50 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </Button>
