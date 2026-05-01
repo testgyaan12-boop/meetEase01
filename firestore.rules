@@ -9,26 +9,17 @@ service cloud.firestore {
     
     // 2. ADMIN NOTIFICATIONS
     match /admin_notifications/{notifId} {
-      allow read, write: if true;
-    }
-    match /admin_notifications {
-      allow list, create: if true;
+      allow read, write, list: if true;
     }
 
     // 3. AVAILABLE SLOTS
     match /availableSlots/{slotId} {
-      allow read, write: if true;
-    }
-    match /availableSlots {
-      allow list: if true;
+      allow read, write, list: if true;
     }
     
     // 4. MEETINGS
     match /meetings/{meetingId} {
-      allow read, write: if true;
-    }
-    match /meetings {
-      allow list, create: if true;
+      allow read, write, list: if true;
     }
 
     // 5. USER PROFILES

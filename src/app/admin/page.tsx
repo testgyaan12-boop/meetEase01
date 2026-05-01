@@ -68,7 +68,7 @@ export default function AdminDashboard() {
   const [slotToDelete, setSlotToDelete] = useState<string | null>(null)
   const [newSlotDateStr, setNewSlotDateStr] = useState(format(new Date(), "yyyy-MM-dd"))
   const [startTimeStr, setStartTimeStr] = useState("09:00")
-  const [endTimeStr, setStartTimeStr2] = useState("10:00") // Fixed shadowing in original
+  const [endTimeStr, setStartTimeStr2] = useState("10:00")
 
   // Review states
   const [reviewMeeting, setReviewMeeting] = useState<Meeting | null>(null)
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
     if (!firestore) return
     const dateObj = new Date(newSlotDateStr)
     const [sH, sM] = startTimeStr.split(":").map(Number)
-    const [eH, eM] = "10:00".split(":").map(Number) // Fixed from earlier
+    const [eH, eM] = "10:00".split(":").map(Number)
     const startTime = setMinutes(setHours(dateObj, sH), sM).toISOString()
     const endTime = setMinutes(setHours(dateObj, eH), eM).toISOString()
 

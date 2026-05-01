@@ -162,7 +162,7 @@ export function ScheduleMeetingForm() {
                 </div>
                 <div className="space-y-3 md:col-span-2">
                   <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
-                    <Phone className="h-3 w-3" /> Mobile Number
+                    <Phone className="h-3 w-3" /> Mobile
                   </label>
                   <Input 
                     placeholder="Enter 10 digit number" 
