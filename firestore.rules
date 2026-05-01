@@ -3,8 +3,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // GLOBAL BYPASS FOR PROTOTYPING
-    // This allows all read/write operations to prevent "Missing or insufficient permissions"
+    // This allows all read/write/list operations to prevent "Missing or insufficient permissions"
     match /{document=**} {
+      allow read, write: if true;
+    }
+    
+    // Explicit match for admin notifications to ensure list operations work
+    match /admin_notifications/{notificationId} {
+      allow read, write: if true;
+    }
+
+    match /meetings/{meetingId} {
+      allow read, write: if true;
+    }
+
+    match /availableSlots/{slotId} {
       allow read, write: if true;
     }
   }

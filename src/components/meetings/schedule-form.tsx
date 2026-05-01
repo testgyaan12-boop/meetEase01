@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Calendar } from "lucide-react"
+import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Calendar, Mail, Phone, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -87,14 +87,14 @@ export function ScheduleMeetingForm() {
       
       addDocumentNonBlocking(collection(firestore, "admin_notifications"), {
         title: "New Booking Request",
-        message: `${values.clientName} has booked a session.`,
+        message: `${values.clientName} booked a session.`,
         isRead: false,
         createdAt: new Date().toISOString()
       })
       
       toast({
         title: "Booking Requested",
-        description: "Payment proof received. Admin will confirm shortly.",
+        description: "Your session request has been submitted for verification.",
       })
       
       router.push("/dashboard/history")
@@ -136,7 +136,9 @@ export function ScheduleMeetingForm() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                    <UserIcon className="h-3 w-3" /> Full Name
+                  </label>
                   <Input 
                     placeholder="e.g. Rahul Sharma" 
                     {...form.register("clientName")} 
@@ -147,7 +149,9 @@ export function ScheduleMeetingForm() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                    <Mail className="h-3 w-3" /> Email Address
+                  </label>
                   <Input 
                     placeholder="name@email.com" 
                     {...form.register("clientEmail")} 
@@ -158,15 +162,17 @@ export function ScheduleMeetingForm() {
                   )}
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Mobile Number</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                    <Phone className="h-3 w-3" /> Mobile Number
+                  </label>
                   <Input 
-                    placeholder="Enter 10 digit number" 
+                    placeholder="e.g. 9876543210" 
                     maxLength={10}
                     {...form.register("clientMobile")} 
                     className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium" 
                   />
                   <p className="text-[10px] text-muted-foreground font-medium px-1 flex items-center gap-1 mt-1">
-                    <Info className="h-3 w-3" /> Valid Indian number (starts with 6-9)
+                    <Info className="h-3 w-3" /> 10-digit number starting with 6-9
                   </p>
                   {form.formState.errors.clientMobile && (
                     <p className="text-[10px] text-destructive font-bold px-1">{form.formState.errors.clientMobile.message as string}</p>
@@ -181,7 +187,7 @@ export function ScheduleMeetingForm() {
                 <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Meeting Agenda</h3>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Description</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Agenda / Description</label>
                 <Textarea 
                   placeholder="What would you like to discuss? Be specific for better results." 
                   {...form.register("description")} 
@@ -196,7 +202,7 @@ export function ScheduleMeetingForm() {
             <section className="space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">03</div>
-                <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Time Slot</h3>
+                <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Select Time Slot</h3>
               </div>
               <SlotPicker 
                 onSelect={(id, start, end) => {
@@ -207,7 +213,7 @@ export function ScheduleMeetingForm() {
               />
               {form.formState.errors.availableSlotId && (
                 <p className="text-[10px] text-destructive font-bold px-1 flex items-center gap-2">
-                  <AlertCircle className="h-3 w-3" /> Please select an available slot
+                  <AlertCircle className="h-3 w-3" /> Please select a time slot
                 </p>
               )}
             </section>
@@ -215,7 +221,7 @@ export function ScheduleMeetingForm() {
             <section className="space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">04</div>
-                <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Payment Verification</h3>
+                <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Payment Proof</h3>
               </div>
               <div className="relative group cursor-pointer">
                 <input
@@ -232,13 +238,13 @@ export function ScheduleMeetingForm() {
                     <>
                       <CheckCircle2 className="h-16 w-16 text-primary mb-4 animate-in zoom-in" />
                       <p className="text-lg font-bold text-primary text-center truncate w-full px-4">{form.watch("paymentProof")?.[0].name}</p>
-                      <p className="text-xs font-medium text-muted-foreground mt-1">Receipt attached. Click to change.</p>
+                      <p className="text-xs font-medium text-muted-foreground mt-1">Screenshot attached. Click to replace.</p>
                     </>
                   ) : (
                     <>
                       <Upload className="h-16 w-16 text-muted-foreground/30 mb-4 group-hover:scale-110 transition-transform" />
                       <p className="text-lg font-bold text-muted-foreground">Upload Payment Screenshot</p>
-                      <p className="text-xs font-medium text-muted-foreground/60 mt-1">Max file size: 500KB</p>
+                      <p className="text-xs font-medium text-muted-foreground/60 mt-1">Provide a clear image of the transaction.</p>
                     </>
                   )}
                 </div>
@@ -256,7 +262,7 @@ export function ScheduleMeetingForm() {
               {isSubmitting ? (
                 <Loader2 className="h-8 w-8 animate-spin" />
               ) : (
-                "CONFIRM & BOOK SESSION"
+                "BOOK CONSULTATION SESSION"
               )}
             </Button>
           </form>
