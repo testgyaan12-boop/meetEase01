@@ -7,42 +7,44 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    function isSuperAdmin() {
-      return isSignedIn() && request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
+    function isAdmin() {
+      return request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
     }
     
-    // Meetings - Sab signed-in users read/create kar sakte hain
+    // MEETINGS - Sab signed-in users create kar sakte hain
     match /meetings/{meetingId} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if isSuperAdmin();
+      allow create: if isSignedIn();  // ✅ YEH LINE IMPORTANT HAI
+      allow update: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
     }
     
-    // Admin Notifications - Sab create kar sakte hain, sirf admin read
+    // ADMIN NOTIFICATIONS - Sab create kar sakte hain, sirf admin read
     match /admin_notifications/{notificationId} {
-      allow create: if isSignedIn();
-      allow read, update, delete: if isSuperAdmin();
+      allow create: if isSignedIn();  // ✅ YEH LINE IMPORTANT HAI
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
     }
     
-    // Available Slots
+    // AVAILABLE SLOTS - Public read
     match /availableSlots/{slotId} {
       allow read: if true;
-      allow write: if isSuperAdmin();
+      allow write: if isAdmin();
+      allow list: if true;
     }
     
-    // Roles Admin - Authenticated users can read, only super admin can write
+    // ROLES ADMIN - Authenticated users can read
     match /roles_admin/{adminUid} {
-      allow read: if isSignedIn();  // ✅ YEH LINE ADD KARO
-      allow write: if isSuperAdmin();
-      allow list: if isSuperAdmin();
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
     
-    // Users
+    // USERS
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() && request.auth.uid == userId;
       allow update: if isSignedIn() && request.auth.uid == userId;
-      allow create: if isSignedIn();
+      allow delete: if isAdmin();
     }
   }
 }
