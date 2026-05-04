@@ -14,7 +14,7 @@ import {
   Check, 
   Image as ImageIcon,
   ExternalLink,
-  X
+  Video
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format, isPast } from "date-fns"
@@ -115,6 +115,7 @@ export default function HistoryPage() {
               <TableHeader className="bg-primary/5">
                 <TableRow className="hover:bg-transparent border-primary/10">
                   <TableHead className="py-4 md:py-6 pl-4 md:pl-8 font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Details</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Meet Link</TableHead>
                   <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Schedule</TableHead>
                   <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Status</TableHead>
                   <TableHead className="pr-4 md:pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Actions</TableHead>
@@ -133,6 +134,27 @@ export default function HistoryPage() {
                           <p className="text-[10px] text-muted-foreground font-medium truncate">{meeting.clientEmail}</p>
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {meeting.meetingLink ? (
+                        <div className="flex items-center gap-2 group/link">
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 max-w-[150px]">
+                            <Video className="h-3 w-3 text-primary shrink-0" />
+                            <span className="text-[10px] md:text-xs font-bold text-primary truncate">{meeting.meetingLink}</span>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 rounded-lg text-primary hover:bg-primary hover:text-white transition-all"
+                            onClick={() => handleCopyLink(meeting.meetingLink!, meeting.id)}
+                            title="Copy Meet Link"
+                          >
+                            {copiedId === meeting.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] md:text-xs text-muted-foreground italic font-medium opacity-60">Pending approval</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-bold text-foreground/80 whitespace-nowrap">
@@ -163,22 +185,11 @@ export default function HistoryPage() {
                         </Button>
 
                         {meeting.status === 'confirmed' && meeting.meetingLink && (!meeting.slotEndTime || !isPast(new Date(meeting.slotEndTime))) && (
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="h-8 md:h-9 w-8 md:w-9 p-0 rounded-lg border-primary/20 text-primary hover:bg-primary hover:text-white"
-                              onClick={() => handleCopyLink(meeting.meetingLink!, meeting.id)}
-                              title="Copy Meeting Link"
-                            >
-                              {copiedId === meeting.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                            </Button>
-                            <Button size="sm" className="bg-primary hover:bg-primary/90 font-bold rounded-lg h-8 md:h-9 gap-1.5 shadow-lg shadow-primary/20" asChild>
-                              <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer">
-                                <LinkIcon className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Join</span>
-                              </a>
-                            </Button>
-                          </div>
+                          <Button size="sm" className="bg-primary hover:bg-primary/90 font-bold rounded-lg h-8 md:h-9 gap-1.5 shadow-lg shadow-primary/20" asChild>
+                            <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer">
+                              <LinkIcon className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Join</span>
+                            </a>
+                          </Button>
                         )}
                       </div>
                     </TableCell>
