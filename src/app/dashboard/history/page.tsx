@@ -1,19 +1,38 @@
+
 "use client"
 
 import { useMemoFirebase, useFirestore, useUser, useCollection } from "@/firebase"
 import { collection, query, where } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
-import { Clock, Link as LinkIcon, Inbox, Mail, AlertCircle } from "lucide-react"
+import { 
+  Clock, 
+  Link as LinkIcon, 
+  Inbox, 
+  Mail, 
+  AlertCircle, 
+  Copy, 
+  Check, 
+  Image as ImageIcon,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format, isPast } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Meeting } from "@/lib/types"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 export default function HistoryPage() {
   const { user, isUserLoading } = useUser()
   const firestore = useFirestore()
+  const { toast } = useToast()
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [expandedProofId, setExpandedProofId] = useState<string | null>(null)
 
   const meetingsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null
@@ -31,6 +50,16 @@ export default function HistoryPage() {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
   }, [rawMeetings])
+
+  const handleCopyLink = (link: string, id: string) => {
+    navigator.clipboard.writeText(link)
+    setCopiedId(id)
+    toast({
+      title: "Link Copied",
+      description: "Meeting link has been copied to your clipboard.",
+    })
+    setTimeout(() => setCopiedId(null), 2000)
+  }
 
   if (isUserLoading || isMeetingsLoading) {
     return (
@@ -80,30 +109,56 @@ export default function HistoryPage() {
             <Table>
               <TableHeader className="bg-primary/5">
                 <TableRow className="hover:bg-transparent border-primary/10">
-                  <TableHead className="py-4 md:py-6 pl-4 md:pl-8 font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Client Details</TableHead>
-                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Request Date</TableHead>
+                  <TableHead className="py-4 md:py-6 pl-4 md:pl-8 font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Details</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Schedule</TableHead>
                   <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Status</TableHead>
-                  <TableHead className="pr-4 md:pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Action</TableHead>
+                  <TableHead className="pr-4 md:pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedMeetings.map((meeting) => (
                   <TableRow key={meeting.id} className="border-primary/5 hover:bg-primary/5 transition-colors group">
                     <TableCell className="py-4 md:py-6 pl-4 md:pl-8">
-                      <div className="flex items-center gap-3 md:gap-4">
-                        <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                          <Mail className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                            <Mail className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-sm truncate">{meeting.clientName}</p>
+                            <p className="text-[10px] text-muted-foreground font-medium truncate">{meeting.clientEmail}</p>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-sm md:text-base truncate">{meeting.clientName}</p>
-                          <p className="text-[10px] md:text-xs text-muted-foreground font-medium truncate">{meeting.clientEmail}</p>
+                        {/* Mobile Proof Toggle */}
+                        <div className="md:hidden">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-7 text-[9px] font-bold gap-1 px-2 text-primary/60 hover:text-primary"
+                            onClick={() => setExpandedProofId(expandedProofId === meeting.id ? null : meeting.id)}
+                          >
+                            <ImageIcon className="h-3 w-3" />
+                            {expandedProofId === meeting.id ? 'Hide Proof' : 'View Proof'}
+                            {expandedProofId === meeting.id ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                          </Button>
+                          {expandedProofId === meeting.id && (
+                            <div className="mt-2 p-2 rounded-xl bg-muted/20 border border-primary/5 animate-in slide-in-from-top-1">
+                              <img 
+                                src={meeting.paymentProofUrl} 
+                                className="w-full aspect-[4/3] object-contain rounded-lg bg-card" 
+                                alt="Payment Proof" 
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-sm font-bold text-foreground/80 whitespace-nowrap">
-                        <Clock className="h-3 w-3 md:h-4 md:w-4 text-primary/60" />
-                        {format(new Date(meeting.createdAt), "MMM d, p")}
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-bold text-foreground/80 whitespace-nowrap">
+                          <Clock className="h-3 w-3 text-primary/60" />
+                          {format(new Date(meeting.createdAt), "MMM d, p")}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -118,15 +173,43 @@ export default function HistoryPage() {
                       </div>
                     </TableCell>
                     <TableCell className="pr-4 md:pr-8 text-right">
-                      {meeting.status === 'confirmed' && meeting.meetingLink && (!meeting.slotEndTime || !isPast(new Date(meeting.slotEndTime))) ? (
-                        <Button size="sm" className="bg-primary hover:bg-primary/90 font-bold rounded-lg md:rounded-xl h-8 md:h-10 gap-1.5 md:gap-2 shadow-lg shadow-primary/20" asChild>
-                          <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer">
-                            <LinkIcon className="h-3 w-3 md:h-4 md:w-4" /> <span className="hidden sm:inline">Join</span>
-                          </a>
-                        </Button>
-                      ) : (
-                        <span className="text-[10px] md:text-xs text-muted-foreground italic font-medium">N/A</span>
-                      )}
+                      <div className="flex flex-col sm:flex-row items-center justify-end gap-2">
+                        {/* Proof Button Desktop */}
+                        <div className="hidden md:block">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 md:h-9 text-[10px] font-bold gap-1.5 text-primary/60 hover:text-primary hover:bg-primary/5"
+                            onClick={() => {
+                              if (meeting.paymentProofUrl) {
+                                window.open(meeting.paymentProofUrl, '_blank')
+                              }
+                            }}
+                          >
+                            <ImageIcon className="h-3.5 w-3.5" /> Proof
+                          </Button>
+                        </div>
+
+                        {meeting.status === 'confirmed' && meeting.meetingLink && (!meeting.slotEndTime || !isPast(new Date(meeting.slotEndTime))) ? (
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="h-8 md:h-9 w-8 md:w-9 p-0 rounded-lg border-primary/20 text-primary hover:bg-primary hover:text-white"
+                              onClick={() => handleCopyLink(meeting.meetingLink!, meeting.id)}
+                            >
+                              {copiedId === meeting.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                            </Button>
+                            <Button size="sm" className="bg-primary hover:bg-primary/90 font-bold rounded-lg h-8 md:h-9 gap-1.5 shadow-lg shadow-primary/20" asChild>
+                              <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer">
+                                <LinkIcon className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Join</span>
+                              </a>
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] md:text-xs text-muted-foreground italic font-medium">No actions</span>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
