@@ -17,6 +17,12 @@
       "description": "Professional meeting background",
       "imageUrl": "https://picsum.photos/seed/meet1/1200/600",
       "imageHint": "business meeting"
+    },
+    {
+      "id": "qr-code",
+      "description": "Donation or Payment QR Code",
+      "imageUrl": "https://picsum.photos/seed/qr99/400/400",
+      "imageHint": "qr code"
     }
   ]
 }
