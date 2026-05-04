@@ -38,7 +38,7 @@
     --secondary: 240 10% 15%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 10% 14%;
-    --muted-foreground: 240 5% 85%; /* Improved visibility */
+    --muted-foreground: 240 5% 85%;
     --accent: 278 80% 55%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
@@ -54,7 +54,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground selection:bg-primary/20 overflow-x-hidden;
+    @apply bg-background text-foreground selection:bg-primary/20 overflow-x-hidden w-full;
   }
 }
 
@@ -76,4 +76,13 @@
 
 .dark .glass {
   @apply bg-white/5 backdrop-blur-xl border border-white/5 shadow-2xl;
+}
+
+/* Hide horizontal scrollbar but keep functionality if needed */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
