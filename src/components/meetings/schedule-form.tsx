@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -12,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { SlotPicker } from "./slot-picker"
 import { useToast } from "@/hooks/use-toast"
-import { cn } from "@/utils"
+import { cn } from "@/lib/utils"
 import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
 import { collection } from "firebase/firestore"
 
@@ -115,7 +116,7 @@ export function ScheduleMeetingForm() {
             {/* STEP 1: CONTACT */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex items-center gap-4 md:gap-6">
-                <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm md:text-xl shadow-xl shadow-primary/20 shrink-0">01</div>
+                <div className="h-8 w-8 md:h-12 w-12 rounded-lg md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm md:text-xl shadow-xl shadow-primary/20 shrink-0">01</div>
                 <div>
                   <h3 className="text-base md:text-xl font-headline font-bold text-foreground">Contact Details</h3>
                   <p className="text-[9px] md:text-sm font-medium text-muted-foreground">Information for follow-up and verification.</p>
@@ -173,7 +174,7 @@ export function ScheduleMeetingForm() {
             {/* STEP 2: AGENDA */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex items-center gap-4 md:gap-6">
-                <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm md:text-xl shadow-xl shadow-primary/20 shrink-0">02</div>
+                <div className="h-8 w-8 md:h-12 w-12 rounded-lg md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm md:text-xl shadow-xl shadow-primary/20 shrink-0">02</div>
                 <div>
                   <h3 className="text-base md:text-xl font-headline font-bold text-foreground">Consultation Agenda</h3>
                   <p className="text-[9px] md:text-sm font-medium text-muted-foreground">What would you like to achieve in this session?</p>
@@ -195,7 +196,7 @@ export function ScheduleMeetingForm() {
             {/* STEP 3: SLOT */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex items-center gap-4 md:gap-6">
-                <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm md:text-xl shadow-xl shadow-primary/20 shrink-0">03</div>
+                <div className="h-8 w-8 md:h-12 w-12 rounded-lg md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm md:text-xl shadow-xl shadow-primary/20 shrink-0">03</div>
                 <div>
                   <h3 className="text-base md:text-xl font-headline font-bold text-foreground">Select Schedule</h3>
                   <p className="text-[9px] md:text-sm font-medium text-muted-foreground">Choose a window that fits your availability.</p>
@@ -221,7 +222,7 @@ export function ScheduleMeetingForm() {
             {/* STEP 4: PAYMENT */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex items-center gap-4 md:gap-6">
-                <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm md:text-xl shadow-xl shadow-primary/20 shrink-0">04</div>
+                <div className="h-8 w-8 md:h-12 w-12 rounded-lg md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm md:text-xl shadow-xl shadow-primary/20 shrink-0">04</div>
                 <div>
                   <h3 className="text-base md:text-xl font-headline font-bold text-foreground">Payment Verification</h3>
                   <p className="text-[9px] md:text-sm font-medium text-muted-foreground">Upload your transaction screenshot or receipt.</p>

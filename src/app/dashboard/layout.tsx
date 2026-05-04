@@ -1,3 +1,4 @@
+
 "use client"
 
 import { MobileNav } from "@/components/navigation/mobile-nav"
@@ -8,7 +9,7 @@ import { useUser, useAuth } from "@/firebase"
 import { signOut } from "firebase/auth"
 import { useRouter, usePathname } from "next/navigation"
 import { useEffect } from "react"
-import { cn } from "@/utils"
+import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/navigation/theme-toggle"
 
 export default function DashboardLayout({
@@ -98,7 +99,7 @@ export default function DashboardLayout({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col md:ml-72 min-h-screen relative w-full max-w-full overflow-x-hidden">
-        <header className="h-20 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-[40] flex items-center justify-between px-4 md:px-12 w-full max-w-full">
+        <header className="h-20 border-b bg-background/95 backdrop-blur-md sticky top-0 z-[100] flex items-center justify-between px-4 md:px-12 w-full max-w-full">
           <div className="md:hidden">
             <Link href="/dashboard" className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
