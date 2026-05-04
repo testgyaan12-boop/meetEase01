@@ -8,7 +8,7 @@ import { useUser, useAuth } from "@/firebase"
 import { signOut } from "firebase/auth"
 import { useRouter, usePathname } from "next/navigation"
 import { useEffect } from "react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils"
 import { ThemeToggle } from "@/components/navigation/theme-toggle"
 
 export default function DashboardLayout({
@@ -54,9 +54,9 @@ export default function DashboardLayout({
   ]
 
   return (
-    <div className="min-h-screen flex bg-background selection:bg-primary/10 overflow-x-hidden relative">
+    <div className="min-h-screen flex bg-background selection:bg-primary/10 overflow-x-hidden relative w-full max-w-full">
       {/* Fixed Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-72 bg-card/50 backdrop-blur-xl border-r p-8 fixed h-screen top-0 left-0 z-20">
+      <aside className="hidden md:flex flex-col w-72 bg-card/50 backdrop-blur-xl border-r p-8 fixed h-screen top-0 left-0 z-[50]">
         <div className="mb-12 px-2 flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
             <ShieldCheck className="h-6 w-6" />
@@ -98,7 +98,7 @@ export default function DashboardLayout({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col md:ml-72 min-h-screen relative w-full max-w-full overflow-x-hidden">
-        <header className="h-20 border-b bg-background/80 backdrop-blur-md sticky top-0 z-[40] flex items-center justify-between px-4 md:px-12 w-full">
+        <header className="h-20 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-[40] flex items-center justify-between px-4 md:px-12 w-full max-w-full">
           <div className="md:hidden">
             <Link href="/dashboard" className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
@@ -111,7 +111,7 @@ export default function DashboardLayout({
             </div>
             <Link 
               href="/dashboard/profile"
-              className="flex items-center gap-3 group transition-opacity hover:opacity-80"
+              className="flex items-center gap-3 group transition-opacity hover:opacity-80 p-1 rounded-2xl"
             >
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-black text-foreground">{user.displayName || 'Account Holder'}</p>

@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon, Calendar as CalendarIcon } from "lucide-react"
+import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { SlotPicker } from "./slot-picker"
 import { useToast } from "@/hooks/use-toast"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils"
 import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
 import { collection } from "firebase/firestore"
 
@@ -21,7 +21,7 @@ const formSchema = z.object({
   clientEmail: z.string().email("Please enter a valid email address"),
   clientMobile: z.string()
     .length(10, "Mobile number must be exactly 10 digits")
-    .regex(/^[6-9]\d{9}$/, "Must be a valid 10-digit number starting with 6-9"),
+    .regex(/^[6-9]\d{9}$/, "Must be a valid 10-digit Indian number starting with 6-9"),
   description: z.string().min(10, "Please provide a clear meeting agenda (min 10 chars)"),
   availableSlotId: z.string().min(1, "Please select a time slot"),
   slotStartTime: z.string(),
@@ -93,7 +93,7 @@ export function ScheduleMeetingForm() {
       toast({ title: "Booking Requested", description: "Verification in progress." })
       router.push("/dashboard/history")
     } catch (error) {
-      toast({ title: "Error", description: "Try again with a smaller image.", variant: "destructive" })
+      toast({ title: "Error", description: "Submission failed. Please check your data.", variant: "destructive" })
     } finally {
       setIsSubmitting(false)
     }
@@ -102,9 +102,9 @@ export function ScheduleMeetingForm() {
   if (!user) return null
 
   return (
-    <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto w-full">
+    <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto w-full max-w-full">
       <Card className="glass rounded-[1.5rem] md:rounded-[3rem] overflow-hidden border-none shadow-2xl w-full">
-        <CardContent className="p-5 md:p-14">
+        <CardContent className="p-6 md:p-14">
           <div className="text-center mb-10 md:mb-16 space-y-3 md:space-y-4">
             <h2 className="text-2xl md:text-5xl font-headline font-bold text-primary tracking-tight">Confirm Booking</h2>
             <p className="text-[11px] md:text-lg font-medium text-muted-foreground max-w-lg mx-auto leading-relaxed">Secure your slot in four simple steps and start your professional journey.</p>
@@ -153,14 +153,14 @@ export function ScheduleMeetingForm() {
                     <Phone className="h-3 w-3 md:h-3.5 md:w-3.5" /> Mobile Number
                   </label>
                   <Input
-                    placeholder="Enter 10 digit number"
+                    placeholder="10 digit Indian number"
                     maxLength={10}
                     {...form.register("clientMobile")}
                     className="h-11 md:h-14 rounded-xl md:rounded-2xl bg-muted/40 border-none shadow-inner px-4 md:px-6 text-sm md:text-base font-bold text-foreground placeholder:text-muted-foreground/40"
                   />
                   <div className="flex items-center justify-between px-1 md:px-2">
                     <p className="text-[8px] md:text-[11px] text-muted-foreground font-bold flex items-center gap-1 mt-1 italic">
-                      <Info className="h-2.5 w-2.5" /> Valid 10-digit number (starts 6-9)
+                      <Info className="h-2.5 w-2.5" /> Exactly 10 digits starting with 6-9
                     </p>
                     {form.formState.errors.clientMobile && (
                       <p className="text-[9px] md:text-xs text-destructive font-bold mt-1">{form.formState.errors.clientMobile.message as string}</p>
@@ -210,7 +210,7 @@ export function ScheduleMeetingForm() {
                   }}
                 />
                 {form.formState.errors.availableSlotId && (
-                  <div className="mt-4 md:mt-6 p-3 md:p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center gap-3 text-destructive animate-bounce">
+                  <div className="mt-4 md:mt-6 p-3 md:p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center gap-3 text-destructive">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     <p className="text-[8px] md:text-sm font-black uppercase tracking-wider">Please select a time slot to continue</p>
                   </div>
@@ -257,7 +257,7 @@ export function ScheduleMeetingForm() {
                       </div>
                       <div>
                         <p className="text-xs md:text-lg font-black text-foreground opacity-60">Upload Receipt</p>
-                        <p className="text-[8px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">Images only (max 2MB)</p>
+                        <p className="text-[8px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">Actual transaction proof</p>
                       </div>
                     </div>
                   )}

@@ -1,10 +1,9 @@
-
 "use client"
 
 import { useMemoFirebase, useFirestore, useUser, useCollection } from "@/firebase"
 import { collection, query, where } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, Link as LinkIcon, Inbox, Mail, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Clock, Link as LinkIcon, Inbox, Mail, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format, isPast } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -26,7 +25,7 @@ export default function HistoryPage() {
 
   const { data: rawMeetings, isLoading: isMeetingsLoading } = useCollection<Meeting>(meetingsQuery)
 
-  const meetings = useMemo(() => {
+  const sortedMeetings = useMemo(() => {
     if (!rawMeetings) return []
     return [...rawMeetings].sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -46,11 +45,11 @@ export default function HistoryPage() {
     )
   }
 
-  const getMeetingStatusBadge = (meeting: Meeting) => {
+  const getStatusBadge = (meeting: Meeting) => {
+    const isPastSession = meeting.status === 'confirmed' && meeting.slotEndTime && isPast(new Date(meeting.slotEndTime))
+    
     if (meeting.status === 'done') return <Badge variant="outline" className="px-3">Completed</Badge>
-    if (meeting.status === 'confirmed' && meeting.slotEndTime && isPast(new Date(meeting.slotEndTime))) {
-      return <Badge variant="secondary" className="px-3">Past Session</Badge>
-    }
+    if (isPastSession) return <Badge variant="secondary" className="px-3">Past Session</Badge>
 
     const variants: Record<string, string> = {
       pending: 'secondary',
@@ -69,26 +68,26 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full max-w-full">
       <div>
         <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary">Meeting History</h2>
         <p className="text-sm md:text-base text-muted-foreground font-medium">Track your requested and confirmed consultations.</p>
       </div>
 
-      <div className="rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white/80 dark:bg-card/40 backdrop-blur-md overflow-hidden">
-        {meetings && meetings.length > 0 ? (
-          <div className="overflow-x-auto scrollbar-hide">
+      <div className="rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white/80 dark:bg-card/40 backdrop-blur-md overflow-hidden w-full max-w-full">
+        {sortedMeetings.length > 0 ? (
+          <div className="overflow-x-auto scrollbar-hide w-full">
             <Table>
               <TableHeader className="bg-primary/5">
                 <TableRow className="hover:bg-transparent border-primary/10">
                   <TableHead className="py-4 md:py-6 pl-4 md:pl-8 font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Client Details</TableHead>
                   <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Request Date</TableHead>
-                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Status & Remarks</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Status</TableHead>
                   <TableHead className="pr-4 md:pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {meetings.map((meeting) => (
+                {sortedMeetings.map((meeting) => (
                   <TableRow key={meeting.id} className="border-primary/5 hover:bg-primary/5 transition-colors group">
                     <TableCell className="py-4 md:py-6 pl-4 md:pl-8">
                       <div className="flex items-center gap-3 md:gap-4">
@@ -109,7 +108,7 @@ export default function HistoryPage() {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-2">
-                        {getMeetingStatusBadge(meeting)}
+                        {getStatusBadge(meeting)}
                         {meeting.status === 'rejected' && meeting.adminNotes && (
                           <div className="flex items-start gap-1.5 p-2 rounded-lg bg-destructive/5 text-destructive border border-destructive/10 max-w-[140px] md:max-w-[200px]">
                             <AlertCircle className="h-3 w-3 shrink-0 mt-0.5" />
