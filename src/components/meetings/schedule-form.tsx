@@ -103,68 +103,68 @@ export function ScheduleMeetingForm() {
   if (!user) return null
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <Card className="glass rounded-[3rem] overflow-hidden border-none shadow-2xl">
-        <CardContent className="p-8 md:p-14">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-headline font-bold text-primary tracking-tight">Confirm Booking</h2>
-            <p className="text-muted-foreground font-medium text-lg max-w-lg mx-auto leading-relaxed">Secure your slot in four simple steps and start your professional journey.</p>
+    <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto">
+      <Card className="glass rounded-[2rem] md:rounded-[3rem] overflow-hidden border-none shadow-2xl">
+        <CardContent className="p-6 md:p-14">
+          <div className="text-center mb-10 md:mb-16 space-y-3 md:space-y-4">
+            <h2 className="text-3xl md:text-5xl font-headline font-bold text-primary tracking-tight">Confirm Booking</h2>
+            <p className="text-sm md:text-lg font-medium text-muted-foreground max-w-lg mx-auto leading-relaxed">Secure your slot in four simple steps and start your professional journey.</p>
           </div>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-16">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12 md:space-y-16">
 
             {/* STEP 1: CONTACT */}
-            <section className="space-y-8">
-              <div className="flex items-center gap-6">
-                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-xl shadow-primary/20">01</div>
+            <section className="space-y-6 md:space-y-8">
+              <div className="flex items-center gap-4 md:gap-6">
+                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-lg md:text-xl shadow-xl shadow-primary/20">01</div>
                 <div>
-                  <h3 className="text-xl font-headline font-bold text-foreground">Contact Details</h3>
-                  <p className="text-sm font-medium text-muted-foreground">Information for follow-up and verification.</p>
+                  <h3 className="text-lg md:text-xl font-headline font-bold text-foreground">Contact Details</h3>
+                  <p className="text-[10px] md:text-sm font-medium text-muted-foreground">Information for follow-up and verification.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1 flex items-center gap-2">
-                    <UserIcon className="h-3.5 w-3.5" /> Full Name
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <div className="space-y-2 md:space-y-3">
+                  <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1 flex items-center gap-2">
+                    <UserIcon className="h-3 w-3 md:h-3.5 md:w-3.5" /> Full Name
                   </label>
                   <Input
                     placeholder="Rahul Sharma"
                     {...form.register("clientName")}
-                    className="h-14 rounded-2xl bg-muted/40 border-none shadow-inner px-6 text-base font-bold text-foreground placeholder:text-muted-foreground/40"
+                    className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-muted/40 border-none shadow-inner px-4 md:px-6 text-sm md:text-base font-bold text-foreground placeholder:text-muted-foreground/40"
                   />
                   {form.formState.errors.clientName && (
-                    <p className="text-xs text-destructive font-bold px-2">{form.formState.errors.clientName.message as string}</p>
+                    <p className="text-[10px] md:text-xs text-destructive font-bold px-2">{form.formState.errors.clientName.message as string}</p>
                   )}
                 </div>
-                <div className="space-y-3">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1 flex items-center gap-2">
-                    <Mail className="h-3.5 w-3.5" /> Email
+                <div className="space-y-2 md:space-y-3">
+                  <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1 flex items-center gap-2">
+                    <Mail className="h-3 w-3 md:h-3.5 md:w-3.5" /> Email
                   </label>
                   <Input
                     placeholder="rahul@example.com"
                     {...form.register("clientEmail")}
-                    className="h-14 rounded-2xl bg-muted/40 border-none shadow-inner px-6 text-base font-bold text-foreground placeholder:text-muted-foreground/40"
+                    className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-muted/40 border-none shadow-inner px-4 md:px-6 text-sm md:text-base font-bold text-foreground placeholder:text-muted-foreground/40"
                   />
                   {form.formState.errors.clientEmail && (
-                    <p className="text-xs text-destructive font-bold px-2">{form.formState.errors.clientEmail.message as string}</p>
+                    <p className="text-[10px] md:text-xs text-destructive font-bold px-2">{form.formState.errors.clientEmail.message as string}</p>
                   )}
                 </div>
-                <div className="space-y-3 md:col-span-2">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1 flex items-center gap-2">
-                    <Phone className="h-3.5 w-3.5" /> Mobile Number
+                <div className="space-y-2 md:space-y-3 md:col-span-2">
+                  <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1 flex items-center gap-2">
+                    <Phone className="h-3 w-3 md:h-3.5 md:w-3.5" /> Mobile Number
                   </label>
                   <Input
                     placeholder="Enter 10 digit number"
                     maxLength={10}
                     {...form.register("clientMobile")}
-                    className="h-14 rounded-2xl bg-muted/40 border-none shadow-inner px-6 text-base font-bold text-foreground placeholder:text-muted-foreground/40"
+                    className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-muted/40 border-none shadow-inner px-4 md:px-6 text-sm md:text-base font-bold text-foreground placeholder:text-muted-foreground/40"
                   />
                   <div className="flex items-center justify-between px-2">
-                    <p className="text-[11px] text-muted-foreground font-bold flex items-center gap-1.5 mt-1.5 italic">
-                      <Info className="h-3 w-3" /> Valid 10-digit number (starts 6-9)
+                    <p className="text-[9px] md:text-[11px] text-muted-foreground font-bold flex items-center gap-1.5 mt-1 md:mt-1.5 italic">
+                      <Info className="h-2.5 w-2.5 md:h-3 md:w-3" /> Valid 10-digit number (starts 6-9)
                     </p>
                     {form.formState.errors.clientMobile && (
-                      <p className="text-xs text-destructive font-bold mt-1.5">{form.formState.errors.clientMobile.message as string}</p>
+                      <p className="text-[10px] md:text-xs text-destructive font-bold mt-1 md:mt-1.5">{form.formState.errors.clientMobile.message as string}</p>
                     )}
                   </div>
                 </div>
@@ -172,37 +172,37 @@ export function ScheduleMeetingForm() {
             </section>
 
             {/* STEP 2: AGENDA */}
-            <section className="space-y-8">
-              <div className="flex items-center gap-6">
-                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-xl shadow-primary/20">02</div>
+            <section className="space-y-6 md:space-y-8">
+              <div className="flex items-center gap-4 md:gap-6">
+                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-lg md:text-xl shadow-xl shadow-primary/20">02</div>
                 <div>
-                  <h3 className="text-xl font-headline font-bold text-foreground">Consultation Agenda</h3>
-                  <p className="text-sm font-medium text-muted-foreground">What would you like to achieve in this session?</p>
+                  <h3 className="text-lg md:text-xl font-headline font-bold text-foreground">Consultation Agenda</h3>
+                  <p className="text-[10px] md:text-sm font-medium text-muted-foreground">What would you like to achieve in this session?</p>
                 </div>
               </div>
-              <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1">Brief Description</label>
+              <div className="space-y-2 md:space-y-3">
+                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1">Brief Description</label>
                 <Textarea
                   placeholder="Describe your requirements or questions..."
                   {...form.register("description")}
-                  className="min-h-[160px] rounded-[2rem] bg-muted/40 border-none shadow-inner p-8 text-base font-bold text-foreground resize-none leading-relaxed"
+                  className="min-h-[120px] md:min-h-[160px] rounded-xl md:rounded-[2rem] bg-muted/40 border-none shadow-inner p-4 md:p-8 text-sm md:text-base font-bold text-foreground resize-none leading-relaxed"
                 />
                 {form.formState.errors.description && (
-                  <p className="text-xs text-destructive font-bold px-4">{form.formState.errors.description.message as string}</p>
+                  <p className="text-[10px] md:text-xs text-destructive font-bold px-4">{form.formState.errors.description.message as string}</p>
                 )}
               </div>
             </section>
 
             {/* STEP 3: SLOT */}
-            <section className="space-y-8">
-              <div className="flex items-center gap-6">
-                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-xl shadow-primary/20">03</div>
+            <section className="space-y-6 md:space-y-8">
+              <div className="flex items-center gap-4 md:gap-6">
+                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-lg md:text-xl shadow-xl shadow-primary/20">03</div>
                 <div>
-                  <h3 className="text-xl font-headline font-bold text-foreground">Select Schedule</h3>
-                  <p className="text-sm font-medium text-muted-foreground">Choose a window that fits your availability.</p>
+                  <h3 className="text-lg md:text-xl font-headline font-bold text-foreground">Select Schedule</h3>
+                  <p className="text-[10px] md:text-sm font-medium text-muted-foreground">Choose a window that fits your availability.</p>
                 </div>
               </div>
-              <div className="p-1">
+              <div className="p-0 md:p-1">
                 <SlotPicker
                   onSelect={(id, start, end) => {
                     form.setValue("availableSlotId", id, { shouldValidate: true })
@@ -211,21 +211,21 @@ export function ScheduleMeetingForm() {
                   }}
                 />
                 {form.formState.errors.availableSlotId && (
-                  <div className="mt-6 p-4 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center gap-3 text-destructive animate-bounce">
-                    <AlertCircle className="h-5 w-5" />
-                    <p className="text-sm font-black uppercase tracking-wider">Please select a time slot to continue</p>
+                  <div className="mt-4 md:mt-6 p-4 rounded-xl md:rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center gap-3 text-destructive animate-bounce">
+                    <AlertCircle className="h-4 w-4 md:h-5 md:w-5" />
+                    <p className="text-[10px] md:text-sm font-black uppercase tracking-wider">Please select a time slot to continue</p>
                   </div>
                 )}
               </div>
             </section>
 
             {/* STEP 4: PAYMENT */}
-            <section className="space-y-8">
-              <div className="flex items-center gap-6">
-                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-xl shadow-primary/20">04</div>
+            <section className="space-y-6 md:space-y-8">
+              <div className="flex items-center gap-4 md:gap-6">
+                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-lg md:text-xl shadow-xl shadow-primary/20">04</div>
                 <div>
-                  <h3 className="text-xl font-headline font-bold text-foreground">Payment Verification</h3>
-                  <p className="text-sm font-medium text-muted-foreground">Upload your transaction screenshot or receipt.</p>
+                  <h3 className="text-lg md:text-xl font-headline font-bold text-foreground">Payment Verification</h3>
+                  <p className="text-[10px] md:text-sm font-medium text-muted-foreground">Upload your transaction screenshot or receipt.</p>
                 </div>
               </div>
               <div className="relative group cursor-pointer">
@@ -236,51 +236,51 @@ export function ScheduleMeetingForm() {
                   onChange={(e) => form.setValue("paymentProof", e.target.files, { shouldValidate: true })}
                 />
                 <div className={cn(
-                  "flex flex-col items-center justify-center border-4 border-dashed rounded-[3rem] p-12 transition-all duration-500 bg-muted/20",
+                  "flex flex-col items-center justify-center border-4 border-dashed rounded-2xl md:rounded-[3rem] p-8 md:p-12 transition-all duration-500 bg-muted/20",
                   form.watch("paymentProof")?.[0] 
-                    ? "border-primary bg-primary/5 ring-8 ring-primary/5" 
+                    ? "border-primary bg-primary/5 ring-4 md:ring-8 ring-primary/5" 
                     : "border-primary/10 hover:border-primary/40 group-hover:bg-primary/5"
                 )}>
                   {form.watch("paymentProof")?.[0] ? (
-                    <div className="text-center space-y-4">
-                      <div className="h-20 w-20 rounded-3xl bg-primary/20 flex items-center justify-center mx-auto shadow-2xl animate-in zoom-in">
-                        <CheckCircle2 className="h-10 w-10 text-primary" />
+                    <div className="text-center space-y-3 md:space-y-4">
+                      <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl md:rounded-3xl bg-primary/20 flex items-center justify-center mx-auto shadow-2xl animate-in zoom-in">
+                        <CheckCircle2 className="h-8 w-8 md:h-10 md:w-10 text-primary" />
                       </div>
                       <div>
-                        <p className="text-lg font-black text-primary truncate max-w-[200px] mx-auto">{form.watch("paymentProof")?.[0].name}</p>
-                        <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-60">Tap to replace file</p>
+                        <p className="text-sm md:text-lg font-black text-primary truncate max-w-[160px] md:max-w-[200px] mx-auto">{form.watch("paymentProof")?.[0].name}</p>
+                        <p className="text-[9px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-60">Tap to replace file</p>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center space-y-4">
-                      <div className="h-20 w-20 rounded-3xl bg-muted/40 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-500">
-                        <Upload className="h-10 w-10 text-muted-foreground/40" />
+                    <div className="text-center space-y-3 md:space-y-4">
+                      <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl md:rounded-3xl bg-muted/40 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-500">
+                        <Upload className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground/40" />
                       </div>
                       <div>
-                        <p className="text-lg font-black text-foreground opacity-60">Upload Receipt</p>
-                        <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">Images only (max 2MB)</p>
+                        <p className="text-sm md:text-lg font-black text-foreground opacity-60">Upload Receipt</p>
+                        <p className="text-[9px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">Images only (max 2MB)</p>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
               {form.formState.errors.paymentProof && (
-                <p className="text-xs text-destructive font-bold px-6 text-center">{form.formState.errors.paymentProof.message as string}</p>
+                <p className="text-[10px] md:text-xs text-destructive font-bold px-6 text-center">{form.formState.errors.paymentProof.message as string}</p>
               )}
             </section>
 
-            <div className="pt-8">
+            <div className="pt-4 md:pt-8">
               <Button
                 type="submit"
-                className="w-full h-20 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-2xl shadow-2xl shadow-primary/30 rounded-[2rem] transition-all active:scale-95 group relative overflow-hidden"
+                className="w-full h-16 md:h-20 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-lg md:text-2xl shadow-2xl shadow-primary/30 rounded-xl md:rounded-[2rem] transition-all active:scale-95 group relative overflow-hidden"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <Loader2 className="h-6 w-6 md:h-8 md:w-8 animate-spin" />
                 ) : (
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 md:gap-4">
                     SUBMIT REQUEST
-                    <CheckCircle2 className="h-6 w-6 opacity-40 group-hover:opacity-100 transition-opacity" />
+                    <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 opacity-40 group-hover:opacity-100 transition-opacity" />
                   </div>
                 )}
               </Button>

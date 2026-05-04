@@ -36,15 +36,12 @@ export default function ProfilePage() {
 
   const { data: profile, isLoading: isProfileLoading } = useDoc(userDocRef)
 
-  // Admin Check Logic
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null
     return doc(firestore, "roles_admin", user.uid)
   }, [firestore, user])
   
   const { data: adminRole } = useDoc(adminRoleRef)
-  
-  // Super admin check for UID hKv5CWVQv7YvJk8mLyCY11ec96O2
   const isSuperAdmin = user?.uid === 'hKv5CWVQv7YvJk8mLyCY11ec96O2'
   const hasAdminAccess = !!adminRole || isSuperAdmin
 
@@ -93,90 +90,90 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="max-w-2xl mx-auto space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-headline font-bold text-primary">Account Profile</h2>
-          <p className="text-muted-foreground font-medium">Manage your personal identity and preferences.</p>
+          <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary">Account Profile</h2>
+          <p className="text-sm md:text-base text-muted-foreground font-medium">Manage your personal identity and preferences.</p>
         </div>
       </div>
 
       {hasAdminAccess && (
         <Link href="/admin">
-          <Card className="border-2 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group rounded-3xl overflow-hidden mb-6">
-            <CardContent className="p-6 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                  <ShieldCheck className="h-6 w-6" />
+          <Card className="border-2 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group rounded-2xl md:rounded-3xl overflow-hidden mb-6">
+            <CardContent className="p-4 md:p-6 flex items-center justify-between">
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                  <ShieldCheck className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-primary text-lg">Admin Workspace</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-bold text-primary text-base md:text-lg">Admin Workspace</p>
                     <Shield className="h-3 w-3 text-primary fill-primary" />
                   </div>
-                  <p className="text-sm text-primary/70 font-medium">Manage meeting requests and verify payments.</p>
+                  <p className="text-[10px] md:text-sm text-primary/70 font-medium">Manage meeting requests and verify payments.</p>
                 </div>
               </div>
-              <ArrowRight className="h-6 w-6 text-primary transition-transform group-hover:translate-x-2" />
+              <ArrowRight className="h-5 w-5 md:h-6 md:w-6 text-primary transition-transform group-hover:translate-x-2" />
             </CardContent>
           </Card>
         </Link>
       )}
 
-      <Card className="border-none shadow-2xl bg-white/80 backdrop-blur-md rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="bg-primary/5 p-10 border-b">
-          <div className="flex items-center gap-5">
-            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
-              <User className="h-8 w-8 text-white" />
+      <Card className="border-none shadow-2xl bg-white/80 dark:bg-card/40 backdrop-blur-md rounded-2xl md:rounded-[2.5rem] overflow-hidden">
+        <CardHeader className="bg-primary/5 p-6 md:p-10 border-b">
+          <div className="flex items-center gap-4 md:gap-5">
+            <div className="h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
+              <User className="h-6 w-6 md:h-8 md:w-8 text-white" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-headline font-bold text-primary tracking-tight">Personal Details</CardTitle>
-              <CardDescription className="text-base font-medium">Update your public information for consultations.</CardDescription>
+              <CardTitle className="text-xl md:text-2xl font-headline font-bold text-primary tracking-tight">Personal Details</CardTitle>
+              <CardDescription className="text-sm md:text-base font-medium">Update your public information.</CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-10">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="space-y-3">
-              <label className="text-sm font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 px-1">
+        <CardContent className="p-6 md:p-10">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
+            <div className="space-y-2 md:space-y-3">
+              <label className="text-[10px] md:text-sm font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 px-1">
                 Full Name
               </label>
               <Input 
                 {...form.register("fullName")} 
-                className="h-16 rounded-2xl border-primary/10 bg-white/50 focus:ring-primary shadow-sm text-lg font-medium px-6"
+                className="h-12 md:h-16 rounded-xl md:rounded-2xl border-primary/10 bg-white/50 dark:bg-card/20 focus:ring-primary shadow-sm text-sm md:text-lg font-medium px-4 md:px-6"
               />
               {form.formState.errors.fullName && (
-                <p className="text-xs text-destructive font-bold px-1">{form.formState.errors.fullName.message}</p>
+                <p className="text-[10px] md:text-xs text-destructive font-bold px-1">{form.formState.errors.fullName.message}</p>
               )}
             </div>
 
-            <div className="space-y-3">
-              <label className="text-sm font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 px-1">
+            <div className="space-y-2 md:space-y-3">
+              <label className="text-[10px] md:text-sm font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 px-1">
                 Email Address
               </label>
               <Input 
                 {...form.register("email")} 
                 disabled
-                className="h-16 rounded-2xl border-primary/10 bg-muted/40 shadow-sm opacity-60 px-6 font-medium"
+                className="h-12 md:h-16 rounded-xl md:rounded-2xl border-primary/10 bg-muted/40 shadow-sm opacity-60 px-4 md:px-6 font-medium"
               />
-              <p className="text-[11px] text-muted-foreground italic px-1 font-medium">Email is linked to your authentication and cannot be changed.</p>
+              <p className="text-[9px] md:text-[11px] text-muted-foreground italic px-1 font-medium">Email is linked to auth and cannot be changed.</p>
             </div>
 
-            <div className="pt-6 flex flex-col gap-4">
+            <div className="pt-4 md:pt-6 flex flex-col gap-3 md:gap-4">
               <Button 
                 type="submit" 
-                className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-bold text-xl rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-95 flex gap-3"
+                className="w-full h-12 md:h-16 bg-primary hover:bg-primary/90 text-white font-bold text-base md:text-xl rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-95 flex gap-2 md:gap-3"
               >
-                <Save className="h-6 w-6" /> Save Profile
+                <Save className="h-5 w-5 md:h-6 md:w-6" /> Save Profile
               </Button>
               
               <Button 
                 type="button" 
                 variant="destructive"
                 onClick={handleLogout}
-                className="w-full h-16 font-bold text-xl rounded-2xl transition-all active:scale-95 flex gap-3 bg-destructive/10 text-destructive hover:bg-destructive hover:text-white border-none shadow-none"
+                className="w-full h-12 md:h-16 font-bold text-base md:text-xl rounded-xl md:rounded-2xl transition-all active:scale-95 flex gap-2 md:gap-3 bg-destructive/10 text-destructive hover:bg-destructive hover:text-white border-none shadow-none"
               >
-                <LogOut className="h-6 w-6" /> Sign Out
+                <LogOut className="h-5 w-5 md:h-6 md:w-6" /> Sign Out
               </Button>
             </div>
           </form>
