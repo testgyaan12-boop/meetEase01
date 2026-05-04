@@ -1,29 +1,52 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 240 64% 98%; /* Lighter background */
+    --background: 240 64% 98%;
     --foreground: 240 10% 10%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 10%;
-    --primary: 240 60% 50%; /* #3333CC */
+    --primary: 240 60% 50%;
     --primary-foreground: 0 0% 100%;
     --secondary: 240 20% 90%;
     --secondary-foreground: 240 60% 50%;
     --muted: 240 10% 92%;
     --muted-foreground: 240 10% 40%;
-    --accent: 278 100% 24%; /* #4F007A */
+    --accent: 278 100% 24%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 20% 88%;
     --input: 240 20% 88%;
     --ring: 240 60% 50%;
-    --radius: 1rem; /* More rounded */
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 6%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 240 60% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 10% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 10% 12%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 278 80% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 10% 15%;
+    --input: 240 10% 15%;
+    --ring: 240 60% 60%;
   }
 }
 
@@ -44,12 +67,10 @@
   font-family: 'Inter', sans-serif;
 }
 
-/* Tab transition optimization */
 .animate-in {
   animation-duration: 400ms;
 }
 
-/* Glassmorphism utility */
 .glass {
-  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  @apply bg-card/70 backdrop-blur-md border border-border shadow-xl;
 }

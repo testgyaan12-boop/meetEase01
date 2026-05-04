@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -9,7 +10,7 @@ import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Calendar, Mail, Phone
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { SlotPicker } from "./slot-picker"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -86,13 +87,9 @@ export function ScheduleMeetingForm() {
       addDocumentNonBlocking(collection(firestore, "admin_notifications"), {
         title: "📅 New Booking Request",
         message: `${values.clientName} (${values.clientEmail}) booked a session on ${new Date(values.slotStartTime).toLocaleString()}`,
-        type: "new_booking",  // Add this
+        type: "new_booking",
         isRead: false,
         createdAt: new Date().toISOString()
-        // title: "New Booking Request",
-        // message: `${values.clientName} booked a session.`,
-        // isRead: false,
-        // createdAt: new Date().toISOString()
       })
 
       toast({
@@ -115,29 +112,17 @@ export function ScheduleMeetingForm() {
   if (!user) return null
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-32">
-      <Card className="border-none shadow-2xl bg-white/90 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
-        <div className="bg-gradient-to-br from-primary/5 via-background to-accent/5 p-8 md:p-12 border-b">
-          <CardHeader className="p-0 space-y-3">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                <Calendar className="h-6 w-6" />
-              </div>
-              <CardTitle className="text-3xl font-headline font-bold text-primary tracking-tight">Schedule Consultation</CardTitle>
-            </div>
-            <CardDescription className="text-base font-medium">Complete the form below to book your expert session.</CardDescription>
-          </CardHeader>
-        </div>
+    <div className="max-w-4xl mx-auto space-y-6 pb-20">
+      <Card className="border-none shadow-2xl bg-white/90 dark:bg-card/90 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
+        <CardContent className="p-6 md:p-10">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
 
-        <CardContent className="p-8 md:p-14">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
-
-            <section className="space-y-8">
+            <section className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">01</div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Contact Details</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
                     <UserIcon className="h-3 w-3" /> Full Name
@@ -145,7 +130,7 @@ export function ScheduleMeetingForm() {
                   <Input
                     placeholder="e.g. Rahul Sharma"
                     {...form.register("clientName")}
-                    className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium"
+                    className="h-12 rounded-xl bg-muted/30 border-none shadow-inner px-4 font-medium"
                   />
                   {form.formState.errors.clientName && (
                     <p className="text-[10px] text-destructive font-bold px-1">{form.formState.errors.clientName.message as string}</p>
@@ -158,7 +143,7 @@ export function ScheduleMeetingForm() {
                   <Input
                     placeholder="name@email.com"
                     {...form.register("clientEmail")}
-                    className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium"
+                    className="h-12 rounded-xl bg-muted/30 border-none shadow-inner px-4 font-medium"
                   />
                   {form.formState.errors.clientEmail && (
                     <p className="text-[10px] text-destructive font-bold px-1">{form.formState.errors.clientEmail.message as string}</p>
@@ -169,13 +154,13 @@ export function ScheduleMeetingForm() {
                     <Phone className="h-3 w-3" /> Mobile Number
                   </label>
                   <Input
-                    placeholder="e.g. 9876543210"
+                    placeholder="Enter 10 digit number"
                     maxLength={10}
                     {...form.register("clientMobile")}
-                    className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium"
+                    className="h-12 rounded-xl bg-muted/30 border-none shadow-inner px-4 font-medium"
                   />
                   <p className="text-[10px] text-muted-foreground font-medium px-1 flex items-center gap-1 mt-1">
-                    <Info className="h-3 w-3" /> 10-digit Indian number starting with 6-9
+                    <Info className="h-3 w-3" /> 10-digit number starting with 6-9
                   </p>
                   {form.formState.errors.clientMobile && (
                     <p className="text-[10px] text-destructive font-bold px-1">{form.formState.errors.clientMobile.message as string}</p>
@@ -184,7 +169,7 @@ export function ScheduleMeetingForm() {
               </div>
             </section>
 
-            <section className="space-y-8">
+            <section className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">02</div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Meeting Agenda</h3>
@@ -192,9 +177,9 @@ export function ScheduleMeetingForm() {
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Agenda / Description</label>
                 <Textarea
-                  placeholder="What would you like to discuss? Be specific for better results."
+                  placeholder="What would you like to discuss?"
                   {...form.register("description")}
-                  className="min-h-[150px] rounded-3xl bg-muted/30 border-none shadow-inner p-6 text-base font-medium"
+                  className="min-h-[120px] rounded-2xl bg-muted/30 border-none shadow-inner p-4 text-base font-medium"
                 />
                 {form.formState.errors.description && (
                   <p className="text-[10px] text-destructive font-bold px-1">{form.formState.errors.description.message as string}</p>
@@ -202,7 +187,7 @@ export function ScheduleMeetingForm() {
               </div>
             </section>
 
-            <section className="space-y-8">
+            <section className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">03</div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Select Time Slot</h3>
@@ -221,7 +206,7 @@ export function ScheduleMeetingForm() {
               )}
             </section>
 
-            <section className="space-y-8">
+            <section className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">04</div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Payment Proof</h3>
@@ -234,20 +219,19 @@ export function ScheduleMeetingForm() {
                   onChange={(e) => form.setValue("paymentProof", e.target.files, { shouldValidate: true })}
                 />
                 <div className={cn(
-                  "flex flex-col items-center justify-center border-4 border-dashed rounded-[2.5rem] p-12 transition-all",
+                  "flex flex-col items-center justify-center border-4 border-dashed rounded-[2rem] p-8 transition-all",
                   form.watch("paymentProof")?.[0] ? "border-primary bg-primary/5" : "border-primary/10 group-hover:border-primary/30"
                 )}>
                   {form.watch("paymentProof")?.[0] ? (
                     <>
-                      <CheckCircle2 className="h-16 w-16 text-primary mb-4 animate-in zoom-in" />
-                      <p className="text-lg font-bold text-primary text-center truncate w-full px-4">{form.watch("paymentProof")?.[0].name}</p>
-                      <p className="text-xs font-medium text-muted-foreground mt-1">Document attached. Click to replace.</p>
+                      <CheckCircle2 className="h-12 w-12 text-primary mb-2 animate-in zoom-in" />
+                      <p className="text-sm font-bold text-primary text-center truncate w-full px-4">{form.watch("paymentProof")?.[0].name}</p>
+                      <p className="text-[10px] font-medium text-muted-foreground mt-1">Click to replace.</p>
                     </>
                   ) : (
                     <>
-                      <Upload className="h-16 w-16 text-muted-foreground/30 mb-4 group-hover:scale-110 transition-transform" />
-                      <p className="text-lg font-bold text-muted-foreground">Upload Payment Receipt</p>
-                      <p className="text-xs font-medium text-muted-foreground/60 mt-1">Actual file required for verification.</p>
+                      <Upload className="h-12 w-12 text-muted-foreground/30 mb-2 group-hover:scale-110 transition-transform" />
+                      <p className="text-sm font-bold text-muted-foreground">Upload Payment Receipt</p>
                     </>
                   )}
                 </div>
@@ -259,13 +243,13 @@ export function ScheduleMeetingForm() {
 
             <Button
               type="submit"
-              className="w-full h-20 bg-primary hover:bg-primary/90 text-white font-black text-xl shadow-xl shadow-primary/20 rounded-3xl transition-all active:scale-95"
+              className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-black text-lg shadow-xl shadow-primary/20 rounded-2xl transition-all active:scale-95"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <Loader2 className="h-8 w-8 animate-spin" />
+                <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
-                "BOOK CONSULTATION SESSION"
+                "CONFIRM BOOKING"
               )}
             </Button>
           </form>
