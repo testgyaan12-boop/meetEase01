@@ -1,4 +1,3 @@
-
 "use client"
 
 import { MobileNav } from "@/components/navigation/mobile-nav"
@@ -55,7 +54,7 @@ export default function DashboardLayout({
   ]
 
   return (
-    <div className="min-h-screen flex bg-background selection:bg-primary/10 overflow-x-hidden relative w-full max-w-full">
+    <div className="min-h-screen flex bg-background selection:bg-primary/10 w-full max-w-full overflow-hidden">
       {/* Fixed Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-72 bg-card/50 backdrop-blur-xl border-r p-8 fixed h-screen top-0 left-0 z-[50]">
         <div className="mb-12 px-2 flex items-center gap-3">
@@ -99,7 +98,7 @@ export default function DashboardLayout({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col md:ml-72 min-h-screen relative w-full max-w-full overflow-x-hidden">
-        <header className="h-20 border-b bg-background/95 backdrop-blur-md sticky top-0 z-[100] flex items-center justify-between px-4 md:px-12 w-full max-w-full">
+        <header className="h-20 border-b bg-background/95 backdrop-blur-md sticky top-0 z-[100] flex items-center justify-between px-4 md:px-12 w-full max-w-full shrink-0">
           <div className="md:hidden">
             <Link href="/dashboard" className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
@@ -125,7 +124,7 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        <main className="flex-1 pb-24 md:pb-12 w-full max-w-full overflow-x-hidden">
+        <main className="flex-1 pb-24 md:pb-12 w-full max-w-full overflow-y-auto">
           <div className="max-w-5xl mx-auto p-4 md:p-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {children}
           </div>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -103,7 +102,7 @@ export function ScheduleMeetingForm() {
   if (!user) return null
 
   return (
-    <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto w-full max-w-full">
+    <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto w-full max-w-full overflow-hidden">
       <Card className="glass rounded-[1.5rem] md:rounded-[3rem] overflow-hidden border-none shadow-2xl w-full">
         <CardContent className="p-6 md:p-14">
           <div className="text-center mb-10 md:mb-16 space-y-3 md:space-y-4">
