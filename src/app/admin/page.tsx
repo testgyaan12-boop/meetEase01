@@ -22,7 +22,9 @@ import {
   CheckCircle2,
   XCircle,
   ExternalLink,
-  Eye
+  ChevronDown,
+  ChevronUp,
+  Image as ImageIcon
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -52,6 +54,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 import { Meeting, AvailableSlot } from "@/lib/types"
 import { NotificationListener } from "@/components/admin/NotificationListener"
@@ -75,6 +78,7 @@ export default function AdminDashboard() {
   const [meetingLink, setMeetingLink] = useState("")
   const [adminNotes, setAdminNotes] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isProofExpanded, setIsProofExpanded] = useState(false)
 
   const isSuperAdmin = user?.uid === 'hKv5CWVQv7YvJk8mLyCY11ec96O2'
 
@@ -286,6 +290,7 @@ export default function AdminDashboard() {
                               setReviewMeeting(req)
                               setMeetingLink(req.meetingLink || "")
                               setAdminNotes(req.adminNotes || "")
+                              setIsProofExpanded(false) // Default closed on mobile context
                             }}
                           >
                             Review
@@ -437,6 +442,7 @@ export default function AdminDashboard() {
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
         <DialogContent className="max-w-4xl w-[95vw] rounded-2xl md:rounded-3xl p-0 overflow-hidden border-none shadow-2xl bg-card">
           <div className="flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh]">
+            
             {/* Scrollable Form Section */}
             <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6 scrollbar-hide order-2 md:order-1">
               <DialogHeader>
@@ -444,7 +450,49 @@ export default function AdminDashboard() {
                 <DialogDescription className="text-xs md:text-sm font-medium text-muted-foreground">Review client agenda and payment proof.</DialogDescription>
               </DialogHeader>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
+                {/* Mobile Transaction Proof - Collapsible */}
+                <div className="md:hidden">
+                  <Collapsible open={isProofExpanded} onOpenChange={setIsProofExpanded} className="rounded-2xl bg-muted/20 border border-primary/5 overflow-hidden">
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" className="w-full flex items-center justify-between p-4 hover:bg-primary/5">
+                        <div className="flex items-center gap-2">
+                          <ImageIcon className="h-4 w-4 text-primary" />
+                          <span className="text-xs font-bold text-foreground">Transaction Proof</span>
+                        </div>
+                        {isProofExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="p-4 border-t border-primary/5">
+                      <div className="flex flex-col items-center">
+                        <div className="w-full aspect-[3/4] rounded-xl bg-card shadow-lg overflow-hidden p-1 relative border border-primary/5">
+                          {reviewMeeting?.paymentProofUrl ? (
+                            <img 
+                              src={reviewMeeting.paymentProofUrl} 
+                              className="w-full h-full object-contain rounded-lg" 
+                              alt="Payment Proof Mobile" 
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-muted/20 rounded-lg">
+                              <Inbox className="h-6 w-6 text-muted-foreground/30" />
+                            </div>
+                          )}
+                          {reviewMeeting?.paymentProofUrl && (
+                            <a 
+                              href={reviewMeeting.paymentProofUrl} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="absolute bottom-2 right-2 h-8 w-8 bg-card/80 backdrop-blur-sm rounded-lg shadow-lg flex items-center justify-center text-primary"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </div>
+
                 <div className="p-4 md:p-5 rounded-2xl bg-primary/5 border border-primary/10">
                   <h4 className="text-[10px] font-black uppercase text-primary/60 mb-2 tracking-widest">Meeting Objective</h4>
                   <p className="text-xs md:text-sm font-medium italic text-primary/80 leading-relaxed">"{reviewMeeting?.description}"</p>
@@ -475,7 +523,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="flex flex-row gap-3 md:gap-4 pt-4 sticky bottom-0 bg-card border-t border-primary/5">
+                <div className="flex flex-row gap-3 md:gap-4 pt-4 sticky bottom-0 bg-card border-t border-primary/5 mt-auto">
                   <Button 
                     variant="destructive" 
                     className="flex-1 h-11 md:h-12 rounded-xl font-bold bg-destructive/10 text-destructive hover:bg-destructive hover:text-white text-xs md:text-sm" 
@@ -495,10 +543,10 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Sidebar / Image Section */}
-            <div className="w-full md:w-[320px] bg-muted/20 p-6 md:p-8 border-b md:border-b-0 md:border-l border-primary/5 flex flex-col items-center order-1 md:order-2 shrink-0">
+            {/* Desktop Sidebar / Image Section */}
+            <div className="hidden md:flex w-[320px] bg-muted/20 p-8 border-l border-primary/5 flex-col items-center shrink-0 order-2">
               <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-4">Transaction Proof</h4>
-              <div className="w-full max-w-[200px] md:max-w-none aspect-[3/4] rounded-2xl bg-card shadow-xl overflow-hidden p-2 group relative border border-primary/5">
+              <div className="w-full aspect-[3/4] rounded-2xl bg-card shadow-xl overflow-hidden p-2 group relative border border-primary/5">
                 {reviewMeeting?.paymentProofUrl ? (
                   <img 
                     src={reviewMeeting.paymentProofUrl} 
@@ -515,7 +563,7 @@ export default function AdminDashboard() {
                     href={reviewMeeting.paymentProofUrl} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="absolute bottom-3 right-3 h-10 w-10 bg-card rounded-lg shadow-xl flex items-center justify-center text-primary opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity border border-primary/10"
+                    className="absolute bottom-3 right-3 h-10 w-10 bg-card rounded-lg shadow-xl flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-opacity border border-primary/10"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>
