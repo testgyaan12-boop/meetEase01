@@ -53,7 +53,7 @@ export function ScheduleMeetingForm() {
     if (!user || !firestore) return
 
     setIsSubmitting(true)
-    
+
     try {
       let paymentProofUrl = ""
       const file = values.paymentProof?.[0]
@@ -82,19 +82,24 @@ export function ScheduleMeetingForm() {
       }
 
       addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
-      
+
       addDocumentNonBlocking(collection(firestore, "admin_notifications"), {
-        title: "New Booking Request",
-        message: `${values.clientName} booked a session.`,
+        title: "📅 New Booking Request",
+        message: `${values.clientName} (${values.clientEmail}) booked a session on ${new Date(values.slotStartTime).toLocaleString()}`,
+        type: "new_booking",  // Add this
         isRead: false,
         createdAt: new Date().toISOString()
+        // title: "New Booking Request",
+        // message: `${values.clientName} booked a session.`,
+        // isRead: false,
+        // createdAt: new Date().toISOString()
       })
-      
+
       toast({
         title: "Booking Requested",
         description: "Your session request has been submitted for verification.",
       })
-      
+
       router.push("/dashboard/history")
     } catch (error) {
       toast({
@@ -123,10 +128,10 @@ export function ScheduleMeetingForm() {
             <CardDescription className="text-base font-medium">Complete the form below to book your expert session.</CardDescription>
           </CardHeader>
         </div>
-        
+
         <CardContent className="p-8 md:p-14">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
-            
+
             <section className="space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">01</div>
@@ -137,10 +142,10 @@ export function ScheduleMeetingForm() {
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
                     <UserIcon className="h-3 w-3" /> Full Name
                   </label>
-                  <Input 
-                    placeholder="e.g. Rahul Sharma" 
-                    {...form.register("clientName")} 
-                    className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium" 
+                  <Input
+                    placeholder="e.g. Rahul Sharma"
+                    {...form.register("clientName")}
+                    className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium"
                   />
                   {form.formState.errors.clientName && (
                     <p className="text-[10px] text-destructive font-bold px-1">{form.formState.errors.clientName.message as string}</p>
@@ -150,10 +155,10 @@ export function ScheduleMeetingForm() {
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
                     <Mail className="h-3 w-3" /> Email Address
                   </label>
-                  <Input 
-                    placeholder="name@email.com" 
-                    {...form.register("clientEmail")} 
-                    className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium" 
+                  <Input
+                    placeholder="name@email.com"
+                    {...form.register("clientEmail")}
+                    className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium"
                   />
                   {form.formState.errors.clientEmail && (
                     <p className="text-[10px] text-destructive font-bold px-1">{form.formState.errors.clientEmail.message as string}</p>
@@ -163,11 +168,11 @@ export function ScheduleMeetingForm() {
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
                     <Phone className="h-3 w-3" /> Mobile Number
                   </label>
-                  <Input 
-                    placeholder="e.g. 9876543210" 
+                  <Input
+                    placeholder="e.g. 9876543210"
                     maxLength={10}
-                    {...form.register("clientMobile")} 
-                    className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium" 
+                    {...form.register("clientMobile")}
+                    className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 font-medium"
                   />
                   <p className="text-[10px] text-muted-foreground font-medium px-1 flex items-center gap-1 mt-1">
                     <Info className="h-3 w-3" /> 10-digit Indian number starting with 6-9
@@ -186,10 +191,10 @@ export function ScheduleMeetingForm() {
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Agenda / Description</label>
-                <Textarea 
-                  placeholder="What would you like to discuss? Be specific for better results." 
-                  {...form.register("description")} 
-                  className="min-h-[150px] rounded-3xl bg-muted/30 border-none shadow-inner p-6 text-base font-medium" 
+                <Textarea
+                  placeholder="What would you like to discuss? Be specific for better results."
+                  {...form.register("description")}
+                  className="min-h-[150px] rounded-3xl bg-muted/30 border-none shadow-inner p-6 text-base font-medium"
                 />
                 {form.formState.errors.description && (
                   <p className="text-[10px] text-destructive font-bold px-1">{form.formState.errors.description.message as string}</p>
@@ -202,12 +207,12 @@ export function ScheduleMeetingForm() {
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">03</div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-primary/60">Select Time Slot</h3>
               </div>
-              <SlotPicker 
+              <SlotPicker
                 onSelect={(id, start, end) => {
                   form.setValue("availableSlotId", id, { shouldValidate: true })
                   form.setValue("slotStartTime", start)
                   form.setValue("slotEndTime", end)
-                }} 
+                }}
               />
               {form.formState.errors.availableSlotId && (
                 <p className="text-[10px] text-destructive font-bold px-1 flex items-center gap-2">
@@ -252,8 +257,8 @@ export function ScheduleMeetingForm() {
               )}
             </section>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-20 bg-primary hover:bg-primary/90 text-white font-black text-xl shadow-xl shadow-primary/20 rounded-3xl transition-all active:scale-95"
               disabled={isSubmitting}
             >
