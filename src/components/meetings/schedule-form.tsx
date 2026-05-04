@@ -104,13 +104,13 @@ export function ScheduleMeetingForm() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col gap-1 px-2">
-        <h2 className="text-4xl font-headline font-bold text-primary tracking-tight">Confirm Booking</h2>
-        <p className="text-muted-foreground font-medium text-lg">Secure your slot in four simple steps.</p>
-      </div>
-
-      <Card className="glass rounded-[3rem] overflow-hidden">
+      <Card className="glass rounded-[3rem] overflow-hidden border-none shadow-2xl">
         <CardContent className="p-8 md:p-14">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl md:text-5xl font-headline font-bold text-primary tracking-tight">Confirm Booking</h2>
+            <p className="text-muted-foreground font-medium text-lg max-w-lg mx-auto leading-relaxed">Secure your slot in four simple steps and start your professional journey.</p>
+          </div>
+
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-16">
 
             {/* STEP 1: CONTACT */}
