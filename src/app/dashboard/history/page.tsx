@@ -13,9 +13,8 @@ import {
   Copy, 
   Check, 
   Image as ImageIcon,
-  ChevronDown,
-  ChevronUp,
-  ExternalLink
+  ExternalLink,
+  X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format, isPast } from "date-fns"
@@ -25,14 +24,20 @@ import { Meeting } from "@/lib/types"
 import { useMemo, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 
 export default function HistoryPage() {
   const { user, isUserLoading } = useUser()
   const firestore = useFirestore()
   const { toast } = useToast()
   const [copiedId, setCopiedId] = useState<string | null>(null)
-  const [expandedProofId, setExpandedProofId] = useState<string | null>(null)
+  const [viewingProofUrl, setViewingProofUrl] = useState<string | null>(null)
 
   const meetingsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null
@@ -119,46 +124,20 @@ export default function HistoryPage() {
                 {sortedMeetings.map((meeting) => (
                   <TableRow key={meeting.id} className="border-primary/5 hover:bg-primary/5 transition-colors group">
                     <TableCell className="py-4 md:py-6 pl-4 md:pl-8">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                            <Mail className="h-4 w-4 text-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-bold text-sm truncate">{meeting.clientName}</p>
-                            <p className="text-[10px] text-muted-foreground font-medium truncate">{meeting.clientEmail}</p>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <Mail className="h-4 w-4 text-primary" />
                         </div>
-                        {/* Mobile Proof Toggle */}
-                        <div className="md:hidden">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-7 text-[9px] font-bold gap-1 px-2 text-primary/60 hover:text-primary"
-                            onClick={() => setExpandedProofId(expandedProofId === meeting.id ? null : meeting.id)}
-                          >
-                            <ImageIcon className="h-3 w-3" />
-                            {expandedProofId === meeting.id ? 'Hide Proof' : 'View Proof'}
-                            {expandedProofId === meeting.id ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                          </Button>
-                          {expandedProofId === meeting.id && (
-                            <div className="mt-2 p-2 rounded-xl bg-muted/20 border border-primary/5 animate-in slide-in-from-top-1">
-                              <img 
-                                src={meeting.paymentProofUrl} 
-                                className="w-full aspect-[4/3] object-contain rounded-lg bg-card" 
-                                alt="Payment Proof" 
-                              />
-                            </div>
-                          )}
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm truncate">{meeting.clientName}</p>
+                          <p className="text-[10px] text-muted-foreground font-medium truncate">{meeting.clientEmail}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-bold text-foreground/80 whitespace-nowrap">
-                          <Clock className="h-3 w-3 text-primary/60" />
-                          {format(new Date(meeting.createdAt), "MMM d, p")}
-                        </div>
+                      <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-bold text-foreground/80 whitespace-nowrap">
+                        <Clock className="h-3 w-3 text-primary/60" />
+                        {format(new Date(meeting.createdAt), "MMM d, p")}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -174,29 +153,23 @@ export default function HistoryPage() {
                     </TableCell>
                     <TableCell className="pr-4 md:pr-8 text-right">
                       <div className="flex flex-col sm:flex-row items-center justify-end gap-2">
-                        {/* Proof Button Desktop */}
-                        <div className="hidden md:block">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 md:h-9 text-[10px] font-bold gap-1.5 text-primary/60 hover:text-primary hover:bg-primary/5"
-                            onClick={() => {
-                              if (meeting.paymentProofUrl) {
-                                window.open(meeting.paymentProofUrl, '_blank')
-                              }
-                            }}
-                          >
-                            <ImageIcon className="h-3.5 w-3.5" /> Proof
-                          </Button>
-                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 md:h-9 text-[10px] font-bold gap-1.5 text-primary/60 hover:text-primary hover:bg-primary/5"
+                          onClick={() => setViewingProofUrl(meeting.paymentProofUrl)}
+                        >
+                          <ImageIcon className="h-3.5 w-3.5" /> Proof
+                        </Button>
 
-                        {meeting.status === 'confirmed' && meeting.meetingLink && (!meeting.slotEndTime || !isPast(new Date(meeting.slotEndTime))) ? (
+                        {meeting.status === 'confirmed' && meeting.meetingLink && (!meeting.slotEndTime || !isPast(new Date(meeting.slotEndTime))) && (
                           <div className="flex items-center gap-2">
                             <Button 
                               size="sm" 
                               variant="outline"
                               className="h-8 md:h-9 w-8 md:w-9 p-0 rounded-lg border-primary/20 text-primary hover:bg-primary hover:text-white"
                               onClick={() => handleCopyLink(meeting.meetingLink!, meeting.id)}
+                              title="Copy Meeting Link"
                             >
                               {copiedId === meeting.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                             </Button>
@@ -206,8 +179,6 @@ export default function HistoryPage() {
                               </a>
                             </Button>
                           </div>
-                        ) : (
-                          <span className="text-[10px] md:text-xs text-muted-foreground italic font-medium">No actions</span>
                         )}
                       </div>
                     </TableCell>
@@ -229,6 +200,51 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
+
+      <Dialog open={!!viewingProofUrl} onOpenChange={(open) => !open && setViewingProofUrl(null)}>
+        <DialogContent className="max-w-2xl w-[95vw] rounded-2xl md:rounded-3xl p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-6 md:p-8 space-y-6">
+            <DialogHeader>
+              <DialogTitle className="text-xl md:text-2xl font-headline font-bold text-primary">Payment Proof</DialogTitle>
+              <DialogDescription className="text-xs md:text-sm font-medium text-muted-foreground">Your uploaded transaction receipt for verification.</DialogDescription>
+            </DialogHeader>
+            
+            <div className="relative aspect-[3/4] md:aspect-video w-full rounded-2xl bg-muted/20 border border-primary/5 overflow-hidden group">
+              {viewingProofUrl ? (
+                <img 
+                  src={viewingProofUrl} 
+                  className="w-full h-full object-contain bg-black/5" 
+                  alt="Transaction Proof" 
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Skeleton className="h-full w-full" />
+                </div>
+              )}
+              {viewingProofUrl && (
+                <a 
+                  href={viewingProofUrl} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="absolute bottom-4 right-4 h-10 w-10 bg-white/90 dark:bg-card/90 backdrop-blur-sm rounded-xl shadow-xl flex items-center justify-center text-primary hover:scale-110 transition-transform"
+                >
+                  <ExternalLink className="h-5 w-5" />
+                </a>
+              )}
+            </div>
+
+            <div className="pt-2">
+              <Button 
+                variant="outline" 
+                className="w-full h-12 rounded-xl font-bold border-primary/10 hover:bg-primary/5"
+                onClick={() => setViewingProofUrl(null)}
+              >
+                Close Preview
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
