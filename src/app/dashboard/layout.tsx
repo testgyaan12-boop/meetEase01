@@ -1,4 +1,3 @@
-
 "use client"
 
 import { MobileNav } from "@/components/navigation/mobile-nav"
@@ -55,7 +54,7 @@ export default function DashboardLayout({
   ]
 
   return (
-    <div className="min-h-screen flex bg-background selection:bg-primary/10">
+    <div className="min-h-screen flex bg-background selection:bg-primary/10 overflow-x-hidden">
       {/* Fixed Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-72 bg-card/50 backdrop-blur-xl border-r p-8 fixed h-screen top-0 left-0 z-20">
         <div className="mb-12 px-2 flex items-center gap-3">
@@ -98,14 +97,14 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col md:ml-72 min-h-screen relative">
-        <header className="h-20 border-b bg-background/80 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between px-6 md:px-12">
+      <div className="flex-1 flex flex-col md:ml-72 min-h-screen relative w-full overflow-x-hidden">
+        <header className="h-20 border-b bg-background/80 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between px-4 md:px-12 w-full max-w-full">
           <div className="md:hidden">
             <h1 className="text-xl font-headline font-bold text-primary">MeetEase</h1>
           </div>
-          <div className="flex items-center gap-6 ml-auto">
-            <div className="flex items-center gap-3 bg-muted/30 px-4 py-1.5 rounded-full border border-primary/5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 hidden sm:inline-block">Theme</span>
+          <div className="flex items-center gap-3 md:gap-6 ml-auto">
+            <div className="flex items-center gap-3 bg-muted/30 px-3 md:px-4 py-1.5 rounded-full border border-primary/5">
+              <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/60 hidden sm:inline-block">Theme</span>
               <ThemeToggle />
             </div>
             <div className="text-right hidden sm:block">
@@ -118,7 +117,7 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        <main className="flex-1 pb-20 md:pb-12">
+        <main className="flex-1 pb-24 md:pb-12 w-full max-w-full">
           <div className="max-w-5xl mx-auto p-4 md:p-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {children}
           </div>
