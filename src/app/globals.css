@@ -24,29 +24,29 @@
     --border: 240 20% 88%;
     --input: 240 20% 88%;
     --ring: 240 60% 50%;
-    --radius: 1rem;
+    --radius: 1.25rem;
   }
 
   .dark {
     --background: 240 10% 4%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 6%;
+    --card: 240 10% 7%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 6%;
+    --popover: 240 10% 8%;
     --popover-foreground: 0 0% 98%;
-    --primary: 240 60% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 240 70% 65%;
+    --primary-foreground: 0 0% 10%;
     --secondary: 240 10% 15%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 10% 12%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 278 80% 40%;
+    --muted: 240 10% 14%;
+    --muted-foreground: 240 5% 85%; /* Improved visibility */
+    --accent: 278 80% 55%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 10% 15%;
-    --input: 240 10% 15%;
-    --ring: 240 60% 60%;
+    --border: 240 10% 18%;
+    --input: 240 10% 18%;
+    --ring: 240 70% 65%;
   }
 }
 
@@ -72,5 +72,9 @@
 }
 
 .glass {
-  @apply bg-card/70 backdrop-blur-md border border-border shadow-xl;
+  @apply bg-card/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)];
+}
+
+.dark .glass {
+  @apply bg-white/5 backdrop-blur-xl border border-white/5 shadow-2xl;
 }

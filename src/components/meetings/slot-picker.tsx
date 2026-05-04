@@ -1,8 +1,9 @@
+
 "use client"
 
 import { useState } from "react"
 import { format, startOfDay, endOfDay, isToday } from "date-fns"
-import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react"
+import { Calendar as CalendarIcon, Clock, AlertCircle, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -42,8 +43,6 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
     onSelect(slot.id, slot.startTime, slot.endTime)
   }
 
-  const isSelectedToday = isToday(date)
-
   const formatRange = (start: string, end: string) => {
     const s = new Date(start)
     const e = new Date(end)
@@ -58,18 +57,17 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h3 className="text-xl font-headline font-bold text-primary flex items-center gap-3">
-            <CalendarIcon className="h-6 w-6" />
-            {isSelectedToday ? "Today's Availability" : `Slots for ${format(date, "MMM do")}`}
-          </h3>
-          <p className="text-sm text-muted-foreground font-medium">Select your preferred session time</p>
+          <h4 className="text-2xl font-headline font-bold text-foreground flex items-center gap-3">
+            <CalendarIcon className="h-6 w-6 text-primary" />
+            {isToday(date) ? "Available Today" : format(date, "EEEE, MMM do")}
+          </h4>
+          <p className="text-sm font-medium text-muted-foreground/80">Select a specific time window for your consultation.</p>
         </div>
 
-        <div className="relative min-w-[200px] w-full sm:w-auto">
-          {/* NATIVE SYSTEM CALENDAR FOR BEST MOBILE UX */}
+        <div className="relative w-full sm:w-auto">
           <Input
             type="date"
             value={format(date, "yyyy-MM-dd")}
@@ -80,20 +78,20 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
               }
             }}
             min={format(new Date(), "yyyy-MM-dd")}
-            className="h-14 px-6 rounded-2xl border-2 border-primary/10 bg-white font-bold text-primary shadow-lg focus:ring-4 focus:ring-primary/5 transition-all"
+            className="h-14 px-8 rounded-2xl border-none bg-muted/40 font-black text-primary shadow-lg focus:ring-4 focus:ring-primary/10 transition-all text-base"
           />
         </div>
       </div>
 
       <div className="space-y-4">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-2xl" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-28 w-full rounded-3xl" />
             ))}
           </div>
         ) : slots && slots.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {slots.map((slot) => (
               <Button
                 key={slot.id}
@@ -101,36 +99,45 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
                 disabled={slot.isBooked}
                 variant={selectedSlotId === slot.id ? "default" : "outline"}
                 className={cn(
-                  "h-24 flex flex-col items-center justify-center rounded-[1.5rem] transition-all border-2",
+                  "h-28 flex flex-col items-center justify-center rounded-[2rem] transition-all duration-500 border-2",
                   selectedSlotId === slot.id
-                    ? "bg-primary text-white border-primary shadow-2xl scale-105"
-                    : "border-primary/5 hover:border-primary/30 bg-white/40 backdrop-blur-md shadow-sm",
-                  slot.isBooked && "opacity-40 grayscale cursor-not-allowed border-dashed bg-muted/20"
+                    ? "bg-primary text-primary-foreground border-primary shadow-2xl scale-105"
+                    : "border-primary/5 hover:border-primary/30 bg-muted/20 backdrop-blur-sm shadow-sm",
+                  slot.isBooked && "opacity-30 grayscale cursor-not-allowed border-dashed"
                 )}
                 onClick={() => handleSlotClick(slot)}
               >
-                <div className="flex items-center gap-2">
-                  <Clock className={cn("h-4 w-4", selectedSlotId === slot.id ? "text-white" : "text-primary/60")} />
+                <div className="flex items-center gap-3">
+                  <Clock className={cn("h-5 w-5", selectedSlotId === slot.id ? "text-primary-foreground" : "text-primary/60")} />
                   <span className={cn(
-                    "font-black text-base md:text-lg tracking-tight",
+                    "font-black text-xl tracking-tight",
                     slot.isBooked && "line-through decoration-destructive/60 decoration-2"
                   )}>
                     {formatRange(slot.startTime, slot.endTime)}
                   </span>
                 </div>
-                {slot.isBooked && <span className="text-[10px] uppercase font-black tracking-widest mt-1 text-destructive/80">Reserved</span>}
-                {selectedSlotId === slot.id && <span className="text-[10px] uppercase font-black tracking-widest mt-1 animate-pulse">Selected</span>}
+                <div className="mt-2 flex items-center gap-1.5">
+                  {slot.isBooked ? (
+                    <span className="text-[10px] uppercase font-black tracking-widest text-destructive">Unavailable</span>
+                  ) : selectedSlotId === slot.id ? (
+                    <span className="text-[10px] uppercase font-black tracking-widest text-primary-foreground flex items-center gap-1">
+                      <Check className="h-2.5 w-2.5" /> Selection Confirmed
+                    </span>
+                  ) : (
+                    <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">Tap to Select</span>
+                  )}
+                </div>
               </Button>
             ))}
           </div>
         ) : (
-          <div className="bg-white/30 border-2 border-dashed border-primary/10 rounded-[3rem] p-16 text-center flex flex-col items-center justify-center animate-in zoom-in duration-500">
-            <div className="h-24 w-24 rounded-full bg-primary/5 flex items-center justify-center mb-6">
-              <AlertCircle className="h-12 w-12 text-primary/20" />
+          <div className="bg-muted/10 border-4 border-dashed border-primary/5 rounded-[4rem] p-24 text-center flex flex-col items-center justify-center animate-in zoom-in duration-700">
+            <div className="h-28 w-28 rounded-[2.5rem] bg-muted/40 flex items-center justify-center mb-8 shadow-xl">
+              <AlertCircle className="h-14 w-14 text-muted-foreground/30" />
             </div>
-            <h4 className="text-2xl font-headline font-bold text-muted-foreground/60">No Slots Available</h4>
-            <p className="text-muted-foreground mt-2 font-medium text-base max-w-xs">
-              Our experts are fully booked or haven't listed availability for this date yet.
+            <h4 className="text-3xl font-headline font-bold text-muted-foreground/80 tracking-tight">Fully Booked</h4>
+            <p className="text-muted-foreground/60 mt-3 font-medium text-lg max-w-sm leading-relaxed">
+              Our experts are currently unavailable for this date. Please select another day from the calendar.
             </p>
           </div>
         )}

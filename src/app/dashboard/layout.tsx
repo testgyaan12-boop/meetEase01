@@ -57,9 +57,9 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen flex bg-background selection:bg-primary/10">
       {/* Fixed Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-72 bg-card border-r p-8 fixed h-screen top-0 left-0 z-20">
+      <aside className="hidden md:flex flex-col w-72 bg-card/50 backdrop-blur-xl border-r p-8 fixed h-screen top-0 left-0 z-20">
         <div className="mb-12 px-2 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
             <ShieldCheck className="h-6 w-6" />
           </div>
           <h1 className="text-2xl font-headline font-bold text-primary tracking-tight">MeetEase</h1>
@@ -75,11 +75,11 @@ export default function DashboardLayout({
                 className={cn(
                   "flex items-center gap-3 px-5 py-4 text-sm font-bold rounded-2xl transition-all duration-300 group",
                   isActive 
-                    ? "bg-primary text-white shadow-lg shadow-primary/20 translate-x-1" 
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 translate-x-1" 
                     : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
                 )}
               >
-                <link.icon className={cn("h-5 w-5 transition-transform group-hover:scale-110", isActive ? "text-white" : "text-primary/60")} />
+                <link.icon className={cn("h-5 w-5 transition-transform group-hover:scale-110", isActive ? "text-primary-foreground" : "text-primary/60")} />
                 {link.label}
               </Link>
             )
@@ -97,20 +97,20 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      {/* Main Content Area - offset by sidebar width on desktop */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col md:ml-72 min-h-screen relative">
         <header className="h-20 border-b bg-background/80 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between px-6 md:px-12">
           <div className="md:hidden">
             <h1 className="text-xl font-headline font-bold text-primary">MeetEase</h1>
           </div>
           <div className="flex items-center gap-6 ml-auto">
-            <div className="flex items-center gap-3 bg-muted/30 px-4 py-2 rounded-2xl border border-primary/5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">Appearance</span>
+            <div className="flex items-center gap-3 bg-muted/30 px-4 py-1.5 rounded-full border border-primary/5">
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 hidden sm:inline-block">Theme</span>
               <ThemeToggle />
             </div>
             <div className="text-right hidden sm:block">
               <p className="text-sm font-black text-foreground">{user.displayName || 'Account Holder'}</p>
-              <p className="text-xs font-medium text-muted-foreground">{user.email}</p>
+              <p className="text-xs font-medium text-muted-foreground/80">{user.email}</p>
             </div>
             <div className="h-10 w-10 rounded-xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center shadow-inner">
               <User className="h-5 w-5 text-primary" />
@@ -118,8 +118,8 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        <main className="flex-1 pb-20 md:pb-0">
-          <div className="p-4 md:p-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <main className="flex-1 pb-20 md:pb-12">
+          <div className="max-w-5xl mx-auto p-4 md:p-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {children}
           </div>
         </main>
