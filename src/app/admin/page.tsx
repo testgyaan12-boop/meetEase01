@@ -198,7 +198,7 @@ export default function AdminDashboard() {
             variant="outline" 
             size="icon" 
             onClick={() => router.push("/dashboard")} 
-            className="h-12 w-12 rounded-xl bg-white shadow-sm border-primary/10"
+            className="h-12 w-12 rounded-xl bg-card shadow-sm border-primary/10"
           >
             <ArrowLeft className="h-6 w-6 text-primary" />
           </Button>
@@ -217,7 +217,7 @@ export default function AdminDashboard() {
             { title: "Pending", value: meetings?.filter(m => m.status === 'pending').length || 0, icon: Activity, color: "bg-orange-500" },
             { title: "Slots", value: slots?.filter(s => !s.isBooked && s.isActive).length || 0, icon: CalendarDays, color: "bg-green-600" }
           ].map((stat, idx) => (
-            <Card key={idx} className="border-none shadow-xl bg-white rounded-2xl overflow-hidden">
+            <Card key={idx} className="border-none shadow-xl bg-card rounded-2xl overflow-hidden">
               <CardContent className="p-3 md:p-6 flex flex-col items-center text-center gap-1 md:gap-3">
                 <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-2xl flex items-center justify-center text-white shadow-lg", stat.color)}>
                   <stat.icon className="h-4 w-4 md:h-6 md:w-6" />
@@ -232,7 +232,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="bg-white rounded-xl p-1 shadow-sm border w-full sm:w-auto">
+          <TabsList className="bg-card rounded-xl p-1 shadow-sm border border-primary/10 w-full sm:w-auto">
             <TabsTrigger value="requests" className="flex-1 rounded-lg px-6 py-2.5 font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">Queue</TabsTrigger>
             <TabsTrigger value="slots" className="flex-1 rounded-lg px-6 py-2.5 font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">Slots</TabsTrigger>
           </TabsList>
@@ -244,30 +244,30 @@ export default function AdminDashboard() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
                   placeholder="Find client..." 
-                  className="pl-10 h-11 bg-white rounded-xl border-none shadow-lg focus:ring-2 focus:ring-primary/20"
+                  className="pl-10 h-11 bg-card rounded-xl border-none shadow-lg focus:ring-2 focus:ring-primary/20"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white shadow-2xl overflow-hidden border border-primary/5">
+            <div className="rounded-2xl bg-card shadow-2xl overflow-hidden border border-primary/5">
               {isMeetingsLoading ? (
                 <div className="p-10 space-y-4"><Skeleton className="h-14 w-full" /><Skeleton className="h-14 w-full" /></div>
               ) : filteredMeetings && filteredMeetings.length > 0 ? (
                 <Table>
                   <TableHeader className="bg-primary/5">
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="py-5 pl-8 font-black text-[10px] uppercase tracking-widest">Client</TableHead>
-                      <TableHead className="font-black text-[10px] uppercase tracking-widest">Status</TableHead>
-                      <TableHead className="text-right pr-8 font-black text-[10px] uppercase tracking-widest">Action</TableHead>
+                    <TableRow className="hover:bg-transparent border-primary/10">
+                      <TableHead className="py-5 pl-8 font-black text-[10px] uppercase tracking-widest text-primary/60">Client</TableHead>
+                      <TableHead className="font-black text-[10px] uppercase tracking-widest text-primary/60">Status</TableHead>
+                      <TableHead className="text-right pr-8 font-black text-[10px] uppercase tracking-widest text-primary/60">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredMeetings.map((req) => (
-                      <TableRow key={req.id} className="hover:bg-primary/5">
+                      <TableRow key={req.id} className="hover:bg-primary/5 border-primary/5">
                         <TableCell className="pl-8 py-4">
-                          <p className="font-bold text-sm">{req.clientName}</p>
+                          <p className="font-bold text-sm text-foreground">{req.clientName}</p>
                           <p className="text-[10px] text-muted-foreground font-medium">{req.clientEmail}</p>
                         </TableCell>
                         <TableCell>
@@ -311,10 +311,10 @@ export default function AdminDashboard() {
                     <Plus className="mr-2 h-4 w-4" /> Add Slot
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="rounded-2xl max-w-sm p-8">
+                <DialogContent className="rounded-2xl max-w-sm p-8 bg-card border-none shadow-2xl">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-headline font-bold">New Availability</DialogTitle>
-                    <DialogDescription>Add a new consultation window.</DialogDescription>
+                    <DialogTitle className="text-xl font-headline font-bold text-primary">New Availability</DialogTitle>
+                    <DialogDescription className="font-medium text-muted-foreground">Add a new consultation window.</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-5 pt-4">
                     <div className="space-y-1.5">
@@ -323,7 +323,7 @@ export default function AdminDashboard() {
                         type="date" 
                         value={newSlotDateStr} 
                         onChange={(e) => setNewSlotDateStr(e.target.value)} 
-                        className="h-12 rounded-xl bg-muted/30 border-none font-bold" 
+                        className="h-12 rounded-xl bg-muted/40 border-none font-bold text-foreground" 
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
                           type="time" 
                           value={startTimeStr} 
                           onChange={(e) => setStartTimeStr(e.target.value)} 
-                          className="h-12 rounded-xl bg-muted/30 border-none font-bold" 
+                          className="h-12 rounded-xl bg-muted/40 border-none font-bold text-foreground" 
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -342,13 +342,13 @@ export default function AdminDashboard() {
                           type="time" 
                           value={endTimeStr} 
                           onChange={(e) => setEndTimeStr(e.target.value)} 
-                          className="h-12 rounded-xl bg-muted/30 border-none font-bold" 
+                          className="h-12 rounded-xl bg-muted/40 border-none font-bold text-foreground" 
                         />
                       </div>
                     </div>
                   </div>
                   <DialogFooter className="pt-6">
-                    <Button onClick={handleAddSlot} className="w-full h-12 rounded-xl font-bold bg-primary text-white">
+                    <Button onClick={handleAddSlot} className="w-full h-12 rounded-xl font-bold bg-primary text-white shadow-xl shadow-primary/20">
                       CREATE SLOT
                     </Button>
                   </DialogFooter>
@@ -356,23 +356,23 @@ export default function AdminDashboard() {
               </Dialog>
             </div>
 
-            <div className="rounded-2xl bg-white shadow-2xl overflow-hidden border border-primary/5">
+            <div className="rounded-2xl bg-card shadow-2xl overflow-hidden border border-primary/5">
               {isSlotsLoading ? (
                 <div className="p-10"><Skeleton className="h-16 w-full" /></div>
               ) : slots && slots.length > 0 ? (
                 <Table>
                   <TableHeader className="bg-primary/5">
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="py-5 pl-8 font-black text-[10px] uppercase tracking-widest">Time Slot</TableHead>
-                      <TableHead className="font-black text-[10px] uppercase tracking-widest">Status</TableHead>
-                      <TableHead className="text-right pr-8 font-black text-[10px] uppercase tracking-widest">Manage</TableHead>
+                    <TableRow className="hover:bg-transparent border-primary/10">
+                      <TableHead className="py-5 pl-8 font-black text-[10px] uppercase tracking-widest text-primary/60">Time Slot</TableHead>
+                      <TableHead className="font-black text-[10px] uppercase tracking-widest text-primary/60">Status</TableHead>
+                      <TableHead className="text-right pr-8 font-black text-[10px] uppercase tracking-widest text-primary/60">Manage</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {slots.map((slot) => (
-                      <TableRow key={slot.id} className="hover:bg-primary/5">
+                      <TableRow key={slot.id} className="hover:bg-primary/5 border-primary/5">
                         <TableCell className="pl-8 py-4">
-                          <p className="font-bold text-sm">{format(new Date(slot.startTime), "MMM d, EEEE")}</p>
+                          <p className="font-bold text-sm text-foreground">{format(new Date(slot.startTime), "MMM d, EEEE")}</p>
                           <p className="text-[10px] text-muted-foreground font-bold">{format(new Date(slot.startTime), "p")} - {format(new Date(slot.endTime), "p")}</p>
                         </TableCell>
                         <TableCell>
@@ -383,7 +383,7 @@ export default function AdminDashboard() {
                               disabled={slot.isBooked}
                               className="data-[state=checked]:bg-primary h-5 w-9"
                             />
-                            <span className="text-[9px] font-black uppercase opacity-60">{slot.isBooked ? 'Booked' : (slot.isActive ? 'Active' : 'Hidden')}</span>
+                            <span className="text-[9px] font-black uppercase opacity-60 text-foreground">{slot.isBooked ? 'Booked' : (slot.isActive ? 'Active' : 'Hidden')}</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-right pr-8">
@@ -413,19 +413,19 @@ export default function AdminDashboard() {
       </div>
 
       <AlertDialog open={!!slotToDelete} onOpenChange={() => setSlotToDelete(null)}>
-        <AlertDialogContent className="rounded-2xl p-8 max-w-sm">
+        <AlertDialogContent className="rounded-2xl p-8 max-w-sm bg-card border-none shadow-2xl">
           <AlertDialogHeader>
             <div className="h-12 w-12 bg-destructive/10 rounded-xl flex items-center justify-center text-destructive mb-4">
               <AlertTriangle className="h-6 w-6" />
             </div>
-            <AlertDialogTitle className="text-xl font-headline font-bold">Remove Slot?</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-medium pt-1">
+            <AlertDialogTitle className="text-xl font-headline font-bold text-foreground">Remove Slot?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm font-medium pt-1 text-muted-foreground">
               This will permanently delete this time window.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-6 gap-3">
-            <AlertDialogCancel className="h-11 rounded-xl border-none bg-muted font-bold">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteSlot} className="h-11 rounded-xl bg-destructive text-white font-bold">
+            <AlertDialogCancel className="h-11 rounded-xl border-none bg-muted font-bold text-foreground">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteSlot} className="h-11 rounded-xl bg-destructive text-white font-bold shadow-xl shadow-destructive/20">
               DELETE
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -433,12 +433,12 @@ export default function AdminDashboard() {
       </AlertDialog>
 
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
-        <DialogContent className="max-w-4xl rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
+        <DialogContent className="max-w-4xl rounded-3xl p-0 overflow-hidden border-none shadow-2xl bg-card">
           <div className="flex flex-col md:flex-row max-h-[85vh]">
             <div className="flex-1 p-8 overflow-y-auto space-y-6 scrollbar-hide">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-headline font-bold text-primary">Verify Request</DialogTitle>
-                <DialogDescription className="font-medium">Review client agenda and payment proof.</DialogDescription>
+                <DialogDescription className="font-medium text-muted-foreground">Review client agenda and payment proof.</DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4">
@@ -454,7 +454,7 @@ export default function AdminDashboard() {
                     </label>
                     <Input 
                       placeholder="https://..." 
-                      className="h-12 rounded-xl border-2 border-primary/5 focus:border-primary/20 font-medium" 
+                      className="h-12 rounded-xl border-2 border-primary/5 focus:border-primary/20 bg-muted/20 font-medium text-foreground" 
                       value={meetingLink} 
                       onChange={(e) => setMeetingLink(e.target.value)} 
                     />
@@ -465,14 +465,14 @@ export default function AdminDashboard() {
                     </label>
                     <Textarea 
                       placeholder="Reason for rejection..." 
-                      className="min-h-[80px] rounded-xl border-2 border-primary/5 focus:border-primary/20 font-medium" 
+                      className="min-h-[80px] rounded-xl border-2 border-primary/5 focus:border-primary/20 bg-muted/20 font-medium text-foreground" 
                       value={adminNotes} 
                       onChange={(e) => setAdminNotes(e.target.value)} 
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-4 pt-4 sticky bottom-0 bg-white">
+                <div className="flex gap-4 pt-4 sticky bottom-0 bg-card border-t border-primary/5">
                   <Button 
                     variant="destructive" 
                     className="flex-1 h-12 rounded-xl font-bold bg-destructive/10 text-destructive hover:bg-destructive hover:text-white" 
@@ -492,9 +492,9 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="w-full md:w-[320px] bg-muted/20 p-8 border-l flex flex-col items-center">
+            <div className="w-full md:w-[320px] bg-muted/20 p-8 border-l border-primary/5 flex flex-col items-center">
               <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-4">Transaction Proof</h4>
-              <div className="w-full aspect-[3/4] rounded-2xl bg-white shadow-xl overflow-hidden p-2 group relative">
+              <div className="w-full aspect-[3/4] rounded-2xl bg-card shadow-xl overflow-hidden p-2 group relative border border-primary/5">
                 {reviewMeeting?.paymentProofUrl ? (
                   <img 
                     src={reviewMeeting.paymentProofUrl} 
@@ -511,7 +511,7 @@ export default function AdminDashboard() {
                     href={reviewMeeting.paymentProofUrl} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="absolute bottom-3 right-3 h-10 w-10 bg-white rounded-lg shadow-xl flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-opacity border"
+                    className="absolute bottom-3 right-3 h-10 w-10 bg-card rounded-lg shadow-xl flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-opacity border border-primary/10"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>
