@@ -1,5 +1,22 @@
+"use client"
+
 import Link from "next/link"
-import { ArrowRight, ShieldCheck, Zap, Bell, CheckCircle2, Star, Quote, Briefcase, UserCheck, TrendingUp } from "lucide-react"
+import { useState } from "react"
+import { 
+  ArrowRight, 
+  ShieldCheck, 
+  Zap, 
+  Bell, 
+  CheckCircle2, 
+  Star, 
+  Quote, 
+  Briefcase, 
+  UserCheck, 
+  TrendingUp,
+  Heart,
+  Copy,
+  Check
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Carousel,
@@ -9,8 +26,32 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
 
 export default function LandingPage() {
+  const [isSupportOpen, setIsSupportOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const { toast } = useToast()
+  const upiId = "meetease@upi"
+
+  const handleCopyUpi = () => {
+    navigator.clipboard.writeText(upiId)
+    setCopied(true)
+    toast({
+      title: "UPI Copied",
+      description: "The support UPI ID has been copied to your clipboard.",
+    })
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const testimonials = [
     {
       name: "Aditya Sharma",
@@ -195,12 +236,74 @@ export default function LandingPage() {
           <div className="flex gap-8 text-sm text-muted-foreground font-medium">
             <Link href="#" className="hover:text-primary">Privacy</Link>
             <Link href="#" className="hover:text-primary">Terms</Link>
-            <Link href="#" className="hover:text-primary">Support</Link>
+            <button 
+              onClick={() => setIsSupportOpen(true)}
+              className="hover:text-primary transition-colors focus:outline-none"
+            >
+              Support
+            </button>
             <Link href="#" className="hover:text-primary">Consultations</Link>
           </div>
           <p className="text-sm text-muted-foreground">© 2024 Office VS Me. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Support Dialog */}
+      <Dialog open={isSupportOpen} onOpenChange={setIsSupportOpen}>
+        <DialogContent className="max-w-md w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-8 md:p-10 text-center space-y-6">
+            <DialogHeader className="space-y-4">
+              <div className="flex flex-col items-center gap-3">
+                <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30 font-black px-4 py-1.5 rounded-full text-[10px] tracking-widest uppercase flex items-center gap-2 mx-auto">
+                  <Heart className="h-3 w-3 fill-primary" /> Show your love for expand
+                </Badge>
+                <DialogTitle className="text-2xl font-headline font-bold text-primary">Support Our Mission</DialogTitle>
+                <DialogDescription className="text-sm font-medium text-muted-foreground">
+                  Your contributions help us keep decoding corporate reality for everyone.
+                </DialogDescription>
+              </div>
+            </DialogHeader>
+
+            <div className="relative group mx-auto w-fit">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white dark:bg-card p-4 rounded-2xl shadow-xl">
+                <img 
+                  src="https://picsum.photos/seed/qr99/400/400" 
+                  alt="Support QR" 
+                  className="w-40 h-40 md:w-48 md:h-48 object-contain rounded-lg"
+                  data-ai-hint="qr code"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <p className="text-[10px] font-black uppercase text-primary/60 tracking-widest">Support via UPI</p>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-12 flex-1 max-w-[240px] px-6 rounded-xl bg-muted/40 border border-primary/10 flex items-center justify-center font-bold text-sm text-primary shadow-sm">
+                    {upiId}
+                  </div>
+                  <Button 
+                    size="icon" 
+                    variant="outline" 
+                    onClick={handleCopyUpi}
+                    className="h-12 w-12 rounded-xl border-primary/10 hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5"
+                  >
+                    {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                  </Button>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                className="w-full h-12 rounded-xl font-bold border-primary/10 hover:bg-primary/5 text-muted-foreground hover:text-primary"
+                onClick={() => setIsSupportOpen(false)}
+              >
+                Maybe Later
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
