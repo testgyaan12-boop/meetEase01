@@ -49,7 +49,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { format, setHours, setMinutes } from "date-fns"
+import { format, setHours, setMinutes, startOfToday } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -69,7 +69,6 @@ export default function AdminDashboard() {
   // Slot states
   const [isAddSlotOpen, setIsAddSlotOpen] = useState(false)
   const [slotToDelete, setSlotToDelete] = useState<string | null>(null)
-  const [newSlotDateStr, setNewSlotDateStr] = useState(format(new Date(), "yyyy-MM-dd"))
   const [startTimeStr, setStartTimeStr] = useState("09:00")
   const [endTimeStr, setEndTimeStr] = useState("10:00")
 
@@ -150,20 +149,21 @@ export default function AdminDashboard() {
 
   const handleAddSlot = () => {
     if (!firestore) return
-    const dateObj = new Date(newSlotDateStr)
+    // Using a placeholder date (epoch) for recurring slots
+    const baseDate = startOfToday()
     const [sH, sM] = startTimeStr.split(":").map(Number)
     const [eH, eM] = endTimeStr.split(":").map(Number)
-    const startTime = setMinutes(setHours(dateObj, sH), sM).toISOString()
-    const endTime = setMinutes(setHours(dateObj, eH), eM).toISOString()
+    const startTime = setMinutes(setHours(baseDate, sH), sM).toISOString()
+    const endTime = setMinutes(setHours(baseDate, eH), eM).toISOString()
 
     addDocumentNonBlocking(collection(firestore, "availableSlots"), {
       startTime,
       endTime,
-      isBooked: false,
+      isBooked: false, // Default false, dynamic checks used in picker
       isActive: true,
     })
 
-    toast({ title: "Slot Created" })
+    toast({ title: "Daily Slot Created" })
     setIsAddSlotOpen(false)
   }
 
@@ -219,9 +219,9 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-3 gap-3 md:gap-6">
           {[
-            { title: "Total", value: meetings?.length || 0, icon: Users, color: "bg-blue-600" },
+            { title: "Total Requests", value: meetings?.length || 0, icon: Users, color: "bg-blue-600" },
             { title: "Pending", value: meetings?.filter(m => m.status === 'pending').length || 0, icon: Activity, color: "bg-orange-500" },
-            { title: "Slots", value: slots?.filter(s => !s.isBooked && s.isActive).length || 0, icon: CalendarDays, color: "bg-green-600" }
+            { title: "Daily Slots", value: slots?.filter(s => s.isActive).length || 0, icon: CalendarDays, color: "bg-green-600" }
           ].map((stat, idx) => (
             <Card key={idx} className="border-none shadow-xl bg-card rounded-2xl overflow-hidden">
               <CardContent className="p-3 md:p-6 flex flex-col items-center text-center gap-1 md:gap-3">
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="requests" className="space-y-6">
           <TabsList className="bg-card rounded-xl p-1 shadow-sm border border-primary/10 w-full sm:w-auto">
             <TabsTrigger value="requests" className="flex-1 rounded-lg px-6 py-2.5 font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">Queue</TabsTrigger>
-            <TabsTrigger value="slots" className="flex-1 rounded-lg px-6 py-2.5 font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">Slots</TabsTrigger>
+            <TabsTrigger value="slots" className="flex-1 rounded-lg px-6 py-2.5 font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">Daily Slots</TabsTrigger>
           </TabsList>
 
           <TabsContent value="requests" className="space-y-6">
@@ -290,7 +290,7 @@ export default function AdminDashboard() {
                               setReviewMeeting(req)
                               setMeetingLink(req.meetingLink || "")
                               setAdminNotes(req.adminNotes || "")
-                              setIsProofExpanded(false) // Default closed on mobile context
+                              setIsProofExpanded(false)
                             }}
                           >
                             Review
@@ -311,7 +311,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="slots" className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg md:text-xl font-headline font-bold text-primary">Availability Slots</h2>
+              <div>
+                <h2 className="text-lg md:text-xl font-headline font-bold text-primary">Recurring Slots</h2>
+                <p className="text-xs text-muted-foreground font-medium">These windows repeat daily unless deactivated.</p>
+              </div>
               <Dialog open={isAddSlotOpen} onOpenChange={setIsAddSlotOpen}>
                 <DialogTrigger asChild>
                   <Button className="h-11 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold px-6 shadow-lg shadow-primary/20">
@@ -320,22 +323,13 @@ export default function AdminDashboard() {
                 </DialogTrigger>
                 <DialogContent className="rounded-2xl max-w-sm p-8 bg-card border-none shadow-2xl">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-headline font-bold text-primary">New Availability</DialogTitle>
-                    <DialogDescription className="font-medium text-muted-foreground">Add a new consultation window.</DialogDescription>
+                    <DialogTitle className="text-xl font-headline font-bold text-primary">New Daily Window</DialogTitle>
+                    <DialogDescription className="font-medium text-muted-foreground">Add a recurring time slot for daily consultations.</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-5 pt-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase text-primary/60 ml-1">Date</label>
-                      <Input 
-                        type="date" 
-                        value={newSlotDateStr} 
-                        onChange={(e) => setNewSlotDateStr(e.target.value)} 
-                        className="h-12 rounded-xl bg-muted/40 border-none font-bold text-foreground" 
-                      />
-                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase text-primary/60 ml-1">Start</label>
+                        <label className="text-[10px] font-black uppercase text-primary/60 ml-1">Start Time</label>
                         <Input 
                           type="time" 
                           value={startTimeStr} 
@@ -344,7 +338,7 @@ export default function AdminDashboard() {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase text-primary/60 ml-1">End</label>
+                        <label className="text-[10px] font-black uppercase text-primary/60 ml-1">End Time</label>
                         <Input 
                           type="time" 
                           value={endTimeStr} 
@@ -356,7 +350,7 @@ export default function AdminDashboard() {
                   </div>
                   <DialogFooter className="pt-6">
                     <Button onClick={handleAddSlot} className="w-full h-12 rounded-xl font-bold bg-primary text-white shadow-xl shadow-primary/20">
-                      CREATE SLOT
+                      CREATE RECURRING SLOT
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -370,8 +364,8 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader className="bg-primary/5">
                     <TableRow className="hover:bg-transparent border-primary/10">
-                      <TableHead className="py-5 pl-8 font-black text-[10px] uppercase tracking-widest text-primary/60">Time Slot</TableHead>
-                      <TableHead className="font-black text-[10px] uppercase tracking-widest text-primary/60">Status</TableHead>
+                      <TableHead className="py-5 pl-8 font-black text-[10px] uppercase tracking-widest text-primary/60">Daily Time Range</TableHead>
+                      <TableHead className="font-black text-[10px] uppercase tracking-widest text-primary/60">Display Status</TableHead>
                       <TableHead className="text-right pr-8 font-black text-[10px] uppercase tracking-widest text-primary/60">Manage</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -379,18 +373,21 @@ export default function AdminDashboard() {
                     {slots.map((slot) => (
                       <TableRow key={slot.id} className="hover:bg-primary/5 border-primary/5">
                         <TableCell className="pl-8 py-4">
-                          <p className="font-bold text-sm text-foreground">{format(new Date(slot.startTime), "MMM d, EEEE")}</p>
-                          <p className="text-[10px] text-muted-foreground font-bold">{format(new Date(slot.startTime), "p")} - {format(new Date(slot.endTime), "p")}</p>
+                          <p className="font-bold text-sm text-foreground">
+                            {format(new Date(slot.startTime), "p")} - {format(new Date(slot.endTime), "p")}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground font-bold">Appears for every user selected date</p>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Switch 
                               checked={slot.isActive} 
                               onCheckedChange={() => toggleSlotActive(slot)} 
-                              disabled={slot.isBooked}
                               className="data-[state=checked]:bg-primary h-5 w-9"
                             />
-                            <span className="text-[9px] font-black uppercase opacity-60 text-foreground">{slot.isBooked ? 'Booked' : (slot.isActive ? 'Active' : 'Hidden')}</span>
+                            <span className="text-[9px] font-black uppercase opacity-60 text-foreground">
+                              {slot.isActive ? 'Active Daily' : 'Paused'}
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell className="text-right pr-8">
@@ -399,7 +396,6 @@ export default function AdminDashboard() {
                             size="icon" 
                             onClick={() => setSlotToDelete(slot.id)} 
                             className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-lg"
-                            disabled={slot.isBooked}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -411,7 +407,7 @@ export default function AdminDashboard() {
               ) : (
                 <div className="text-center py-20">
                   <CalendarIcon className="mx-auto h-12 w-12 text-muted/20" />
-                  <p className="mt-2 font-bold text-muted-foreground">No slots defined</p>
+                  <p className="mt-2 font-bold text-muted-foreground">No recurring slots defined</p>
                 </div>
               )}
             </div>
@@ -427,7 +423,7 @@ export default function AdminDashboard() {
             </div>
             <AlertDialogTitle className="text-xl font-headline font-bold text-foreground">Remove Slot?</AlertDialogTitle>
             <AlertDialogDescription className="text-sm font-medium pt-1 text-muted-foreground">
-              This will permanently delete this time window.
+              This will permanently delete this recurring time window.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-6 gap-3">
@@ -442,8 +438,6 @@ export default function AdminDashboard() {
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
         <DialogContent className="max-w-4xl w-[95vw] rounded-2xl md:rounded-3xl p-0 overflow-hidden border-none shadow-2xl bg-card">
           <div className="flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh]">
-            
-            {/* Scrollable Form Section */}
             <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6 scrollbar-hide order-2 md:order-1">
               <DialogHeader>
                 <DialogTitle className="text-xl md:text-2xl font-headline font-bold text-primary">Verify Request</DialogTitle>
@@ -451,7 +445,6 @@ export default function AdminDashboard() {
               </DialogHeader>
               
               <div className="space-y-6">
-                {/* Mobile Transaction Proof - Collapsible */}
                 <div className="md:hidden">
                   <Collapsible open={isProofExpanded} onOpenChange={setIsProofExpanded} className="rounded-2xl bg-muted/20 border border-primary/5 overflow-hidden">
                     <CollapsibleTrigger asChild>
@@ -512,7 +505,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase text-primary/60 ml-1 flex items-center gap-1.5">
-                      <XCircle className="h-3 w-3 text-destructive" /> Rejection Remarks (Internal/Client)
+                      <XCircle className="h-3 w-3 text-destructive" /> Rejection Remarks
                     </label>
                     <Textarea 
                       placeholder="Reason for rejection..." 
@@ -543,7 +536,6 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Desktop Sidebar / Image Section */}
             <div className="hidden md:flex w-[320px] bg-muted/20 p-8 border-l border-primary/5 flex-col items-center shrink-0 order-2">
               <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-4">Transaction Proof</h4>
               <div className="w-full aspect-[3/4] rounded-2xl bg-card shadow-xl overflow-hidden p-2 group relative border border-primary/5">
