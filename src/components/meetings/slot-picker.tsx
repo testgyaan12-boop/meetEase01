@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { format, startOfDay, endOfDay, isToday, setHours, setMinutes } from "date-fns"
 import { Calendar as CalendarIcon, Clock, AlertCircle, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -17,12 +17,16 @@ interface SlotPickerProps {
 }
 
 export function SlotPicker({ onSelect }: SlotPickerProps) {
-  const [date, setDate] = useState<Date>(new Date())
+  const [date, setDate] = useState<Date | null>(null)
   const [selectedSlotId, setSelectedSlotId] = useState<string>()
   const firestore = useFirestore()
   
+  // Initialize date on client to avoid hydration mismatch
+  useEffect(() => {
+    setDate(new Date())
+  }, [])
+
   // Fetch ALL recurring daily slots that are active
-  // Removed dependency on 'user' as slots are public read
   const slotsQuery = useMemoFirebase(() => {
     if (!firestore) return null
     return query(
@@ -94,8 +98,8 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
     return `${fmt(s)}-${fmt(e)} ${period}`
   }
 
-  // Ensure we are truly loading if the slots data hasn't arrived yet
-  const isLoading = isSlotsLoading || isMeetingsLoading || (slotsQuery && !slots)
+  // Truly loading if firestore isn't ready or data hasn't arrived
+  const isLoading = !date || !firestore || isSlotsLoading || isMeetingsLoading || (slotsQuery && !slots)
 
   return (
     <div className="space-y-10">
@@ -103,24 +107,26 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
         <div className="space-y-1">
           <h4 className="text-2xl font-headline font-bold text-foreground flex items-center gap-3">
             <CalendarIcon className="h-6 w-6 text-primary" />
-            {isToday(date) ? "Available Today" : format(date, "EEEE, MMM do")}
+            {!date ? "Loading..." : isToday(date) ? "Available Today" : format(date, "EEEE, MMM do")}
           </h4>
           <p className="text-sm font-medium text-muted-foreground/80">Our experts are available during these recurring hours.</p>
         </div>
 
         <div className="relative w-full sm:w-auto">
-          <Input
-            type="date"
-            value={format(date, "yyyy-MM-dd")}
-            onChange={(e) => {
-              if (e.target.value) {
-                setDate(new Date(e.target.value))
-                setSelectedSlotId(undefined)
-              }
-            }}
-            min={format(new Date(), "yyyy-MM-dd")}
-            className="h-14 px-8 rounded-2xl border-none bg-muted/40 font-black text-primary shadow-lg focus:ring-4 focus:ring-primary/10 transition-all text-base"
-          />
+          {date && (
+            <Input
+              type="date"
+              value={format(date, "yyyy-MM-dd")}
+              onChange={(e) => {
+                if (e.target.value) {
+                  setDate(new Date(e.target.value))
+                  setSelectedSlotId(undefined)
+                }
+              }}
+              min={format(new Date(), "yyyy-MM-dd")}
+              className="h-14 px-8 rounded-2xl border-none bg-muted/40 font-black text-primary shadow-lg focus:ring-4 focus:ring-primary/10 transition-all text-base"
+            />
+          )}
         </div>
       </div>
 
