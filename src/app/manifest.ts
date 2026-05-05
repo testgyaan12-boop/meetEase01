@@ -1,11 +1,10 @@
-
 import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'MeetEase',
-    short_name: 'MeetEase',
-    description: 'Effortless Scheduling and Professional Meetings',
+    name: 'Office VS Me',
+    short_name: 'Office VS Me',
+    description: 'Decoding Corporate Reality and Professional Fixes',
     start_url: '/dashboard',
     display: 'standalone',
     background_color: '#F0F0FB',

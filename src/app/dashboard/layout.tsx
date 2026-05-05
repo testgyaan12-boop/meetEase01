@@ -39,7 +39,7 @@ export default function DashboardLayout({
           <div className="h-16 w-16 bg-primary rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-primary/20">
             <Loader2 className="h-10 w-10 animate-spin text-white" />
           </div>
-          <p className="text-lg font-bold text-primary animate-pulse tracking-tight">MeetEase - Preparing Workspace</p>
+          <p className="text-lg font-bold text-primary animate-pulse tracking-tight">Office VS Me - Preparing Workspace</p>
         </div>
       </div>
     )
@@ -61,7 +61,7 @@ export default function DashboardLayout({
           <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
             <ShieldCheck className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-headline font-bold text-primary tracking-tight">MeetEase</h1>
+          <h1 className="text-2xl font-headline font-bold text-primary tracking-tight">Office VS Me</h1>
         </div>
         
         <nav className="flex-1 space-y-2">
@@ -102,7 +102,7 @@ export default function DashboardLayout({
           <div className="md:hidden">
             <Link href="/dashboard" className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-headline font-bold text-primary">MeetEase</h1>
+              <h1 className="text-xl font-headline font-bold text-primary">Office VS Me</h1>
             </Link>
           </div>
           <div className="flex items-center gap-3 md:gap-6 ml-auto">

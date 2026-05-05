@@ -5,8 +5,6 @@ import { useState } from "react"
 import { 
   ArrowRight, 
   ShieldCheck, 
-  Zap, 
-  Bell, 
   CheckCircle2, 
   Star, 
   Quote, 
@@ -86,7 +84,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <span className="text-xl font-headline font-bold text-primary">MeetEase</span>
+            <span className="text-xl font-headline font-bold text-primary">Office VS Me</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/login">
@@ -129,7 +127,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <p className="text-sm font-medium text-muted-foreground">
-                Trusted by <span className="text-foreground font-bold">14.7K+</span> followers
+                Trusted by <span className="text-foreground font-bold">14.7K+</span> professionals
               </p>
             </div>
           </div>
@@ -139,7 +137,7 @@ export default function LandingPage() {
             <div className="relative bg-white p-2 rounded-[2rem] shadow-2xl border border-white/50 backdrop-blur-sm">
               <img 
                 src="https://picsum.photos/seed/office/1200/900" 
-                alt="MeetEase Career Dashboard" 
+                alt="Office VS Me Strategy Dashboard" 
                 className="rounded-[1.5rem] w-full"
                 data-ai-hint="office meeting"
               />
@@ -231,7 +229,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-6 w-6 text-primary" />
-            <span className="text-lg font-headline font-bold text-primary">MeetEase</span>
+            <span className="text-lg font-headline font-bold text-primary">Office VS Me</span>
           </div>
           <div className="flex gap-8 text-sm text-muted-foreground font-medium">
             <Link href="#" className="hover:text-primary">Privacy</Link>
@@ -255,7 +253,7 @@ export default function LandingPage() {
             <DialogHeader className="space-y-4">
               <div className="flex flex-col items-center gap-3">
                 <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30 font-black px-4 py-1.5 rounded-full text-[10px] tracking-widest uppercase flex items-center gap-2 mx-auto">
-                  <Heart className="h-3 w-3 fill-primary" /> Show your love for expand
+                  <Heart className="h-3 w-3 fill-primary" /> Show your love
                 </Badge>
                 <DialogTitle className="text-2xl font-headline font-bold text-primary">Support Our Mission</DialogTitle>
                 <DialogDescription className="text-sm font-medium text-muted-foreground">

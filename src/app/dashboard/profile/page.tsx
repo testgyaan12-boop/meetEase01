@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { User, Mail, Shield, Save, LogOut, ArrowRight, ShieldCheck, Copy, Check, QrCode, Heart } from "lucide-react"
+import { User, Shield, Save, LogOut, ArrowRight, ShieldCheck, Copy, Check, Heart } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useMemoFirebase } from "@/firebase"
@@ -138,8 +138,8 @@ export default function ProfilePage() {
       <Card className="border-none shadow-2xl bg-gradient-to-br from-primary/10 via-background to-accent/5 dark:from-primary/5 dark:via-card dark:to-accent/5 rounded-2xl md:rounded-[2.5rem] overflow-hidden">
         <CardContent className="p-6 md:p-10 text-center space-y-6">
           <div className="flex flex-col items-center gap-4">
-            <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30 font-black px-4 py-1.5 rounded-full text-[10px] tracking-widest uppercase flex items-center gap-2">
-              <Heart className="h-3 w-3 fill-primary" /> Show your love for expand
+            <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30 font-black px-4 py-1.5 rounded-full text-[10px] tracking-widest uppercase flex items-center gap-2 mx-auto">
+              <Heart className="h-3 w-3 fill-primary" /> Show your love
             </Badge>
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>

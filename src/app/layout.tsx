@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -6,12 +5,12 @@ import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
-  title: 'MeetEase - Effortless Scheduling',
-  description: 'Book your professional meetings with confidence and ease.',
+  title: 'Office VS Me - Professional Consultation',
+  description: 'Decode corporate reality with expert CV fixes, strategy, and HR insights.',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'MeetEase',
+    title: 'Office VS Me',
   },
   formatDetection: {
     telephone: false,

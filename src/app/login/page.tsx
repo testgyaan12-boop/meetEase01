@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -53,7 +52,7 @@ export default function LoginPage() {
         if (data.fullName) {
           await updateProfile(userCredential.user, { displayName: data.fullName })
         }
-        toast({ title: "Account created!", description: "Welcome to MeetEase." })
+        toast({ title: "Account created!", description: "Welcome to Office VS Me." })
       }
       router.push('/dashboard')
     } catch (err: any) {
@@ -93,8 +92,7 @@ export default function LoginPage() {
           <div className="inline-flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-2xl md:rounded-3xl bg-primary text-white mb-2 md:mb-6 shadow-2xl shadow-primary/20 transform hover:rotate-6 transition-transform">
             <ShieldCheck className="h-8 w-8 md:h-10 md:w-10" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary tracking-tight">MeetEase</h1>
-          <p className="hidden md:block text-muted-foreground font-medium text-lg">Your professional meeting hub</p>
+          <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary tracking-tight">Office VS Me</h1>
         </div>
 
         <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.1)] bg-white/80 dark:bg-card/90 backdrop-blur-xl">
@@ -103,7 +101,7 @@ export default function LoginPage() {
               {isLogin ? "Welcome Back" : "Create Account"}
             </CardTitle>
             <CardDescription className="text-sm md:text-base font-medium">
-              {isLogin ? "Sign in to manage your appointments." : "Start your journey with MeetEase today."}
+              {isLogin ? "Sign in to manage your appointments." : "Start your journey with Office VS Me today."}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-5 md:p-6 pt-0 md:pt-0">
