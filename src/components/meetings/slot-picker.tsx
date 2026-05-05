@@ -132,13 +132,13 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
 
       <div className="space-y-4">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-3 gap-3 md:gap-6">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-28 w-full rounded-3xl" />
+              <Skeleton key={i} className="h-20 md:h-28 w-full rounded-2xl md:rounded-3xl" />
             ))}
           </div>
         ) : normalizedSlots && normalizedSlots.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <div className="grid grid-cols-3 gap-3 md:gap-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {normalizedSlots.map((slot) => (
               <Button
                 key={slot.id}
@@ -146,7 +146,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
                 disabled={slot.isBookedOnSelectedDate}
                 variant={selectedSlotId === slot.id ? "default" : "outline"}
                 className={cn(
-                  "h-28 flex flex-col items-center justify-center rounded-[2rem] transition-all duration-500 border-2",
+                  "h-20 md:h-28 flex flex-col items-center justify-center rounded-2xl md:rounded-[2rem] transition-all duration-500 border-2",
                   selectedSlotId === slot.id
                     ? "bg-primary text-primary-foreground border-primary shadow-2xl scale-105"
                     : "border-primary/5 hover:border-primary/30 bg-muted/20 backdrop-blur-sm shadow-sm",
@@ -154,24 +154,24 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
                 )}
                 onClick={() => handleSlotClick(slot)}
               >
-                <div className="flex items-center gap-3">
-                  <Clock className={cn("h-5 w-5", selectedSlotId === slot.id ? "text-primary-foreground" : "text-primary/60")} />
+                <div className="flex items-center gap-1 md:gap-3">
+                  <Clock className={cn("hidden sm:block h-5 w-5", selectedSlotId === slot.id ? "text-primary-foreground" : "text-primary/60")} />
                   <span className={cn(
-                    "font-black text-xl tracking-tight",
+                    "font-black text-[10px] md:text-xl tracking-tight leading-none",
                     slot.isBookedOnSelectedDate && "line-through decoration-destructive/60 decoration-2"
                   )}>
                     {formatRange(slot.actualStartTime, slot.actualEndTime)}
                   </span>
                 </div>
-                <div className="mt-2 flex items-center gap-1.5">
+                <div className="mt-1 md:mt-2 flex items-center gap-1.5">
                   {slot.isBookedOnSelectedDate ? (
-                    <span className="text-[10px] uppercase font-black tracking-widest text-destructive">Booked</span>
+                    <span className="text-[7px] md:text-[10px] uppercase font-black tracking-widest text-destructive">Booked</span>
                   ) : selectedSlotId === slot.id ? (
-                    <span className="text-[10px] uppercase font-black tracking-widest text-primary-foreground flex items-center gap-1">
-                      <Check className="h-2.5 w-2.5" /> Selected
+                    <span className="text-[7px] md:text-[10px] uppercase font-black tracking-widest text-primary-foreground flex items-center gap-1">
+                      <Check className="h-2 md:h-2.5 w-2 md:w-2.5" /> Selected
                     </span>
                   ) : (
-                    <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">Available</span>
+                    <span className="text-[7px] md:text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">Available</span>
                   )}
                 </div>
               </Button>

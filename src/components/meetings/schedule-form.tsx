@@ -9,6 +9,7 @@ import * as z from "zod"
 import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon, QrCode, Copy, Check, Briefcase } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { SlotPicker } from "./slot-picker"
 import { useToast } from "@/hooks/use-toast"
@@ -16,7 +17,6 @@ import { cn } from "@/lib/utils"
 import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
-import { MeetingDescriptionAI } from "./meeting-description-ai"
 
 const formSchema = z.object({
   clientName: z.string().min(2, "Name must be at least 2 characters"),
@@ -195,10 +195,11 @@ export function ScheduleMeetingForm() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[9px] md:text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1">Brief Description (AI Assisted)</label>
-                <MeetingDescriptionAI 
-                  value={form.watch("description")} 
-                  onChange={(val) => form.setValue("description", val, { shouldValidate: true })} 
+                <label className="text-[9px] md:text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1">Professional Agenda</label>
+                <Textarea
+                  placeholder="Tell us more about your career goals or specific challenges..."
+                  {...form.register("description")}
+                  className="min-h-[120px] md:min-h-[160px] rounded-xl md:rounded-[2rem] bg-muted/40 border-none shadow-inner p-4 md:p-8 text-sm md:text-base font-bold text-foreground resize-none leading-relaxed"
                 />
                 {form.formState.errors.description && (
                   <p className="text-[9px] md:text-xs text-destructive font-bold px-2">{form.formState.errors.description.message as string}</p>
