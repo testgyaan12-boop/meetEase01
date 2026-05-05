@@ -7,9 +7,19 @@ import { Button } from "@/components/ui/button"
 import { useUser, useAuth } from "@/firebase"
 import { signOut } from "firebase/auth"
 import { useRouter, usePathname } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/navigation/theme-toggle"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function DashboardLayout({
   children,
@@ -20,6 +30,7 @@ export default function DashboardLayout({
   const auth = useAuth()
   const router = useRouter()
   const pathname = usePathname()
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -29,7 +40,7 @@ export default function DashboardLayout({
 
   const handleSignOut = async () => {
     await signOut(auth)
-    router.push("/login")
+    router.push("/")
   }
 
   if (isUserLoading) {
@@ -88,7 +99,7 @@ export default function DashboardLayout({
         <div className="pt-8 border-t border-muted-foreground/10 space-y-4">
           <Button 
             variant="ghost" 
-            onClick={handleSignOut}
+            onClick={() => setShowLogoutDialog(true)}
             className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/5 rounded-2xl font-bold px-5 py-6 h-auto"
           >
             <LogOut className="h-5 w-5 mr-3" /> Log Out
@@ -132,6 +143,26 @@ export default function DashboardLayout({
       </div>
 
       <MobileNav />
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="rounded-2xl md:rounded-3xl p-8 max-w-sm bg-card border-none shadow-2xl">
+          <AlertDialogHeader>
+            <div className="h-14 w-14 bg-destructive/10 rounded-2xl flex items-center justify-center text-destructive mb-4 mx-auto md:mx-0">
+              <LogOut className="h-7 w-7" />
+            </div>
+            <AlertDialogTitle className="text-2xl font-headline font-bold text-foreground">Sign Out?</AlertDialogTitle>
+            <AlertDialogDescription className="text-base font-medium pt-1 text-muted-foreground">
+              Are you sure you want to end your professional session?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="pt-8 gap-3">
+            <AlertDialogCancel className="h-14 rounded-2xl border-none bg-muted font-bold text-foreground flex-1">Wait, Stay</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSignOut} className="h-14 rounded-2xl bg-destructive text-white font-bold shadow-xl shadow-destructive/20 flex-1">
+              LOG OUT
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

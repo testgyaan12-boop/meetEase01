@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -14,8 +13,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { SlotPicker } from "./slot-picker"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
-import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
+import { useFirestore, useUser, addDocumentNonBlocking, useStorage } from "@/firebase"
 import { collection } from "firebase/firestore"
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { Badge } from "@/components/ui/badge"
 
 const formSchema = z.object({
@@ -38,6 +38,7 @@ export function ScheduleMeetingForm() {
   const router = useRouter()
   const { user } = useUser()
   const firestore = useFirestore()
+  const storage = useStorage()
 
   const upiId = "meetease@upi"
 
@@ -65,19 +66,18 @@ export function ScheduleMeetingForm() {
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!user || !firestore) return
+    if (!user || !firestore || !storage) return
     setIsSubmitting(true)
 
     try {
       let paymentProofUrl = ""
       const file = values.paymentProof?.[0]
       if (file) {
-        paymentProofUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        // Upload to Firebase Storage
+        const storagePath = `payment_proofs/${user.uid}/${Date.now()}_${file.name}`
+        const storageRef = ref(storage, storagePath)
+        const snapshot = await uploadBytes(storageRef, file)
+        paymentProofUrl = await getDownloadURL(snapshot.ref)
       }
 
       const meetingData = {
@@ -108,7 +108,8 @@ export function ScheduleMeetingForm() {
       toast({ title: "Booking Requested", description: "Verification in progress." })
       router.push("/dashboard/history")
     } catch (error) {
-      toast({ title: "Error", description: "Submission failed. Please check your data.", variant: "destructive" })
+      console.error("Submission error:", error)
+      toast({ title: "Error", description: "Submission failed. Please check your connection.", variant: "destructive" })
     } finally {
       setIsSubmitting(false)
     }

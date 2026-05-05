@@ -17,6 +17,16 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const profileSchema = z.object({
   fullName: z.string().min(2, "Full name is too short"),
@@ -30,6 +40,7 @@ export default function ProfilePage() {
   const { toast } = useToast()
   const router = useRouter()
   const [copied, setCopied] = useState(false)
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
   const upiId = "meetease@upi" // Placeholder UPI ID
 
@@ -75,7 +86,7 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     await signOut(auth)
-    router.push("/login")
+    router.push("/")
   }
 
   const handleCopyUpi = () => {
@@ -220,13 +231,13 @@ export default function ProfilePage() {
                 type="submit" 
                 className="w-full h-12 md:h-16 bg-primary hover:bg-primary/90 text-white font-bold text-base md:text-xl rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-95 flex gap-2 md:gap-3"
               >
-                <Save className="h-5 w-5 md:h-6 md:w-6" /> Save Profile
+                <ShieldCheck className="h-5 w-5 md:h-6 md:w-6" /> Save Profile
               </Button>
               
               <Button 
                 type="button" 
                 variant="destructive"
-                onClick={handleLogout}
+                onClick={() => setShowLogoutDialog(true)}
                 className="w-full h-12 md:h-16 font-bold text-base md:text-xl rounded-xl md:rounded-2xl transition-all active:scale-95 flex gap-2 md:gap-3 bg-destructive/10 text-destructive hover:bg-destructive hover:text-white border-none shadow-none"
               >
                 <LogOut className="h-5 w-5 md:h-6 md:w-6" /> Sign Out
@@ -235,6 +246,26 @@ export default function ProfilePage() {
           </form>
         </CardContent>
       </Card>
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="rounded-2xl md:rounded-3xl p-8 max-w-sm bg-card border-none shadow-2xl">
+          <AlertDialogHeader>
+            <div className="h-14 w-14 bg-destructive/10 rounded-2xl flex items-center justify-center text-destructive mb-4 mx-auto md:mx-0">
+              <LogOut className="h-7 w-7" />
+            </div>
+            <AlertDialogTitle className="text-2xl font-headline font-bold text-foreground">Sign Out?</AlertDialogTitle>
+            <AlertDialogDescription className="text-base font-medium pt-1 text-muted-foreground">
+              Are you sure you want to end your professional session?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="pt-8 gap-3">
+            <AlertDialogCancel className="h-14 rounded-2xl border-none bg-muted font-bold text-foreground flex-1">Wait, Stay</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} className="h-14 rounded-2xl bg-destructive text-white font-bold shadow-xl shadow-destructive/20 flex-1">
+              LOG OUT
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
