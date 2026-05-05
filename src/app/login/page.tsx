@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { ShieldCheck, Mail, Lock, ArrowRight, Loader2, AlertCircle } from "lucide-react"
+import { ShieldCheck, Mail, Lock, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
@@ -23,6 +23,7 @@ const loginSchema = z.object({
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLogin, setIsLogin] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const { toast } = useToast()
@@ -73,7 +74,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-primary/10 via-background to-accent/5">
       <div className="w-full max-w-md space-y-4 md:space-y-8 animate-in fade-in zoom-in duration-500">
         <div className="text-center space-y-1 md:space-y-2">
-          <div className="inline-flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-2xl md:rounded-3xl bg-primary text-white mb-4 md:mb-6 shadow-2xl shadow-primary/20 transform hover:rotate-6 transition-transform">
+          <div className="inline-flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-2xl md:rounded-3xl bg-primary text-white mb-2 md:mb-6 shadow-2xl shadow-primary/20 transform hover:rotate-6 transition-transform">
             <ShieldCheck className="h-8 w-8 md:h-10 md:w-10" />
           </div>
           <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary tracking-tight">MeetEase</h1>
@@ -127,12 +128,21 @@ export default function LoginPage() {
                 <label className="text-xs md:text-sm font-bold flex items-center gap-2 text-primary">
                   <Lock className="h-4 w-4" /> Password
                 </label>
-                <Input 
-                  type="password" 
-                  placeholder="••••••••" 
-                  className="h-11 md:h-12 border-primary/10 focus:ring-primary focus:border-primary bg-white/50"
-                  {...register("password")}
-                />
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    className="h-11 md:h-12 border-primary/10 focus:ring-primary focus:border-primary bg-white/50 pr-10"
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
                 {errors.password && <p className="text-[10px] md:text-xs text-destructive font-semibold">{errors.password.message}</p>}
               </div>
               <Button 
