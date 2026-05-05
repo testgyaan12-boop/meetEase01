@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, ShieldCheck, Zap, Bell, CheckCircle2, Star, Quote } from "lucide-react"
+import { ArrowRight, ShieldCheck, Zap, Bell, CheckCircle2, Star, Quote, Briefcase, UserCheck, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Carousel,
@@ -13,21 +13,21 @@ import { Card, CardContent } from "@/components/ui/card"
 export default function LandingPage() {
   const testimonials = [
     {
-      name: "Dr. Ananya Iyer",
-      role: "Psychologist",
-      text: "MeetEase has completely transformed how I handle patient consultations. The payment verification is a lifesaver.",
+      name: "Aditya Sharma",
+      role: "Marketing Manager",
+      text: "The salary negotiation strategy I learned here literally increased my offer by 30%. Decoding corporate reality is a game changer.",
       avatar: "https://picsum.photos/seed/doc1/100/100"
     },
     {
-      name: "Rahul Verma",
-      role: "Tech Consultant",
-      text: "The AI description tool helps me set professional agendas in seconds. Highly recommend for any freelancer.",
+      name: "Sneha Kapur",
+      role: "Software Engineer",
+      text: "Finally, someone who explains what HR is actually looking for. My CV fix helped me land 3 interviews in a week.",
       avatar: "https://picsum.photos/seed/doc2/100/100"
     },
     {
-      name: "Sarah Jenkins",
-      role: "Career Coach",
-      text: "Finally, a scheduling tool that feels premium and handles the messy logistics of booking and payments.",
+      name: "Vikram Malhotra",
+      role: "Operations Lead",
+      text: "The one-on-one consultation for background verification gave me the confidence I needed to switch jobs smoothly.",
       avatar: "https://picsum.photos/seed/doc3/100/100"
     },
     {
@@ -52,7 +52,7 @@ export default function LandingPage() {
               <Button variant="ghost" className="font-semibold">Sign In</Button>
             </Link>
             <Link href="/login">
-              <Button className="bg-primary hover:bg-primary/90 text-white font-bold">Get Started</Button>
+              <Button className="bg-primary hover:bg-primary/90 text-white font-bold">Book Consultation</Button>
             </Link>
           </div>
         </div>
@@ -63,32 +63,32 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animate-in slide-in-from-left duration-700">
             <h1 className="text-5xl md:text-7xl font-headline font-bold text-primary leading-tight">
-              Professional Meetings, <br />
-              <span className="text-accent">Simplified.</span>
+              Decoding <br />
+              <span className="text-accent">Corporate Reality.</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-lg leading-relaxed">
-              Book consultations, verify payments, and manage your schedule effortlessly. The all-in-one platform for modern professionals.
+              Ex-HR insights for your CV, Job Strategy, and Career Fixes. Skip the corporate noise and get the professional strategy you need to win.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/login">
                 <Button size="lg" className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 font-bold group shadow-xl shadow-primary/20">
-                  Book Your Session <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  Fix Your Career <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-2 font-bold">
-                View Pricing
+                View Strategies
               </Button>
             </div>
             <div className="flex items-center gap-6 pt-4">
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="h-10 w-10 rounded-full border-2 border-white bg-muted overflow-hidden">
-                    <img src={`https://picsum.photos/seed/${i}/100/100`} alt="user" />
+                    <img src={`https://picsum.photos/seed/career${i}/100/100`} alt="user" />
                   </div>
                 ))}
               </div>
               <p className="text-sm font-medium text-muted-foreground">
-                Joined by <span className="text-foreground font-bold">2,000+</span> professionals
+                Trusted by <span className="text-foreground font-bold">14.7K+</span> followers
               </p>
             </div>
           </div>
@@ -97,9 +97,10 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-accent/20 rounded-[2rem] blur-3xl" />
             <div className="relative bg-white p-2 rounded-[2rem] shadow-2xl border border-white/50 backdrop-blur-sm">
               <img 
-                src="https://picsum.photos/seed/dashboard/1200/900" 
-                alt="MeetEase Dashboard Preview" 
+                src="https://picsum.photos/seed/office/1200/900" 
+                alt="MeetEase Career Dashboard" 
                 className="rounded-[1.5rem] w-full"
+                data-ai-hint="office meeting"
               />
             </div>
           </div>
@@ -111,12 +112,12 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div className="space-y-2">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary">What our community says</h2>
-              <p className="text-muted-foreground font-medium">Trusted by experts across the globe.</p>
+              <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary">Success Stories</h2>
+              <p className="text-muted-foreground font-medium">From corporate blockers to dream careers.</p>
             </div>
             <div className="hidden md:flex gap-2">
               <p className="text-sm font-bold text-primary flex items-center gap-1.5">
-                <Star className="h-4 w-4 fill-primary" /> 4.9/5 Rating
+                <Star className="h-4 w-4 fill-primary" /> 4.9/5 Success Rate
               </p>
             </div>
           </div>
@@ -163,14 +164,14 @@ export default function LandingPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl md:text-5xl font-headline font-bold">Everything you need to grow</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Our feature-rich platform handles the logistics so you can focus on the conversation.</p>
+            <h2 className="text-3xl md:text-5xl font-headline font-bold">Your Career Toolkit</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Get the strategy you need to navigate background verifications, salary negotiations, and HR reality.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: "AI-Powered Descriptions", icon: Zap, desc: "Generate professional meeting summaries in seconds with our embedded GenAI tool." },
-              { title: "Secure Payment Verification", icon: ShieldCheck, desc: "Built-in proof-of-payment system ensures secure and verified bookings every time." },
-              { title: "Real-time Notifications", icon: Bell, desc: "Get notified instantly when meetings are confirmed or updated across all your devices." },
+              { title: "CV & Job Strategy", icon: UserCheck, desc: "Professional CV fixes and LinkedIn optimization to ensure you actually get seen by recruiters." },
+              { title: "Salary Negotiation", icon: TrendingUp, desc: "Proven scripts and strategies to handle the 'What are your expectations?' talk and win." },
+              { title: "Corporate reality check", icon: Briefcase, desc: "One-on-one sessions to decode your office politics, management issues, and career blockers." },
             ].map((f, i) => (
               <div key={i} className="p-8 rounded-2xl bg-background hover:bg-primary/5 transition-colors group">
                 <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-all">
@@ -195,9 +196,9 @@ export default function LandingPage() {
             <Link href="#" className="hover:text-primary">Privacy</Link>
             <Link href="#" className="hover:text-primary">Terms</Link>
             <Link href="#" className="hover:text-primary">Support</Link>
-            <Link href="#" className="hover:text-primary">Contact</Link>
+            <Link href="#" className="hover:text-primary">Consultations</Link>
           </div>
-          <p className="text-sm text-muted-foreground">© 2024 MeetEase. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2024 Office VS Me. All rights reserved.</p>
         </div>
       </footer>
     </div>
