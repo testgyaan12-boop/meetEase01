@@ -7,7 +7,7 @@ import { Calendar as CalendarIcon, Clock, AlertCircle, Check } from "lucide-reac
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AvailableSlot, Meeting } from "@/lib/types"
@@ -19,24 +19,24 @@ interface SlotPickerProps {
 export function SlotPicker({ onSelect }: SlotPickerProps) {
   const [date, setDate] = useState<Date>(new Date())
   const [selectedSlotId, setSelectedSlotId] = useState<string>()
-  const { user } = useUser()
   const firestore = useFirestore()
   
   // Fetch ALL recurring daily slots that are active
+  // Removed dependency on 'user' as slots are public read
   const slotsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null
+    if (!firestore) return null
     return query(
       collection(firestore, "availableSlots"),
       where("isActive", "==", true),
       orderBy("startTime", "asc")
     )
-  }, [firestore, user])
+  }, [firestore])
 
   const { data: slots, isLoading: isSlotsLoading } = useCollection<AvailableSlot>(slotsQuery)
 
   // Fetch confirmed/pending meetings for the selected date to check availability
   const meetingsQuery = useMemoFirebase(() => {
-    if (!firestore || !date || !user) return null
+    if (!firestore || !date) return null
     const dayStart = startOfDay(date).toISOString()
     const dayEnd = endOfDay(date).toISOString()
 
@@ -45,7 +45,7 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
       where("slotStartTime", ">=", dayStart),
       where("slotStartTime", "<=", dayEnd)
     )
-  }, [firestore, date, user])
+  }, [firestore, date])
 
   const { data: dailyMeetings, isLoading: isMeetingsLoading } = useCollection<Meeting>(meetingsQuery)
 
@@ -94,7 +94,8 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
     return `${fmt(s)}-${fmt(e)} ${period}`
   }
 
-  const isLoading = isSlotsLoading || isMeetingsLoading
+  // Ensure we are truly loading if the slots data hasn't arrived yet
+  const isLoading = isSlotsLoading || isMeetingsLoading || (slotsQuery && !slots)
 
   return (
     <div className="space-y-10">
@@ -175,9 +176,9 @@ export function SlotPicker({ onSelect }: SlotPickerProps) {
             <div className="h-28 w-28 rounded-[2.5rem] bg-muted/40 flex items-center justify-center mb-8 shadow-xl">
               <AlertCircle className="h-14 w-14 text-muted-foreground/30" />
             </div>
-            <h4 className="text-3xl font-headline font-bold text-muted-foreground/80 tracking-tight">No Slots Active</h4>
+            <h4 className="text-3xl font-headline font-bold text-muted-foreground/80 tracking-tight">Fully Booked</h4>
             <p className="text-muted-foreground/60 mt-3 font-medium text-lg max-w-sm leading-relaxed">
-              Admin has not activated any daily consultation windows. Please check back later.
+              Our experts are currently unavailable for this date. Please select another day or check back later.
             </p>
           </div>
         )}
