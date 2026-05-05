@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -66,20 +67,36 @@ export function ScheduleMeetingForm() {
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!user || !firestore || !storage) return
+    if (!user) {
+      toast({ title: "Auth Required", description: "Please sign in to book a session.", variant: "destructive" })
+      return
+    }
+    if (!firestore || !storage) {
+      toast({ title: "Service Error", description: "Firebase services are not ready. Please refresh.", variant: "destructive" })
+      return
+    }
+    
     setIsSubmitting(true)
 
     try {
       let paymentProofUrl = ""
       const file = values.paymentProof?.[0]
+      
       if (file) {
-        // Upload to Firebase Storage
+        // 1. Upload to Firebase Storage
         const storagePath = `payment_proofs/${user.uid}/${Date.now()}_${file.name}`
         const storageRef = ref(storage, storagePath)
-        const snapshot = await uploadBytes(storageRef, file)
-        paymentProofUrl = await getDownloadURL(snapshot.ref)
+        
+        try {
+          const snapshot = await uploadBytes(storageRef, file)
+          paymentProofUrl = await getDownloadURL(snapshot.ref)
+        } catch (uploadError: any) {
+          console.error("Storage upload error:", uploadError)
+          throw new Error(`Payment proof upload failed: ${uploadError.message}`)
+        }
       }
 
+      // 2. Prepare meeting data
       const meetingData = {
         userId: user.uid,
         clientEmail: values.clientEmail,
@@ -95,9 +112,11 @@ export function ScheduleMeetingForm() {
         updatedAt: new Date().toISOString(),
       }
 
-      addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
+      // 3. Save to Firestore
+      await addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
 
-      addDocumentNonBlocking(collection(firestore, "admin_notifications"), {
+      // 4. Create Notification
+      await addDocumentNonBlocking(collection(firestore, "admin_notifications"), {
         title: "📅 New Booking Request",
         message: `${values.clientName} booked a session on ${new Date(values.slotStartTime).toLocaleString()}`,
         type: "new_booking",
@@ -105,11 +124,15 @@ export function ScheduleMeetingForm() {
         createdAt: new Date().toISOString()
       })
 
-      toast({ title: "Booking Requested", description: "Verification in progress." })
+      toast({ title: "Booking Requested", description: "Your verification is in progress. Check history for updates." })
       router.push("/dashboard/history")
-    } catch (error) {
-      console.error("Submission error:", error)
-      toast({ title: "Error", description: "Submission failed. Please check your connection.", variant: "destructive" })
+    } catch (error: any) {
+      console.error("Final submission error:", error)
+      toast({ 
+        title: "Submission Failed", 
+        description: error.message || "Something went wrong. Please check your connection and try again.", 
+        variant: "destructive" 
+      })
     } finally {
       setIsSubmitting(false)
     }
