@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -47,40 +48,40 @@ export function MeetingDescriptionAI({ value, onChange }: MeetingDescriptionAIPr
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">Quick Brief (AI Input)</label>
-        <div className="flex gap-2">
+    <div className="space-y-5">
+      <div className="flex flex-col gap-2 p-4 md:p-6 rounded-2xl bg-primary/5 border border-primary/10 border-dashed">
+        <label className="text-[10px] font-black uppercase tracking-widest text-primary/60 ml-1">AI Quick Prompt</label>
+        <div className="flex gap-3">
           <Textarea
-            placeholder="e.g. discuss marketing budget for Q3"
+            placeholder="e.g. discuss salary negotiation strategy for a senior manager role"
             value={briefInput}
             onChange={(e) => setBriefInput(e.target.value)}
-            className="min-h-[60px] resize-none"
+            className="min-h-[60px] md:min-h-[80px] bg-white border-none shadow-sm rounded-xl font-medium text-xs md:text-sm resize-none"
           />
           <Button
             type="button"
-            variant="outline"
-            className="h-auto shrink-0 border-primary text-primary hover:bg-primary/5"
+            className="h-auto shrink-0 bg-primary hover:bg-primary/90 text-white rounded-xl px-4 md:px-6 shadow-lg shadow-primary/20 transition-all active:scale-95"
             onClick={handleGenerate}
             disabled={isGenerating}
           >
             {isGenerating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-5 w-5" />
             )}
-            <span className="ml-2 hidden sm:inline">Magic</span>
+            <span className="ml-2 hidden sm:inline font-bold">Magic</span>
           </Button>
         </div>
+        <p className="text-[9px] text-muted-foreground italic font-medium">Brief keywords will be expanded into a professional agenda.</p>
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">Final Professional Description</label>
+        <label className="text-[10px] font-black uppercase tracking-widest text-primary/60 ml-1">Professional Agenda</label>
         <Textarea
           placeholder="Professional description will appear here..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="min-h-[120px]"
+          className="min-h-[120px] md:min-h-[160px] rounded-xl md:rounded-[2rem] bg-muted/40 border-none shadow-inner p-4 md:p-8 text-sm md:text-base font-bold text-foreground resize-none leading-relaxed"
         />
       </div>
     </div>
