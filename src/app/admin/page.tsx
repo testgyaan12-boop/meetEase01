@@ -191,8 +191,8 @@ export default function AdminDashboard() {
   if (!hasAdminAccess) return null
 
   const filteredMeetings = meetings?.filter(m => 
-    m.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    m.clientEmail.toLowerCase().includes(searchTerm.toLowerCase())
+    (m.clientName?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (m.clientEmail?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   )
 
   return (

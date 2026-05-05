@@ -8,7 +8,8 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2';
+      return request.auth.uid == 'hKv5CWVQv7YvJk8mLyCY11ec96O2' || 
+             exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
     
     // MEETINGS - Sab signed-in users create kar sakte hain
