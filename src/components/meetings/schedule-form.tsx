@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -5,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon } from "lucide-react"
+import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon, QrCode, Copy, Check, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -15,6 +16,7 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
 import { collection } from "firebase/firestore"
+import { Badge } from "@/components/ui/badge"
 
 const formSchema = z.object({
   clientName: z.string().min(2, "Name must be at least 2 characters"),
@@ -31,10 +33,13 @@ const formSchema = z.object({
 
 export function ScheduleMeetingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [upiCopied, setUpiCopied] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
   const { user } = useUser()
   const firestore = useFirestore()
+
+  const upiId = "meetease@upi"
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,6 +53,16 @@ export function ScheduleMeetingForm() {
       slotEndTime: "",
     },
   })
+
+  const handleCopyUpi = () => {
+    navigator.clipboard.writeText(upiId)
+    setUpiCopied(true)
+    toast({
+      title: "UPI Copied",
+      description: "The UPI ID has been copied to your clipboard.",
+    })
+    setTimeout(() => setUpiCopied(false), 2000)
+  }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user || !firestore) return
@@ -218,7 +233,52 @@ export function ScheduleMeetingForm() {
               </div>
             </section>
 
-            {/* STEP 4: PAYMENT */}
+            {/* PAYMENT INSTRUCTIONS */}
+            <Card className="border-2 border-primary/20 bg-primary/5 rounded-[2rem] md:rounded-[3rem] overflow-hidden animate-in fade-in zoom-in duration-700">
+              <CardContent className="p-6 md:p-10 flex flex-col items-center text-center space-y-6">
+                <div className="space-y-2">
+                  <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30 font-black px-4 py-1.5 rounded-full text-[10px] tracking-widest uppercase flex items-center gap-2 mx-auto">
+                    <Heart className="h-3 w-3 fill-primary" /> Show your love for expand
+                  </Badge>
+                  <h3 className="text-xl md:text-2xl font-headline font-bold text-primary">Payment Details</h3>
+                  <p className="text-xs md:text-sm font-medium text-muted-foreground max-w-xs mx-auto">
+                    Scan the QR code below or copy the UPI ID to complete your transaction.
+                  </p>
+                </div>
+
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-25"></div>
+                  <div className="relative bg-white dark:bg-card p-3 rounded-2xl shadow-xl">
+                    <img 
+                      src="https://picsum.photos/seed/qr99/400/400" 
+                      alt="Payment QR" 
+                      className="w-32 h-32 md:w-40 md:h-40 object-contain rounded-lg"
+                      data-ai-hint="qr code"
+                    />
+                  </div>
+                </div>
+
+                <div className="w-full max-w-xs space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-12 rounded-xl bg-background border border-primary/10 flex items-center justify-center font-bold text-sm md:text-base text-primary shadow-sm">
+                      {upiId}
+                    </div>
+                    <Button 
+                      type="button"
+                      size="icon" 
+                      variant="outline" 
+                      onClick={handleCopyUpi}
+                      className="h-12 w-12 rounded-xl border-primary/10 hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5"
+                    >
+                      {upiCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                    </Button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground font-medium italic">Your support helps us build better tools.</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* STEP 4: PAYMENT VERIFICATION */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex items-center gap-4 md:gap-6">
                 <div className="h-8 w-8 md:h-12 w-12 rounded-lg md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm md:text-xl shadow-xl shadow-primary/20 shrink-0">04</div>
