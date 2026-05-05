@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon, QrCode, Copy, Check, Heart } from "lucide-react"
+import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon, QrCode, Copy, Check, Briefcase } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -233,16 +233,16 @@ export function ScheduleMeetingForm() {
               </div>
             </section>
 
-            {/* PAYMENT INSTRUCTIONS */}
+            {/* SESSION PAYMENT INSTRUCTIONS */}
             <Card className="border-2 border-primary/20 bg-primary/5 rounded-[2rem] md:rounded-[3rem] overflow-hidden animate-in fade-in zoom-in duration-700">
               <CardContent className="p-6 md:p-10 flex flex-col items-center text-center space-y-6">
                 <div className="space-y-2">
                   <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30 font-black px-4 py-1.5 rounded-full text-[10px] tracking-widest uppercase flex items-center gap-2 mx-auto">
-                    <Heart className="h-3 w-3 fill-primary" /> Show your love for expand
+                    <Briefcase className="h-3 w-3" /> Professional Fee
                   </Badge>
-                  <h3 className="text-xl md:text-2xl font-headline font-bold text-primary">Payment Details</h3>
+                  <h3 className="text-xl md:text-2xl font-headline font-bold text-primary">Session Payment</h3>
                   <p className="text-xs md:text-sm font-medium text-muted-foreground max-w-xs mx-auto">
-                    Scan the QR code below or copy the UPI ID to complete your transaction.
+                    Please scan the QR code or use the UPI ID to pay for your selected consultation session.
                   </p>
                 </div>
 
@@ -273,7 +273,7 @@ export function ScheduleMeetingForm() {
                       {upiCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
                     </Button>
                   </div>
-                  <p className="text-[10px] text-muted-foreground font-medium italic">Your support helps us build better tools.</p>
+                  <p className="text-[10px] text-muted-foreground font-medium italic">Payment is required to confirm your booking.</p>
                 </div>
               </CardContent>
             </Card>
