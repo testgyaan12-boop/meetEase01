@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon, QrCode, Copy, Check, Briefcase } from "lucide-react"
+import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon, Copy, Check, Briefcase } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -14,9 +14,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { SlotPicker } from "./slot-picker"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
-import { useFirestore, useUser, addDocumentNonBlocking, useStorage } from "@/firebase"
+import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
 import { collection } from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { Badge } from "@/components/ui/badge"
 
 const formSchema = z.object({
@@ -32,6 +31,14 @@ const formSchema = z.object({
   paymentProof: z.any().refine((files) => files?.length > 0, "Payment proof is required"),
 })
 
+const toBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+  });
+
 export function ScheduleMeetingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [upiCopied, setUpiCopied] = useState(false)
@@ -39,7 +46,6 @@ export function ScheduleMeetingForm() {
   const router = useRouter()
   const { user } = useUser()
   const firestore = useFirestore()
-  const storage = useStorage()
 
   const upiId = "meetease@upi"
 
@@ -71,8 +77,8 @@ export function ScheduleMeetingForm() {
       toast({ title: "Auth Required", description: "Please sign in to book a session.", variant: "destructive" })
       return
     }
-    if (!firestore || !storage) {
-      toast({ title: "Service Error", description: "Firebase services are not ready. Please refresh.", variant: "destructive" })
+    if (!firestore) {
+      toast({ title: "Service Error", description: "Firestore is not ready. Please refresh.", variant: "destructive" })
       return
     }
     
@@ -83,17 +89,8 @@ export function ScheduleMeetingForm() {
       const file = values.paymentProof?.[0]
       
       if (file) {
-        // 1. Upload to Firebase Storage
-        const storagePath = `payment_proofs/${user.uid}/${Date.now()}_${file.name}`
-        const storageRef = ref(storage, storagePath)
-        
-        try {
-          const snapshot = await uploadBytes(storageRef, file)
-          paymentProofUrl = await getDownloadURL(snapshot.ref)
-        } catch (uploadError: any) {
-          console.error("Storage upload error:", uploadError)
-          throw new Error(`Payment proof upload failed: ${uploadError.message}`)
-        }
+        // Convert to Base64 (Data URI)
+        paymentProofUrl = await toBase64(file)
       }
 
       // 2. Prepare meeting data
@@ -127,7 +124,7 @@ export function ScheduleMeetingForm() {
       toast({ title: "Booking Requested", description: "Your verification is in progress. Check history for updates." })
       router.push("/dashboard/history")
     } catch (error: any) {
-      console.error("Final submission error:", error)
+      console.error("Submission error:", error)
       toast({ 
         title: "Submission Failed", 
         description: error.message || "Something went wrong. Please check your connection and try again.", 
