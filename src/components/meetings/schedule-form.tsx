@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -6,7 +5,21 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Upload, CheckCircle2, Loader2, AlertCircle, Info, Mail, Phone, User as UserIcon, Copy, Check, Briefcase } from "lucide-react"
+import { 
+  Upload, 
+  CheckCircle2, 
+  Loader2, 
+  AlertCircle, 
+  Info, 
+  Mail, 
+  Phone, 
+  User as UserIcon, 
+  Copy, 
+  Check, 
+  Briefcase,
+  FileText,
+  ShieldAlert
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -17,6 +30,14 @@ import { cn } from "@/lib/utils"
 import { useFirestore, useUser, addDocumentNonBlocking } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 
 const formSchema = z.object({
   clientName: z.string().min(2, "Name must be at least 2 characters"),
@@ -29,6 +50,7 @@ const formSchema = z.object({
   slotStartTime: z.string(),
   slotEndTime: z.string(),
   paymentProof: z.any().refine((files) => files?.length > 0, "Payment proof is required"),
+  consent: z.boolean().refine(val => val === true, "You must agree to the terms to proceed"),
 })
 
 const toBase64 = (file: File): Promise<string> =>
@@ -42,6 +64,9 @@ const toBase64 = (file: File): Promise<string> =>
 export function ScheduleMeetingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [upiCopied, setUpiCopied] = useState(false)
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
+  const [isTermsOpen, setIsTermsOpen] = useState(false)
+  
   const { toast } = useToast()
   const router = useRouter()
   const { user } = useUser()
@@ -59,6 +84,7 @@ export function ScheduleMeetingForm() {
       availableSlotId: "",
       slotStartTime: "",
       slotEndTime: "",
+      consent: false,
     },
   })
 
@@ -89,11 +115,9 @@ export function ScheduleMeetingForm() {
       const file = values.paymentProof?.[0]
       
       if (file) {
-        // Convert to Base64 (Data URI)
         paymentProofUrl = await toBase64(file)
       }
 
-      // 2. Prepare meeting data
       const meetingData = {
         userId: user.uid,
         clientEmail: values.clientEmail,
@@ -109,10 +133,8 @@ export function ScheduleMeetingForm() {
         updatedAt: new Date().toISOString(),
       }
 
-      // 3. Save to Firestore
       await addDocumentNonBlocking(collection(firestore, "meetings"), meetingData)
 
-      // 4. Create Notification
       await addDocumentNonBlocking(collection(firestore, "admin_notifications"), {
         title: "📅 New Booking Request",
         message: `${values.clientName} booked a session on ${new Date(values.slotStartTime).toLocaleString()}`,
@@ -349,6 +371,40 @@ export function ScheduleMeetingForm() {
               )}
             </section>
 
+            {/* CONSENT CHECKBOX */}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                <Checkbox 
+                  id="consent" 
+                  checked={form.watch("consent")}
+                  onCheckedChange={(checked) => form.setValue("consent", !!checked, { shouldValidate: true })}
+                  className="mt-1 data-[state=checked]:bg-primary"
+                />
+                <label htmlFor="consent" className="text-xs md:text-sm font-medium text-foreground/80 leading-relaxed cursor-pointer select-none">
+                  I agree to the{" "}
+                  <button 
+                    type="button" 
+                    onClick={() => setIsPrivacyOpen(true)}
+                    className="text-primary font-bold hover:underline"
+                  >
+                    privacy policy
+                  </button>{" "}
+                  and{" "}
+                  <button 
+                    type="button" 
+                    onClick={() => setIsTermsOpen(true)}
+                    className="text-primary font-bold hover:underline"
+                  >
+                    terms
+                  </button>{" "}
+                  for this consultation.
+                </label>
+              </div>
+              {form.formState.errors.consent && (
+                <p className="text-[10px] md:text-xs text-destructive font-bold px-2">{form.formState.errors.consent.message as string}</p>
+              )}
+            </div>
+
             <div className="pt-2 md:pt-8 w-full">
               <Button
                 type="submit"
@@ -368,6 +424,77 @@ export function ScheduleMeetingForm() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Privacy Dialog */}
+      <Dialog open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen}>
+        <DialogContent className="max-w-lg w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-8 md:p-10 space-y-6">
+            <DialogHeader className="text-left">
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <FileText className="h-6 w-6" />
+              </div>
+              <DialogTitle className="text-2xl font-headline font-bold text-primary">Privacy Policy</DialogTitle>
+              <DialogDescription className="text-sm font-medium text-muted-foreground">
+                For Office VS Me Consultation
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 text-sm md:text-base text-foreground/80 leading-relaxed font-medium">
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>Your name, email, and phone number are collected only to schedule and confirm consultation sessions.</p>
+              </div>
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>Payment proof images are stored temporarily for verification and deleted after 30 days.</p>
+              </div>
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>Your data is not shared with any third party.</p>
+              </div>
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>For data removal, contact: <span className="font-bold text-primary">officevsme@gmail.com</span></p>
+              </div>
+            </div>
+            <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white" onClick={() => setIsPrivacyOpen(false)}>
+              Got it
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Terms Dialog */}
+      <Dialog open={isTermsOpen} onOpenChange={setIsTermsOpen}>
+        <DialogContent className="max-w-lg w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-8 md:p-10 space-y-6">
+            <DialogHeader className="text-left">
+              <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                <ShieldAlert className="h-6 w-6" />
+              </div>
+              <DialogTitle className="text-2xl font-headline font-bold text-primary">Service Terms</DialogTitle>
+              <DialogDescription className="text-sm font-medium text-muted-foreground">
+                Agreement for professional consultations.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { label: "Full payment required to confirm booking", icon: "✅" },
+                { label: "No refund for no-shows", icon: "❌" },
+                { label: "Reschedule allowed 12 hours before session", icon: "🔄" },
+                { label: "Contact: officevsme@gmail.com for queries", icon: "📧" }
+              ].map((term, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-primary/5">
+                  <span className="text-xl shrink-0">{term.icon}</span>
+                  <p className="text-sm md:text-base font-bold text-foreground/80">{term.label}</p>
+                </div>
+              ))}
+            </div>
+            <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white" onClick={() => setIsTermsOpen(false)}>
+              I Agree
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
