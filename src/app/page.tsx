@@ -13,7 +13,10 @@ import {
   TrendingUp,
   Heart,
   Copy,
-  Check
+  Check,
+  X,
+  FileText,
+  ShieldAlert
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -36,6 +39,8 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function LandingPage() {
   const [isSupportOpen, setIsSupportOpen] = useState(false)
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
+  const [isTermsOpen, setIsTermsOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const { toast } = useToast()
   const upiId = "meetease@upi"
@@ -232,15 +237,15 @@ export default function LandingPage() {
             <span className="text-lg font-headline font-bold text-primary">Office VS Me</span>
           </div>
           <div className="flex gap-8 text-sm text-muted-foreground font-medium">
-            <Link href="#" className="hover:text-primary">Privacy</Link>
-            <Link href="#" className="hover:text-primary">Terms</Link>
+            <button onClick={() => setIsPrivacyOpen(true)} className="hover:text-primary transition-colors">Privacy</button>
+            <button onClick={() => setIsTermsOpen(true)} className="hover:text-primary transition-colors">Terms</button>
             <button 
               onClick={() => setIsSupportOpen(true)}
               className="hover:text-primary transition-colors focus:outline-none"
             >
               Support
             </button>
-            <Link href="#" className="hover:text-primary">Consultations</Link>
+            <Link href="/login" className="hover:text-primary">Consultations</Link>
           </div>
           <p className="text-sm text-muted-foreground">© 2024 Office VS Me. All rights reserved.</p>
         </div>
@@ -299,6 +304,77 @@ export default function LandingPage() {
                 Maybe Later
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Privacy Dialog */}
+      <Dialog open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen}>
+        <DialogContent className="max-w-lg w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-8 md:p-10 space-y-6">
+            <DialogHeader className="text-left">
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <FileText className="h-6 w-6" />
+              </div>
+              <DialogTitle className="text-2xl font-headline font-bold text-primary">Privacy Policy</DialogTitle>
+              <DialogDescription className="text-sm font-medium text-muted-foreground">
+                For Office VS Me Consultation
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 text-sm md:text-base text-foreground/80 leading-relaxed font-medium">
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>Your name, email, and phone number are collected only to schedule and confirm consultation sessions.</p>
+              </div>
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>Payment proof images are stored temporarily for verification and deleted after 30 days.</p>
+              </div>
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>Your data is not shared with any third party.</p>
+              </div>
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>For data removal, contact: <span className="font-bold text-primary">officevsme@gmail.com</span></p>
+              </div>
+            </div>
+            <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white" onClick={() => setIsPrivacyOpen(false)}>
+              Got it
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Terms Dialog */}
+      <Dialog open={isTermsOpen} onOpenChange={setIsTermsOpen}>
+        <DialogContent className="max-w-lg w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-8 md:p-10 space-y-6">
+            <DialogHeader className="text-left">
+              <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                <ShieldAlert className="h-6 w-6" />
+              </div>
+              <DialogTitle className="text-2xl font-headline font-bold text-primary">Service Terms</DialogTitle>
+              <DialogDescription className="text-sm font-medium text-muted-foreground">
+                Agreement for professional consultations.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { label: "Full payment required to confirm booking", icon: "✅" },
+                { label: "No refund for no-shows", icon: "❌" },
+                { label: "Reschedule allowed 12 hours before session", icon: "🔄" },
+                { label: "Contact: officevsme@gmail.com for queries", icon: "📧" }
+              ].map((term, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-primary/5">
+                  <span className="text-xl shrink-0">{term.icon}</span>
+                  <p className="text-sm md:text-base font-bold text-foreground/80">{term.label}</p>
+                </div>
+              ))}
+            </div>
+            <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white" onClick={() => setIsTermsOpen(false)}>
+              I Agree
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

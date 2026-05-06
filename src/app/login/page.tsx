@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { ShieldCheck, Mail, Lock, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react"
+import { ShieldCheck, Mail, Lock, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, FileText, ShieldAlert, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
@@ -13,6 +13,13 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth, useUser } from "@/firebase"
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -24,6 +31,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
+  const [isTermsOpen, setIsTermsOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const { toast } = useToast()
@@ -89,7 +98,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-primary/10 via-background to-accent/5">
       <div className="w-full max-w-md space-y-4 md:space-y-8 animate-in fade-in zoom-in duration-500">
         <div className="text-center space-y-1 md:space-y-2">
-          <div className="inline-flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-2xl md:rounded-3xl bg-primary text-white mb-2 md:mb-6 shadow-2xl shadow-primary/20 transform hover:rotate-6 transition-transform">
+          <div className="inline-flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-2xl md:rounded-3xl bg-primary text-white mb-2 md:mb-6 shadow-2xl shadow-primary/20 transform hover:rotate-6 transition-transform cursor-pointer" onClick={() => router.push('/')}>
             <ShieldCheck className="h-8 w-8 md:h-10 md:w-10" />
           </div>
           <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary tracking-tight">Office VS Me</h1>
@@ -218,21 +227,99 @@ export default function LoginPage() {
                 <span className="bg-white/80 dark:bg-card px-4 text-muted-foreground font-bold">Account help</span>
               </div>
             </div>
-            <p className="text-center text-xs md:text-sm font-medium">
-              {isLogin ? "Don't have an account?" : "Already a member?"}
-              <button 
-                className="ml-2 text-primary font-bold hover:underline"
-                onClick={() => {
-                  setIsLogin(!isLogin)
-                  setError(null)
-                }}
-              >
-                {isLogin ? "Create account" : "Sign in here"}
-              </button>
-            </p>
+            <div className="text-center space-y-4">
+              <p className="text-xs md:text-sm font-medium">
+                {isLogin ? "Don't have an account?" : "Already a member?"}
+                <button 
+                  className="ml-2 text-primary font-bold hover:underline"
+                  onClick={() => {
+                    setIsLogin(!isLogin)
+                    setError(null)
+                  }}
+                >
+                  {isLogin ? "Create account" : "Sign in here"}
+                </button>
+              </p>
+              <div className="flex items-center justify-center gap-4 text-[10px] md:text-xs text-muted-foreground font-bold">
+                <button onClick={() => setIsPrivacyOpen(true)} className="hover:text-primary transition-colors">Privacy Policy</button>
+                <span>•</span>
+                <button onClick={() => setIsTermsOpen(true)} className="hover:text-primary transition-colors">Terms of Service</button>
+              </div>
+            </div>
           </CardFooter>
         </Card>
       </div>
+
+      {/* Privacy Dialog */}
+      <Dialog open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen}>
+        <DialogContent className="max-w-lg w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-8 md:p-10 space-y-6">
+            <DialogHeader className="text-left">
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <FileText className="h-6 w-6" />
+              </div>
+              <DialogTitle className="text-2xl font-headline font-bold text-primary">Privacy Policy</DialogTitle>
+              <DialogDescription className="text-sm font-medium text-muted-foreground">
+                For Office VS Me Consultation
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 text-sm md:text-base text-foreground/80 leading-relaxed font-medium">
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>Your name, email, and phone number are collected only to schedule and confirm consultation sessions.</p>
+              </div>
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>Payment proof images are stored temporarily for verification and deleted after 30 days.</p>
+              </div>
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>Your data is not shared with any third party.</p>
+              </div>
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <p>For data removal, contact: <span className="font-bold text-primary">officevsme@gmail.com</span></p>
+              </div>
+            </div>
+            <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white" onClick={() => setIsPrivacyOpen(false)}>
+              Got it
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Terms Dialog */}
+      <Dialog open={isTermsOpen} onOpenChange={setIsTermsOpen}>
+        <DialogContent className="max-w-lg w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-8 md:p-10 space-y-6">
+            <DialogHeader className="text-left">
+              <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                <ShieldAlert className="h-6 w-6" />
+              </div>
+              <DialogTitle className="text-2xl font-headline font-bold text-primary">Service Terms</DialogTitle>
+              <DialogDescription className="text-sm font-medium text-muted-foreground">
+                Agreement for professional consultations.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { label: "Full payment required to confirm booking", icon: "✅" },
+                { label: "No refund for no-shows", icon: "❌" },
+                { label: "Reschedule allowed 12 hours before session", icon: "🔄" },
+                { label: "Contact: officevsme@gmail.com for queries", icon: "📧" }
+              ].map((term, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-primary/5">
+                  <span className="text-xl shrink-0">{term.icon}</span>
+                  <p className="text-sm md:text-base font-bold text-foreground/80">{term.label}</p>
+                </div>
+              ))}
+            </div>
+            <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white" onClick={() => setIsTermsOpen(false)}>
+              I Agree
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
