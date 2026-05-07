@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useFirestore, useMemoFirebase, useCollection, updateDocumentNonBlocking, useDoc, useUser } from "@/firebase"
-import { collection, query, orderBy, limit, doc } from "firebase/firestore"  // Removed where
+import { collection, query, orderBy, limit, doc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 
 export function NotificationListener() {
@@ -17,17 +17,16 @@ export function NotificationListener() {
   }, [firestore, user])
 
   const { data: adminRole } = useDoc(adminRoleRef)
-  const hasAdminAccess = !!adminRole || isSuperAdmin
+  const hasAdminAccess = !!(adminRole || isSuperAdmin)
 
-  // Fixed query - no where clause
   const notificationsQuery = useMemoFirebase(() => {
-    if (!firestore || !hasAdminAccess) return null
+    if (!firestore || !user || !hasAdminAccess) return null
     return query(
       collection(firestore, "admin_notifications"),
       orderBy("createdAt", "desc"),
       limit(10)
     )
-  }, [firestore, hasAdminAccess])
+  }, [firestore, user, hasAdminAccess])
 
   const { data: notifications } = useCollection(notificationsQuery)
 
@@ -42,7 +41,6 @@ export function NotificationListener() {
   useEffect(() => {
     if (notifications && notifications.length > 0) {
       notifications.forEach((notif) => {
-        // Client-side filter for unread notifications
         if (!notif.isRead) {
           toast({
             title: notif.title,
@@ -51,10 +49,13 @@ export function NotificationListener() {
           })
 
           if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-            new Notification(notif.title, { body: notif.message })
+            try {
+              new Notification(notif.title, { body: notif.message })
+            } catch (err) {
+              console.warn("System notification failed", err)
+            }
           }
 
-          // Mark as read
           const notifRef = doc(firestore!, "admin_notifications", notif.id)
           updateDocumentNonBlocking(notifRef, { isRead: true })
         }

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemoFirebase, useFirestore, useUser, useCollection } from "@/firebase"
@@ -56,14 +55,22 @@ export default function HistoryPage() {
     )
   }, [rawMeetings])
 
-  const handleCopyLink = (link: string, id: string) => {
-    navigator.clipboard.writeText(link)
-    setCopiedId(id)
-    toast({
-      title: "Link Copied",
-      description: "Meeting link has been copied to your clipboard.",
-    })
-    setTimeout(() => setCopiedId(null), 2000)
+  const handleCopyLink = async (link: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopiedId(id)
+      toast({
+        title: "Link Copied",
+        description: "Meeting link has been copied to your clipboard.",
+      })
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch (err) {
+      toast({
+        title: "Manual Copy Required",
+        description: `Please copy this link manually: ${link}`,
+        variant: "destructive"
+      })
+    }
   }
 
   if (isUserLoading || isMeetingsLoading) {

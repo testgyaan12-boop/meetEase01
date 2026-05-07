@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -88,7 +87,7 @@ export default function AdminDashboard() {
   }, [firestore, user])
 
   const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminRoleRef)
-  const hasAdminAccess = !!adminRole || isSuperAdmin
+  const hasAdminAccess = !!(adminRole || isSuperAdmin)
 
   useEffect(() => {
     if (!isUserLoading && !isAdminLoading) {
@@ -102,14 +101,14 @@ export default function AdminDashboard() {
   }, [user, isUserLoading, hasAdminAccess, isAdminLoading, router, toast])
 
   const meetingsQuery = useMemoFirebase(() => {
-    if (!firestore || !hasAdminAccess) return null
+    if (!firestore || !user || !hasAdminAccess) return null
     return query(collection(firestore, "meetings"), orderBy("createdAt", "desc"))
-  }, [firestore, hasAdminAccess])
+  }, [firestore, user, hasAdminAccess])
 
   const slotsQuery = useMemoFirebase(() => {
-    if (!firestore || !hasAdminAccess) return null
+    if (!firestore || !user || !hasAdminAccess) return null
     return query(collection(firestore, "availableSlots"), orderBy("startTime", "asc"))
-  }, [firestore, hasAdminAccess])
+  }, [firestore, user, hasAdminAccess])
 
   const { data: meetings, isLoading: isMeetingsLoading } = useCollection<Meeting>(meetingsQuery)
   const { data: slots, isLoading: isSlotsLoading } = useCollection<AvailableSlot>(slotsQuery)
@@ -154,7 +153,6 @@ export default function AdminDashboard() {
 
   const handleAddSlot = () => {
     if (!firestore) return
-    // Using a placeholder date (epoch) for recurring slots
     const baseDate = startOfToday()
     const [sH, sM] = startTimeStr.split(":").map(Number)
     const [eH, eM] = endTimeStr.split(":").map(Number)
