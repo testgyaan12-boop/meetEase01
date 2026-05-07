@@ -1,12 +1,10 @@
-
 export type MeetingStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'done';
 
 export interface Meeting {
   id: string;
-  userId: string;
+  userId?: string; // Optional for guests
   clientName: string;
   clientEmail: string;
-  clientMobile: string;
   description: string;
   availableSlotId: string;
   paymentProofUrl: string;

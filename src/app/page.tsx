@@ -14,7 +14,6 @@ import {
   Heart,
   Copy,
   Check,
-  X,
   FileText,
   ShieldAlert
 } from "lucide-react"
@@ -95,7 +94,7 @@ export default function LandingPage() {
             <Link href="/login">
               <Button variant="ghost" className="font-semibold">Sign In</Button>
             </Link>
-            <Link href="/login">
+            <Link href="/book">
               <Button className="bg-primary hover:bg-primary/90 text-white font-bold">Book Consultation</Button>
             </Link>
           </div>
@@ -114,14 +113,16 @@ export default function LandingPage() {
               Ex-HR insights for your CV, Job Strategy, and Career Fixes. Skip the corporate noise and get the professional strategy you need to win.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/login">
+              <Link href="/book">
                 <Button size="lg" className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 font-bold group shadow-xl shadow-primary/20">
                   Fix Your Career <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-2 font-bold">
-                View Strategies
-              </Button>
+              <Link href="/book">
+                <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-2 font-bold">
+                  View Strategies
+                </Button>
+              </Link>
             </div>
             <div className="flex items-center gap-6 pt-4">
               <div className="flex -space-x-3">
@@ -245,7 +246,7 @@ export default function LandingPage() {
             >
               Support
             </button>
-            <Link href="/login" className="hover:text-primary">Consultations</Link>
+            <Link href="/book" className="hover:text-primary">Consultations</Link>
           </div>
           <p className="text-sm text-muted-foreground">© 2024 Office VS Me. All rights reserved.</p>
         </div>

@@ -12,13 +12,13 @@ import {
   AlertCircle, 
   Info, 
   Mail, 
-  Phone, 
   User as UserIcon, 
   Copy, 
   Check, 
   Briefcase,
   FileText,
-  ShieldAlert
+  ShieldAlert,
+  AlertTriangle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,14 +37,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog"
 
 const formSchema = z.object({
   clientName: z.string().min(2, "Name must be at least 2 characters"),
   clientEmail: z.string().email("Please enter a valid email address"),
-  clientMobile: z.string()
-    .length(10, "Mobile number must be exactly 10 digits")
-    .regex(/^[6-9]\d{9}$/, "Must be a valid 10-digit Indian number starting with 6-9"),
   description: z.string().min(10, "Please provide a clear meeting agenda (min 10 chars)"),
   availableSlotId: z.string().min(1, "Please select a time slot"),
   slotStartTime: z.string(),
@@ -63,6 +61,7 @@ const toBase64 = (file: File): Promise<string> =>
 
 export function ScheduleMeetingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [upiCopied, setUpiCopied] = useState(false)
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
   const [isTermsOpen, setIsTermsOpen] = useState(false)
@@ -79,7 +78,6 @@ export function ScheduleMeetingForm() {
     defaultValues: {
       clientName: "",
       clientEmail: user?.email || "",
-      clientMobile: "",
       description: "",
       availableSlotId: "",
       slotStartTime: "",
@@ -98,17 +96,15 @@ export function ScheduleMeetingForm() {
     setTimeout(() => setUpiCopied(false), 2000)
   }
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!user) {
-      toast({ title: "Auth Required", description: "Please sign in to book a session.", variant: "destructive" })
-      return
-    }
+  const onConfirmSubmission = async () => {
     if (!firestore) {
       toast({ title: "Service Error", description: "Firestore is not ready. Please refresh.", variant: "destructive" })
       return
     }
     
     setIsSubmitting(true)
+    setIsConfirmOpen(false)
+    const values = form.getValues()
 
     try {
       let paymentProofUrl = ""
@@ -119,10 +115,9 @@ export function ScheduleMeetingForm() {
       }
 
       const meetingData = {
-        userId: user.uid,
+        userId: user?.uid || "guest",
         clientEmail: values.clientEmail,
         clientName: values.clientName,
-        clientMobile: values.clientMobile,
         description: values.description,
         availableSlotId: values.availableSlotId,
         slotStartTime: values.slotStartTime,
@@ -143,13 +138,18 @@ export function ScheduleMeetingForm() {
         createdAt: new Date().toISOString()
       })
 
-      toast({ title: "Booking Requested", description: "Your verification is in progress. Check history for updates." })
-      router.push("/dashboard/history")
+      toast({ title: "Booking Requested", description: "Your verification is in progress." })
+      
+      if (user) {
+        router.push("/dashboard/history")
+      } else {
+        router.push("/book/success")
+      }
     } catch (error: any) {
       console.error("Submission error:", error)
       toast({ 
         title: "Submission Failed", 
-        description: error.message || "Something went wrong. Please check your connection and try again.", 
+        description: error.message || "Something went wrong.", 
         variant: "destructive" 
       })
     } finally {
@@ -157,15 +157,17 @@ export function ScheduleMeetingForm() {
     }
   }
 
-  if (!user) return null
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsConfirmOpen(true)
+  }
 
   return (
     <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto w-full max-w-full overflow-hidden">
       <Card className="glass rounded-[1.5rem] md:rounded-[3rem] overflow-hidden border-none shadow-2xl w-full">
         <CardContent className="p-6 md:p-14">
           <div className="text-center mb-10 md:mb-16 space-y-3 md:space-y-4">
-            <h2 className="text-2xl md:text-5xl font-headline font-bold text-primary tracking-tight">Confirm Booking</h2>
-            <p className="text-[11px] md:text-lg font-medium text-muted-foreground max-w-lg mx-auto leading-relaxed">Secure your slot in four simple steps and start your professional journey.</p>
+            <h2 className="text-2xl md:text-5xl font-headline font-bold text-primary tracking-tight">Schedule Consultation</h2>
+            <p className="text-[11px] md:text-lg font-medium text-muted-foreground max-w-lg mx-auto leading-relaxed">Secure your professional strategy session in four simple steps.</p>
           </div>
 
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 md:space-y-16">
@@ -205,25 +207,6 @@ export function ScheduleMeetingForm() {
                   {form.formState.errors.clientEmail && (
                     <p className="text-[9px] md:text-xs text-destructive font-bold px-2">{form.formState.errors.clientEmail.message as string}</p>
                   )}
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-[9px] md:text-[11px] font-black uppercase tracking-widest text-primary/70 ml-1 flex items-center gap-2">
-                    <Phone className="h-3 w-3 md:h-3.5 md:w-3.5" /> Mobile Number
-                  </label>
-                  <Input
-                    placeholder="10 digit Indian number"
-                    maxLength={10}
-                    {...form.register("clientMobile")}
-                    className="h-11 md:h-14 rounded-xl md:rounded-2xl bg-muted/40 border-none shadow-inner px-4 md:px-6 text-sm md:text-base font-bold text-foreground placeholder:text-muted-foreground/40"
-                  />
-                  <div className="flex items-center justify-between px-1 md:px-2">
-                    <p className="text-[8px] md:text-[11px] text-muted-foreground font-bold flex items-center gap-1 mt-1 italic">
-                      <Info className="h-2.5 w-2.5" /> Exactly 10 digits starting with 6-9
-                    </p>
-                    {form.formState.errors.clientMobile && (
-                      <p className="text-[9px] md:text-xs text-destructive font-bold mt-1">{form.formState.errors.clientMobile.message as string}</p>
-                    )}
-                  </div>
                 </div>
               </div>
             </section>
@@ -424,6 +407,53 @@ export function ScheduleMeetingForm() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <DialogContent className="max-w-md w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-8 md:p-10 space-y-6">
+            <DialogHeader className="text-center">
+              <div className="h-14 w-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-4 mx-auto">
+                <ShieldAlert className="h-8 w-8" />
+              </div>
+              <DialogTitle className="text-2xl font-headline font-bold text-primary">Verify Details</DialogTitle>
+              <DialogDescription className="text-sm font-medium text-muted-foreground">
+                Please double check your agenda and payment proof before final submission.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-muted/50 border border-primary/5 space-y-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary/60">Schedule</p>
+                <p className="text-sm font-bold text-foreground">
+                  {form.watch("slotStartTime") ? new Date(form.watch("slotStartTime")).toLocaleString() : 'Not selected'}
+                </p>
+              </div>
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600">
+                <AlertTriangle className="h-5 w-5 shrink-0" />
+                <p className="text-xs font-bold leading-tight">Confirmed sessions are non-refundable for no-shows.</p>
+              </div>
+            </div>
+
+            <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Button 
+                variant="ghost" 
+                className="flex-1 h-12 rounded-xl font-bold border-none bg-muted text-muted-foreground"
+                onClick={() => setIsConfirmOpen(false)}
+              >
+                Go Back
+              </Button>
+              <Button 
+                className="flex-1 h-12 rounded-xl font-bold bg-primary text-white shadow-xl shadow-primary/20"
+                onClick={onConfirmSubmission}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Confirm & Send"}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Privacy Dialog */}
       <Dialog open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen}>
