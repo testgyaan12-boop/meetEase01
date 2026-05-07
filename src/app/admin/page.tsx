@@ -24,7 +24,8 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  Image as ImageIcon
+  Image as ImageIcon,
+  UserCircle
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -159,7 +160,7 @@ export default function AdminDashboard() {
     addDocumentNonBlocking(collection(firestore, "availableSlots"), {
       startTime,
       endTime,
-      isBooked: false, // Default false, dynamic checks used in picker
+      isBooked: false,
       isActive: true,
     })
 
@@ -273,7 +274,12 @@ export default function AdminDashboard() {
                     {filteredMeetings.map((req) => (
                       <TableRow key={req.id} className="hover:bg-primary/5 border-primary/5">
                         <TableCell className="pl-8 py-4">
-                          <p className="font-bold text-sm text-foreground">{req.clientName}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-sm text-foreground">{req.clientName}</p>
+                            {(!req.userId || req.userId === 'guest') && (
+                              <Badge variant="outline" className="text-[8px] h-4 bg-muted text-muted-foreground border-muted-foreground/20 font-black px-1.5">GUEST</Badge>
+                            )}
+                          </div>
                           <p className="text-[10px] text-muted-foreground font-medium">{req.clientEmail}</p>
                         </TableCell>
                         <TableCell>
@@ -440,7 +446,12 @@ export default function AdminDashboard() {
           <div className="flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh]">
             <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6 scrollbar-hide order-2 md:order-1">
               <DialogHeader>
-                <DialogTitle className="text-xl md:text-2xl font-headline font-bold text-primary">Verify Request</DialogTitle>
+                <div className="flex items-center gap-2">
+                  <DialogTitle className="text-xl md:text-2xl font-headline font-bold text-primary">Verify Request</DialogTitle>
+                  {(!reviewMeeting?.userId || reviewMeeting?.userId === 'guest') && (
+                    <Badge variant="outline" className="bg-muted text-muted-foreground border-muted-foreground/20 font-bold px-2 py-0">Guest Account</Badge>
+                  )}
+                </div>
                 <DialogDescription className="text-xs md:text-sm font-medium text-muted-foreground">Review client agenda and payment proof.</DialogDescription>
               </DialogHeader>
               
@@ -484,6 +495,22 @@ export default function AdminDashboard() {
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-muted/30 border border-primary/5">
+                    <h4 className="text-[10px] font-black uppercase text-primary/60 mb-1 tracking-widest">Client Profile</h4>
+                    <div className="flex items-center gap-2">
+                      <UserCircle className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-xs font-bold text-foreground">{reviewMeeting?.clientName}</p>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-muted/30 border border-primary/5">
+                    <h4 className="text-[10px] font-black uppercase text-primary/60 mb-1 tracking-widest">Selected Window</h4>
+                    <p className="text-xs font-bold text-foreground">
+                      {reviewMeeting?.slotStartTime ? format(new Date(reviewMeeting.slotStartTime), "PPP, p") : "Not specified"}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="p-4 md:p-5 rounded-2xl bg-primary/5 border border-primary/10">
