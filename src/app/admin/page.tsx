@@ -90,6 +90,17 @@ export default function AdminDashboard() {
   const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminRoleRef)
   const hasAdminAccess = !!adminRole || isSuperAdmin
 
+  useEffect(() => {
+    if (!isUserLoading && !isAdminLoading) {
+      if (!user) {
+        router.push("/")
+      } else if (!hasAdminAccess) {
+        toast({ title: "Access Denied", variant: "destructive" })
+        router.push("/dashboard")
+      }
+    }
+  }, [user, isUserLoading, hasAdminAccess, isAdminLoading, router, toast])
+
   const meetingsQuery = useMemoFirebase(() => {
     if (!firestore || !hasAdminAccess) return null
     return query(collection(firestore, "meetings"), orderBy("createdAt", "desc"))
@@ -102,13 +113,6 @@ export default function AdminDashboard() {
 
   const { data: meetings, isLoading: isMeetingsLoading } = useCollection<Meeting>(meetingsQuery)
   const { data: slots, isLoading: isSlotsLoading } = useCollection<AvailableSlot>(slotsQuery)
-
-  useEffect(() => {
-    if (!isUserLoading && !isAdminLoading && user && !hasAdminAccess) {
-      toast({ title: "Access Denied", variant: "destructive" })
-      router.push("/dashboard")
-    }
-  }, [user, isUserLoading, hasAdminAccess, isAdminLoading, router, toast])
 
   const handleApprove = () => {
     if (!firestore || !reviewMeeting) return
