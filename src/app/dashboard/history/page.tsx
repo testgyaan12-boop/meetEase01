@@ -13,7 +13,8 @@ import {
   Check, 
   Image as ImageIcon,
   ExternalLink,
-  Video
+  Video,
+  CalendarDays
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format, isPast } from "date-fns"
@@ -123,7 +124,8 @@ export default function HistoryPage() {
                 <TableRow className="hover:bg-transparent border-primary/10">
                   <TableHead className="py-4 md:py-6 pl-4 md:pl-8 font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Details</TableHead>
                   <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Meet Link</TableHead>
-                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Schedule</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Requested</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Meeting Slot</TableHead>
                   <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Status</TableHead>
                   <TableHead className="pr-4 md:pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Actions</TableHead>
                 </TableRow>
@@ -164,9 +166,14 @@ export default function HistoryPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-bold text-foreground/80 whitespace-nowrap">
-                        <Clock className="h-3 w-3 text-primary/60" />
+                      <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-medium text-muted-foreground/80 whitespace-nowrap">
                         {format(new Date(meeting.createdAt), "MMM d, p")}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-bold text-foreground whitespace-nowrap">
+                        <Clock className="h-3 w-3 text-primary/60" />
+                        {meeting.slotStartTime ? format(new Date(meeting.slotStartTime), "MMM d, p") : "—"}
                       </div>
                     </TableCell>
                     <TableCell>
