@@ -26,7 +26,9 @@ import {
   Image as ImageIcon,
   UserCircle,
   Clock,
-  CalendarSearch
+  CalendarSearch,
+  MessageSquare,
+  CheckCircle
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -80,6 +82,10 @@ export default function AdminDashboard() {
   const [adminNotes, setAdminNotes] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
   const [isProofExpanded, setIsProofExpanded] = useState(false)
+
+  // Completion states
+  const [completingMeeting, setCompletingMeeting] = useState<Meeting | null>(null)
+  const [completionRemark, setCompletionRemark] = useState("")
 
   const isSuperAdmin = user?.uid === 'hKv5CWVQv7YvJk8mLyCY11ec96O2'
 
@@ -150,6 +156,21 @@ export default function AdminDashboard() {
     toast({ title: "Request Rejected" })
     setReviewMeeting(null)
     setAdminNotes("")
+    setIsProcessing(false)
+  }
+
+  const handleMarkComplete = () => {
+    if (!firestore || !completingMeeting) return
+    setIsProcessing(true)
+    const meetingRef = doc(firestore, "meetings", completingMeeting.id)
+    updateDocumentNonBlocking(meetingRef, { 
+      status: 'done',
+      adminNotes: completionRemark,
+      updatedAt: new Date().toISOString()
+    })
+    toast({ title: "Session Completed", description: "The meeting has been moved to history." })
+    setCompletingMeeting(null)
+    setCompletionRemark("")
     setIsProcessing(false)
   }
 
@@ -260,7 +281,7 @@ export default function AdminDashboard() {
 
           <TabsContent value="requests" className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <h2 className="text-lg md:text-xl font-headline font-bold text-primary">Pending Approvals</h2>
+              <h2 className="text-lg md:text-xl font-headline font-bold text-primary">Request Queue</h2>
               <div className="relative w-full sm:max-w-xs">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
@@ -283,6 +304,7 @@ export default function AdminDashboard() {
                       <TableHead className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Requested</TableHead>
                       <TableHead className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Booked Slot</TableHead>
                       <TableHead className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Status</TableHead>
+                      <TableHead className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Remarks</TableHead>
                       <TableHead className="text-right pr-8 font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Action</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -311,24 +333,52 @@ export default function AdminDashboard() {
                           </div>
                         </TableCell>
                         <TableCell className="px-2">
-                          <Badge variant="secondary" className="text-[8px] uppercase font-black px-2 py-0.5">
+                          <Badge 
+                            variant="secondary" 
+                            className={cn(
+                              "text-[8px] uppercase font-black px-2 py-0.5",
+                              req.status === 'confirmed' && "bg-blue-100 text-blue-700",
+                              req.status === 'done' && "bg-green-100 text-green-700",
+                              req.status === 'rejected' && "bg-red-100 text-red-700"
+                            )}
+                          >
                             {req.status}
                           </Badge>
                         </TableCell>
+                        <TableCell className="px-2 max-w-[150px]">
+                          <p className="text-[10px] text-muted-foreground font-medium truncate italic">
+                            {req.adminNotes || "—"}
+                          </p>
+                        </TableCell>
                         <TableCell className="text-right pr-8 px-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="h-8 rounded-lg font-bold text-xs bg-primary/5 hover:bg-primary hover:text-white"
-                            onClick={() => {
-                              setReviewMeeting(req)
-                              setMeetingLink(req.meetingLink || "")
-                              setAdminNotes(req.adminNotes || "")
-                              setIsProofExpanded(false)
-                            }}
-                          >
-                            Review
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            {req.status === 'confirmed' && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-8 rounded-lg font-bold text-[9px] uppercase bg-green-500/10 text-green-600 hover:bg-green-500 hover:text-white"
+                                onClick={() => {
+                                  setCompletingMeeting(req)
+                                  setCompletionRemark(req.adminNotes || "")
+                                }}
+                              >
+                                <CheckCircle className="h-3 w-3 mr-1" /> Done
+                              </Button>
+                            )}
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="h-8 rounded-lg font-bold text-[9px] uppercase bg-primary/5 hover:bg-primary hover:text-white"
+                              onClick={() => {
+                                setReviewMeeting(req)
+                                setMeetingLink(req.meetingLink || "")
+                                setAdminNotes(req.adminNotes || "")
+                                setIsProofExpanded(false)
+                              }}
+                            >
+                              Review
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -469,6 +519,54 @@ export default function AdminDashboard() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Completion Confirmation Dialog */}
+      <Dialog open={!!completingMeeting} onOpenChange={(open) => !open && setCompletingMeeting(null)}>
+        <DialogContent className="max-w-md w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-card">
+          <div className="p-8 md:p-10 space-y-6">
+            <DialogHeader className="text-center">
+              <div className="h-14 w-14 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-600 mb-4 mx-auto">
+                <CheckCircle className="h-8 w-8" />
+              </div>
+              <DialogTitle className="text-2xl font-headline font-bold text-primary">Mark as Completed</DialogTitle>
+              <DialogDescription className="text-sm font-medium text-muted-foreground">
+                Move this session to history. You can add a final remark for the client.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-primary/60 ml-1 flex items-center gap-1.5">
+                  <MessageSquare className="h-3 w-3" /> Final Remarks (Optional)
+                </label>
+                <Textarea 
+                  placeholder="Summarize the session outcome..." 
+                  className="min-h-[100px] rounded-xl border-2 border-primary/5 focus:border-primary/20 bg-muted/20 font-medium text-foreground text-sm" 
+                  value={completionRemark} 
+                  onChange={(e) => setCompletionRemark(e.target.value)} 
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Button 
+                variant="ghost" 
+                className="flex-1 h-12 rounded-xl font-bold border-none bg-muted text-muted-foreground"
+                onClick={() => setCompletingMeeting(null)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="flex-1 h-12 rounded-xl font-bold bg-green-600 text-white shadow-xl shadow-green-500/20"
+                onClick={handleMarkComplete}
+                disabled={isProcessing}
+              >
+                {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Complete Session"}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!reviewMeeting} onOpenChange={(open) => !open && setReviewMeeting(null)}>
         <DialogContent className="max-w-4xl w-[95vw] rounded-2xl md:rounded-3xl p-0 overflow-hidden border-none shadow-2xl bg-card">
           <div className="flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh]">
@@ -560,10 +658,10 @@ export default function AdminDashboard() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase text-primary/60 ml-1 flex items-center gap-1.5">
-                      <XCircle className="h-3 w-3 text-destructive" /> Rejection Remarks
+                      <MessageSquare className="h-3 w-3 text-muted-foreground" /> Admin Remarks
                     </label>
                     <Textarea 
-                      placeholder="Reason for rejection..." 
+                      placeholder="Reason for rejection or special notes..." 
                       className="min-h-[80px] rounded-xl border-2 border-primary/5 focus:border-primary/20 bg-muted/20 font-medium text-foreground text-sm" 
                       value={adminNotes} 
                       onChange={(e) => setAdminNotes(e.target.value)} 

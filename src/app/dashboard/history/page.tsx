@@ -14,7 +14,9 @@ import {
   Image as ImageIcon,
   ExternalLink,
   Video,
-  CalendarDays
+  CalendarDays,
+  CheckCircle2,
+  MessageSquare
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format, isPast } from "date-fns"
@@ -90,7 +92,7 @@ export default function HistoryPage() {
   const getStatusBadge = (meeting: Meeting) => {
     const isPastSession = meeting.status === 'confirmed' && meeting.slotEndTime && isPast(new Date(meeting.slotEndTime))
     
-    if (meeting.status === 'done') return <Badge variant="outline" className="px-3">Completed</Badge>
+    if (meeting.status === 'done') return <Badge variant="default" className="bg-green-600 px-3 flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3" /> Done</Badge>
     if (isPastSession) return <Badge variant="secondary" className="px-3">Past Session</Badge>
 
     const variants: Record<string, string> = {
@@ -189,9 +191,12 @@ export default function HistoryPage() {
                     <TableCell className="px-3">
                       <div className="space-y-1">
                         {getStatusBadge(meeting)}
-                        {meeting.status === 'rejected' && meeting.adminNotes && (
-                          <div className="flex items-start gap-1 p-1.5 rounded-lg bg-destructive/5 text-destructive border border-destructive/10 max-w-[120px]">
-                            <AlertCircle className="h-2.5 w-2.5 shrink-0 mt-0.5" />
+                        {meeting.adminNotes && (
+                          <div className={cn(
+                            "flex items-start gap-1 p-1.5 rounded-lg max-w-[120px] border",
+                            meeting.status === 'rejected' ? "bg-destructive/5 text-destructive border-destructive/10" : "bg-green-500/5 text-green-600 border-green-500/10"
+                          )}>
+                            <MessageSquare className="h-2.5 w-2.5 shrink-0 mt-0.5" />
                             <p className="text-[8px] md:text-[9px] font-bold leading-tight line-clamp-2">{meeting.adminNotes}</p>
                           </div>
                         )}
