@@ -24,7 +24,9 @@ import {
   ChevronDown,
   ChevronUp,
   Image as ImageIcon,
-  UserCircle
+  UserCircle,
+  Clock,
+  CalendarSearch
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -198,6 +200,16 @@ export default function AdminDashboard() {
     (m.clientEmail?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   )
 
+  const formatSlotRange = (start?: string, end?: string) => {
+    if (!start) return "—"
+    const startDate = new Date(start)
+    const startTime = format(startDate, "MMM d, p")
+    if (!end) return startTime
+    const endDate = new Date(end)
+    const endTime = format(endDate, "p")
+    return `${startTime} - ${endTime}`
+  }
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 animate-in fade-in duration-500 pb-32">
       <NotificationListener />
@@ -267,15 +279,17 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader className="bg-primary/5">
                     <TableRow className="hover:bg-transparent border-primary/10">
-                      <TableHead className="py-5 pl-8 font-black text-[10px] uppercase tracking-widest text-primary/60">Client</TableHead>
-                      <TableHead className="font-black text-[10px] uppercase tracking-widest text-primary/60">Status</TableHead>
-                      <TableHead className="text-right pr-8 font-black text-[10px] uppercase tracking-widest text-primary/60">Action</TableHead>
+                      <TableHead className="py-5 pl-8 font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Client</TableHead>
+                      <TableHead className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Requested</TableHead>
+                      <TableHead className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Booked Slot</TableHead>
+                      <TableHead className="font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Status</TableHead>
+                      <TableHead className="text-right pr-8 font-black text-[9px] md:text-[10px] uppercase tracking-widest text-primary/60 px-2">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredMeetings.map((req) => (
                       <TableRow key={req.id} className="hover:bg-primary/5 border-primary/5">
-                        <TableCell className="pl-8 py-4">
+                        <TableCell className="pl-8 py-4 px-2">
                           <div className="flex items-center gap-2">
                             <p className="font-bold text-sm text-foreground">{req.clientName}</p>
                             {(!req.userId || req.userId === 'guest') && (
@@ -284,12 +298,24 @@ export default function AdminDashboard() {
                           </div>
                           <p className="text-[10px] text-muted-foreground font-medium">{req.clientEmail}</p>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="px-2">
+                          <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
+                            <CalendarSearch className="h-3 w-3 text-primary/40" />
+                            {format(new Date(req.createdAt), "MMM d, p")}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2">
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-foreground">
+                            <Clock className="h-3 w-3 text-primary/60" />
+                            {formatSlotRange(req.slotStartTime, req.slotEndTime)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2">
                           <Badge variant="secondary" className="text-[8px] uppercase font-black px-2 py-0.5">
                             {req.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right pr-8">
+                        <TableCell className="text-right pr-8 px-2">
                           <Button 
                             variant="ghost" 
                             size="sm"
