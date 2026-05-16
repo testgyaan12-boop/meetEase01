@@ -16,10 +16,8 @@ service cloud.firestore {
     
     // MEETINGS
     match /meetings/{meetingId} {
-      // Allow individual doc get if admin or owner
-      allow get: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
-      // Allow listing if admin or if the query is filtered by the user's own ID
-      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      // Allow public read for availability checks in guest booking flow
+      allow read: if true;
       
       allow create: if true;
       allow update: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
@@ -37,7 +35,6 @@ service cloud.firestore {
     match /availableSlots/{slotId} {
       allow read: if true;
       allow write: if isAdmin();
-      allow list: if true;
     }
     
     // ROLES ADMIN - Authenticated users can read
