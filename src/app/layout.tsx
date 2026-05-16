@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { ThemeProvider } from "next-themes";
+import { NotificationListener } from "@/components/admin/NotificationListener";
 
 export const metadata: Metadata = {
   title: 'Office VS Me - Professional Consultation',
@@ -41,6 +42,7 @@ export default function RootLayout({
       <body className="font-body antialiased min-h-screen bg-background text-foreground" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <FirebaseClientProvider>
+            <NotificationListener />
             {children}
             <Toaster />
           </FirebaseClientProvider>

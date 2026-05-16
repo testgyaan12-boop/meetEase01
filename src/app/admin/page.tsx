@@ -61,7 +61,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 import { Meeting, AvailableSlot } from "@/lib/types"
-import { NotificationListener } from "@/components/admin/NotificationListener"
 
 export default function AdminDashboard() {
   const { user, isUserLoading } = useUser()
@@ -233,7 +232,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 animate-in fade-in duration-500 pb-32">
-      <NotificationListener />
       <div className="max-w-6xl mx-auto space-y-8">
         <header className="flex items-center gap-4">
           <Button 

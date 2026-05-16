@@ -4,11 +4,13 @@ import { useEffect } from "react"
 import { useFirestore, useMemoFirebase, useCollection, updateDocumentNonBlocking, useDoc, useUser } from "@/firebase"
 import { collection, query, orderBy, limit, doc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 export function NotificationListener() {
   const { user } = useUser()
   const firestore = useFirestore()
   const { toast } = useToast()
+  const router = useRouter()
 
   const isSuperAdmin = user?.uid === 'hKv5CWVQv7YvJk8mLyCY11ec96O2'
   const adminRoleRef = useMemoFirebase(() => {
@@ -42,26 +44,39 @@ export function NotificationListener() {
     if (notifications && notifications.length > 0) {
       notifications.forEach((notif) => {
         if (!notif.isRead) {
+          // 1. Show UI Toast
           toast({
             title: notif.title,
             description: notif.message,
-            duration: 5000,
+            duration: 8000,
+            onClick: () => router.push("/admin")
           })
 
+          // 2. Show System Notification (OS Level)
           if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
             try {
-              new Notification(notif.title, { body: notif.message })
+              const systemNotif = new Notification(notif.title, { 
+                body: notif.message,
+                icon: "https://picsum.photos/seed/hands/192/192"
+              })
+              
+              systemNotif.onclick = (e) => {
+                e.preventDefault()
+                window.focus()
+                router.push("/admin")
+              }
             } catch (err) {
               console.warn("System notification failed", err)
             }
           }
 
+          // 3. Mark as read in Firestore
           const notifRef = doc(firestore!, "admin_notifications", notif.id)
           updateDocumentNonBlocking(notifRef, { isRead: true })
         }
       })
     }
-  }, [notifications, toast, firestore])
+  }, [notifications, toast, firestore, router])
 
   return null
 }
