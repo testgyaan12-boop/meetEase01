@@ -109,6 +109,15 @@ export default function HistoryPage() {
     )
   }
 
+  const formatSlotRange = (start?: string, end?: string) => {
+    if (!start) return "—"
+    const startDate = new Date(start)
+    const startTime = format(startDate, "MMM d, p")
+    if (!end) return startTime
+    const endTime = format(new Date(end), "p")
+    return `${startTime} - ${endTime}`
+  }
+
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full max-w-full">
       <div>
@@ -173,7 +182,7 @@ export default function HistoryPage() {
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-bold text-foreground whitespace-nowrap">
                         <Clock className="h-3 w-3 text-primary/60" />
-                        {meeting.slotStartTime ? format(new Date(meeting.slotStartTime), "MMM d, p") : "—"}
+                        {formatSlotRange(meeting.slotStartTime, meeting.slotEndTime)}
                       </div>
                     </TableCell>
                     <TableCell>
