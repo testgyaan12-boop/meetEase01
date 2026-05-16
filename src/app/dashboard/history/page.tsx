@@ -114,7 +114,8 @@ export default function HistoryPage() {
     const startDate = new Date(start)
     const startTime = format(startDate, "MMM d, p")
     if (!end) return startTime
-    const endTime = format(new Date(end), "p")
+    const endDate = new Date(end)
+    const endTime = format(endDate, "p")
     return `${startTime} - ${endTime}`
   }
 
@@ -125,92 +126,92 @@ export default function HistoryPage() {
         <p className="text-sm md:text-base text-muted-foreground font-medium">Track your requested and confirmed consultations.</p>
       </div>
 
-      <div className="rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white/80 dark:bg-card/40 backdrop-blur-md overflow-hidden w-full max-w-full">
+      <div className="rounded-2xl md:rounded-[2rem] border-none shadow-2xl bg-white/80 dark:bg-card/40 backdrop-blur-md overflow-hidden w-full max-w-full">
         {sortedMeetings.length > 0 ? (
           <div className="overflow-x-auto scrollbar-hide w-full">
             <Table>
               <TableHeader className="bg-primary/5">
                 <TableRow className="hover:bg-transparent border-primary/10">
-                  <TableHead className="py-4 md:py-6 pl-4 md:pl-8 font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Details</TableHead>
-                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Meet Link</TableHead>
-                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Requested</TableHead>
-                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Meeting Slot</TableHead>
-                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Status</TableHead>
-                  <TableHead className="pr-4 md:pr-8 text-right font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[11px]">Actions</TableHead>
+                  <TableHead className="py-4 md:py-5 pl-4 md:pl-6 font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px] whitespace-nowrap px-3">Details</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px] whitespace-nowrap px-3">Meet Link</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px] whitespace-nowrap px-3">Requested</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px] whitespace-nowrap px-3">Meeting Slot</TableHead>
+                  <TableHead className="font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px] whitespace-nowrap px-3">Status</TableHead>
+                  <TableHead className="pr-4 md:pr-6 text-right font-black uppercase text-primary/60 tracking-widest text-[9px] md:text-[10px] whitespace-nowrap px-3">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedMeetings.map((meeting) => (
                   <TableRow key={meeting.id} className="border-primary/5 hover:bg-primary/5 transition-colors group">
-                    <TableCell className="py-4 md:py-6 pl-4 md:pl-8">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Mail className="h-4 w-4 text-primary" />
+                    <TableCell className="py-3 md:py-4 pl-4 md:pl-6 px-3">
+                      <div className="flex items-center gap-2">
+                        <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <Mail className="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-sm truncate">{meeting.clientName}</p>
-                          <p className="text-[10px] text-muted-foreground font-medium truncate">{meeting.clientEmail}</p>
+                          <p className="font-bold text-xs md:text-sm truncate max-w-[120px]">{meeting.clientName}</p>
+                          <p className="text-[9px] text-muted-foreground font-medium truncate max-w-[120px]">{meeting.clientEmail}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="px-3">
                       {meeting.meetingLink ? (
-                        <div className="flex items-center gap-2 group/link">
-                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 max-w-[150px]">
+                        <div className="flex items-center gap-1.5 group/link">
+                          <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/5 border border-primary/10 max-w-[120px]">
                             <Video className="h-3 w-3 text-primary shrink-0" />
-                            <span className="text-[10px] md:text-xs font-bold text-primary truncate">{meeting.meetingLink}</span>
+                            <span className="text-[9px] md:text-xs font-bold text-primary truncate">{meeting.meetingLink}</span>
                           </div>
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8 rounded-lg text-primary hover:bg-primary hover:text-white transition-all"
+                            className="h-7 w-7 rounded-lg text-primary hover:bg-primary hover:text-white transition-all"
                             onClick={() => handleCopyLink(meeting.meetingLink!, meeting.id)}
                             title="Copy Meet Link"
                           >
-                            {copiedId === meeting.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                            {copiedId === meeting.id ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                           </Button>
                         </div>
                       ) : (
-                        <span className="text-[10px] md:text-xs text-muted-foreground italic font-medium opacity-60">Pending approval</span>
+                        <span className="text-[9px] md:text-xs text-muted-foreground italic font-medium opacity-60">Pending approval</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-medium text-muted-foreground/80 whitespace-nowrap">
+                    <TableCell className="px-3">
+                      <div className="flex items-center gap-1 text-[9px] md:text-xs font-medium text-muted-foreground/80 whitespace-nowrap">
                         {format(new Date(meeting.createdAt), "MMM d, p")}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-bold text-foreground whitespace-nowrap">
-                        <Clock className="h-3 w-3 text-primary/60" />
+                    <TableCell className="px-3">
+                      <div className="flex items-center gap-1 text-[9px] md:text-xs font-bold text-foreground whitespace-nowrap">
+                        <Clock className="h-3 w-3 text-primary/60 shrink-0" />
                         {formatSlotRange(meeting.slotStartTime, meeting.slotEndTime)}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="space-y-2">
+                    <TableCell className="px-3">
+                      <div className="space-y-1">
                         {getStatusBadge(meeting)}
                         {meeting.status === 'rejected' && meeting.adminNotes && (
-                          <div className="flex items-start gap-1.5 p-2 rounded-lg bg-destructive/5 text-destructive border border-destructive/10 max-w-[140px] md:max-w-[200px]">
-                            <AlertCircle className="h-3 w-3 shrink-0 mt-0.5" />
-                            <p className="text-[9px] md:text-[10px] font-bold leading-tight">{meeting.adminNotes}</p>
+                          <div className="flex items-start gap-1 p-1.5 rounded-lg bg-destructive/5 text-destructive border border-destructive/10 max-w-[120px]">
+                            <AlertCircle className="h-2.5 w-2.5 shrink-0 mt-0.5" />
+                            <p className="text-[8px] md:text-[9px] font-bold leading-tight line-clamp-2">{meeting.adminNotes}</p>
                           </div>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="pr-4 md:pr-8 text-right">
-                      <div className="flex flex-col sm:flex-row items-center justify-end gap-2">
+                    <TableCell className="pr-4 md:pr-6 text-right px-3">
+                      <div className="flex flex-col sm:flex-row items-center justify-end gap-1.5">
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="h-8 md:h-9 text-[10px] font-bold gap-1.5 text-primary/60 hover:text-primary hover:bg-primary/5"
+                          className="h-7 md:h-8 text-[9px] font-bold gap-1 text-primary/60 hover:text-primary hover:bg-primary/5"
                           onClick={() => setViewingProofUrl(meeting.paymentProofUrl)}
                         >
-                          <ImageIcon className="h-3.5 w-3.5" /> Proof
+                          <ImageIcon className="h-3 w-3" /> Proof
                         </Button>
 
                         {meeting.status === 'confirmed' && meeting.meetingLink && (!meeting.slotEndTime || !isPast(new Date(meeting.slotEndTime))) && (
-                          <Button size="sm" className="bg-primary hover:bg-primary/90 font-bold rounded-lg h-8 md:h-9 gap-1.5 shadow-lg shadow-primary/20" asChild>
+                          <Button size="sm" className="bg-primary hover:bg-primary/90 font-bold rounded-lg h-7 md:h-8 gap-1 shadow-lg shadow-primary/20" asChild>
                             <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer">
-                              <LinkIcon className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Join</span>
+                              <LinkIcon className="h-3 w-3" /> <span className="hidden sm:inline">Join</span>
                             </a>
                           </Button>
                         )}
